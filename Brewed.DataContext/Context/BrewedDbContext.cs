@@ -1,7 +1,7 @@
-﻿using Brewed.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Brewed.DataContext.Entities;
 
-namespace Brewed.Data
+namespace Brewed.DataContext.Context
 {
     public class BrewedDbContext : DbContext
     {

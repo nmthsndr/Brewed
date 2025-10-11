@@ -1,4 +1,4 @@
-﻿namespace Brewed.Models
+﻿namespace Brewed.DataContext.Entities
 {
     public class Category
     {
