@@ -25,4 +25,9 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Brewed.DataContext\Brewed.DataContext.csproj" />
+    <ProjectReference Include="..\Brewed.Services\Brewed.Services.csproj" />
+  </ItemGroup>
+
 </Project>

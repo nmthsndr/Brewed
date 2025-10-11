@@ -4,8 +4,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.14.36408.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brewed", "Brewed\Brewed.csproj", "{31DF5F74-BC97-45D0-AB86-0426436B9C59}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4FCA3FCA-1DED-4B2D-AC28-B67419A1630A} = {4FCA3FCA-1DED-4B2D-AC28-B67419A1630A}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brewed.DataContext", "Brewed.DataContext\Brewed.DataContext.csproj", "{4FCA3FCA-1DED-4B2D-AC28-B67419A1630A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brewed.Services", "Brewed.Services\Brewed.Services.csproj", "{0DCFB842-A933-48D6-BE8C-F6A0D94E8E24}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +26,10 @@ Global
 		{4FCA3FCA-1DED-4B2D-AC28-B67419A1630A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4FCA3FCA-1DED-4B2D-AC28-B67419A1630A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4FCA3FCA-1DED-4B2D-AC28-B67419A1630A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DCFB842-A933-48D6-BE8C-F6A0D94E8E24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DCFB842-A933-48D6-BE8C-F6A0D94E8E24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DCFB842-A933-48D6-BE8C-F6A0D94E8E24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DCFB842-A933-48D6-BE8C-F6A0D94E8E24}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

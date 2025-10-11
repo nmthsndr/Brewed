@@ -1,6 +1,6 @@
-﻿using Brewed.Data;
+﻿using Brewed.DataContext.Context;
 using Brewed.Dtos;
-using Brewed.Models;
+using Brewed.DataContext.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
