@@ -3,6 +3,8 @@ using Microsoft.OpenApi.Models;
 
 namespace Brewed
 {
+    using Brewed.Data;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.OpenApi.Models;
     public class Program
     {
@@ -10,6 +12,9 @@ namespace Brewed
         {
 
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddDbContext<BrewedDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             // Add services to the container.
             builder.Services.AddControllers();
