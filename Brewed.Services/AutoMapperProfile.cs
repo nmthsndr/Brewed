@@ -12,8 +12,22 @@ namespace Brewed.Services
         {
             // User Mappings
             CreateMap<User, UserDto>();
-            CreateMap<UserRegisterDto, User>();
-            CreateMap<UserUpdateDto, User>();
+            // User Mappings
+            CreateMap<User, UserDto>();
+            CreateMap<UserRegisterDto, User>()
+                .ForMember(dest => dest.Orders, opt => opt.Ignore())
+                .ForMember(dest => dest.Reviews, opt => opt.Ignore())
+                .ForMember(dest => dest.Addresses, opt => opt.Ignore())
+                .ForMember(dest => dest.Cart, opt => opt.Ignore())
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore());
+
+            CreateMap<UserUpdateDto, User>()
+                .ForMember(dest => dest.Orders, opt => opt.Ignore())
+                .ForMember(dest => dest.Reviews, opt => opt.Ignore())
+                .ForMember(dest => dest.Addresses, opt => opt.Ignore())
+                .ForMember(dest => dest.Cart, opt => opt.Ignore())
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
+                .ForMember(dest => dest.Role, opt => opt.Ignore());
 
             // Product Mappings
             CreateMap<Product, ProductDto>()
