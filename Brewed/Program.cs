@@ -52,7 +52,7 @@ namespace Brewed
             app.Run();
 
         }
-        void SeedData(BrewedDbContext context)
+        /*void SeedData(BrewedDbContext context)
         {
             if (!context.Categories.Any())
             {
@@ -202,6 +202,6 @@ namespace Brewed
                 context.Orders.UpdateRange(orders);
                 context.SaveChanges();
             }
-        }
+        }*/
     }
 }

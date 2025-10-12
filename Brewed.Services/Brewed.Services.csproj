@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+	  <ItemGroup>
+		  <PackageReference Include="AutoMapper" Version="15.0.1" />
+	  </ItemGroup>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Brewed.DataContext\Brewed.DataContext.csproj" />
   </ItemGroup>
 

@@ -5,37 +5,173 @@ namespace Brewed.DataContext.Context
 {
     public class BrewedDbContext : DbContext
     {
-        public BrewedDbContext(DbContextOptions<BrewedDbContext> options)
-            : base(options) { }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<ProductImage> ProductImages { get; set; }
+        public DbSet<Review> Reviews { get; set; }
+        public DbSet<Cart> Carts { get; set; }
+        public DbSet<CartItem> CartItems { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<Address> Addresses { get; set; }
+        public DbSet<Invoice> Invoices { get; set; }
 
-        public DbSet<User> Users => Set<User>();
-        public DbSet<Category> Categories => Set<Category>();
-        public DbSet<Product> Products => Set<Product>();
-        public DbSet<Order> Orders => Set<Order>();
-        public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+        public BrewedDbContext(DbContextOptions<BrewedDbContext> options) : base(options)
+        {
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //Egyedi email
+            // User Relationships
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Orders)
+                .WithOne(o => o.User)
+                .HasForeignKey(o => o.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Reviews)
+                .WithOne(r => r.User)
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Addresses)
+                .WithOne(a => a.User)
+                .HasForeignKey(a => a.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Cart)
+                .WithOne(c => c.User)
+                .HasForeignKey<Cart>(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Category Relationships
+            modelBuilder.Entity<Category>()
+                .HasMany(c => c.Products)
+                .WithOne(p => p.Category)
+                .HasForeignKey("CategoryId")
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Product Relationships
+            modelBuilder.Entity<Product>()
+                .HasMany(p => p.ProductImages)
+                .WithOne(pi => pi.Product)
+                .HasForeignKey(pi => pi.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Product>()
+                .HasMany(p => p.Reviews)
+                .WithOne(r => r.Product)
+                .HasForeignKey(r => r.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Product>()
+                .HasMany(p => p.OrderItems)
+                .WithOne(oi => oi.Product)
+                .HasForeignKey(oi => oi.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Product>()
+                .HasMany(p => p.CartItems)
+                .WithOne(ci => ci.Product)
+                .HasForeignKey(ci => ci.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Cart Relationships
+            modelBuilder.Entity<Cart>()
+                .HasMany(c => c.CartItems)
+                .WithOne(ci => ci.Cart)
+                .HasForeignKey(ci => ci.CartId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Order Relationships
+            modelBuilder.Entity<Order>()
+                .HasMany(o => o.OrderItems)
+                .WithOne(oi => oi.Order)
+                .HasForeignKey(oi => oi.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.ShippingAddress)
+                .WithMany()
+                .HasForeignKey(o => o.ShippingAddressId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.BillingAddress)
+                .WithMany()
+                .HasForeignKey(o => o.BillingAddressId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Invoice)
+                .WithOne(i => i.Order)
+                .HasForeignKey<Invoice>(i => i.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Unique Indexes
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
 
-            //Egy kategóriában több termék lehet
-            modelBuilder.Entity<Category>()
-                .HasMany(c => c.Products)
-                .WithOne(p => p.Category)
-                .HasForeignKey(p => p.CategoryId);
+            modelBuilder.Entity<Order>()
+                .HasIndex(o => o.OrderNumber)
+                .IsUnique();
 
-            //Ár pontosság
+            modelBuilder.Entity<Invoice>()
+                .HasIndex(i => i.InvoiceNumber)
+                .IsUnique();
+
+            // Composite unique index for Review (one review per user per product)
+            modelBuilder.Entity<Review>()
+                .HasIndex(r => new { r.UserId, r.ProductId })
+                .IsUnique();
+
+            // Index for Cart SessionId
+            modelBuilder.Entity<Cart>()
+                .HasIndex(c => c.SessionId);
+
+            // Decimal precision configuration
             modelBuilder.Entity<Product>()
                 .Property(p => p.Price)
                 .HasPrecision(18, 2);
 
-            //Összeg pontosság a rendelésnél
-            modelBuilder.Entity<Order>()
-                .Property(o => o.TotalPrice)
+            modelBuilder.Entity<CartItem>()
+                .Property(ci => ci.Price)
                 .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Order>()
+                .Property(o => o.SubTotal)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Order>()
+                .Property(o => o.ShippingCost)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Order>()
+                .Property(o => o.Discount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Order>()
+                .Property(o => o.TotalAmount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<OrderItem>()
+                .Property(oi => oi.UnitPrice)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<OrderItem>()
+                .Property(oi => oi.TotalPrice)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Invoice>()
+                .Property(i => i.TotalAmount)
+                .HasPrecision(18, 2);
+
+            base.OnModelCreating(modelBuilder);
         }
     }
 }

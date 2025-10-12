@@ -1,137 +1,105 @@
-﻿using Brewed.DataContext.Context;
+﻿using Brewed.DataContext.Dtos;
 using Brewed.Dtos;
-using Brewed.DataContext.Entities;
+using Brewed.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-namespace Brewed.Controllers
+namespace Brewed.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class ProductsController : ControllerBase
     {
-        private readonly BrewedDbContext _db;
+        private readonly IProductService _productService;
 
-        public ProductsController(BrewedDbContext db)
+        public ProductsController(IProductService productService)
         {
-            _db = db;
+            _productService = productService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductDto>>> GetAll()
+        public async Task<IActionResult> GetProducts([FromQuery] ProductFilterDto filter)
         {
-            var products = await _db.Products
-                .Include(p => p.Category)
-                .Select(p => new ProductDto
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Description = p.Description,
-                    Price = p.Price,
-                    Stock = p.Stock,
-                    ImageUrl = p.ImageUrl,
-                    CategoryId = p.CategoryId,
-                    CategoryName = p.Category.Name
-                })
-                .ToListAsync();
-
-            return Ok(products);
+            try
+            {
+                var result = await _productService.GetProductsAsync(filter);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ProductDto>> GetById(int id)
+        [HttpGet("{productId}")]
+        public async Task<IActionResult> GetProduct(int productId)
         {
-            var product = await _db.Products
-                .Include(p => p.Category)
-                .Where(p => p.Id == id)
-                .Select(p => new ProductDto
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Description = p.Description,
-                    Price = p.Price,
-                    Stock = p.Stock,
-                    ImageUrl = p.ImageUrl,
-                    CategoryId = p.CategoryId,
-                    CategoryName = p.Category.Name
-                })
-                .FirstOrDefaultAsync();
-
-            if (product == null)
-                return NotFound();
-
-            return Ok(product);
+            try
+            {
+                var product = await _productService.GetProductByIdAsync(productId);
+                return Ok(product);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound("Product not found");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<ActionResult<ProductDto>> Create(ProductCreateDto dto)
+        public async Task<IActionResult> CreateProduct([FromBody] ProductCreateDto productDto)
         {
-            var category = await _db.Categories.FindAsync(dto.CategoryId);
-            if (category == null)
-                return BadRequest("A megadott kategória nem létezik.");
-
-            var product = new Product
+            try
             {
-                Name = dto.Name,
-                Description = dto.Description,
-                Price = dto.Price,
-                Stock = dto.Stock,
-                ImageUrl = dto.ImageUrl,
-                CategoryId = dto.CategoryId
-            };
-
-            _db.Products.Add(product);
-            await _db.SaveChangesAsync();
-
-            var resultDto = new ProductDto
+                var result = await _productService.CreateProductAsync(productDto);
+                return CreatedAtAction(nameof(GetProduct), new { productId = result.Id }, result);
+            }
+            catch (Exception ex)
             {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                Stock = product.Stock,
-                ImageUrl = product.ImageUrl,
-                CategoryId = product.CategoryId,
-                CategoryName = category.Name
-            };
-
-            return CreatedAtAction(nameof(GetById), new { id = product.Id }, resultDto);
+                return BadRequest(ex.Message);
+            }
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, ProductUpdateDto dto)
+        [Authorize(Roles = "Admin")]
+        [HttpPut("{productId}")]
+        public async Task<IActionResult> UpdateProduct(int productId, [FromBody] ProductUpdateDto productDto)
         {
-            var product = await _db.Products.FindAsync(id);
-            if (product == null)
-                return NotFound();
-
-            var category = await _db.Categories.FindAsync(dto.CategoryId);
-            if (category == null)
-                return BadRequest("A megadott kategória nem létezik.");
-
-            product.Name = dto.Name;
-            product.Description = dto.Description;
-            product.Price = dto.Price;
-            product.Stock = dto.Stock;
-            product.ImageUrl = dto.ImageUrl;
-            product.CategoryId = dto.CategoryId;
-
-            await _db.SaveChangesAsync();
-
-            return NoContent();
+            try
+            {
+                var result = await _productService.UpdateProductAsync(productId, productDto);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound("Product not found");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{productId}")]
+        public async Task<IActionResult> DeleteProduct(int productId)
         {
-            var product = await _db.Products.FindAsync(id);
-            if (product == null)
-                return NotFound();
-
-            _db.Products.Remove(product);
-            await _db.SaveChangesAsync();
-
-            return NoContent();
+            try
+            {
+                var result = await _productService.DeleteProductAsync(productId);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound("Product not found");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
