@@ -1,4 +1,4 @@
-
+Ôªø
 namespace Brewed
 {
     using System;
@@ -49,159 +49,192 @@ namespace Brewed
 
             app.MapControllers();
 
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var context = services.GetRequiredService<BrewedDbContext>();
+                    SeedData(context);
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred during database initialization");
+                }
+            }
+
             app.Run();
 
         }
-        /*void SeedData(BrewedDbContext context)
+        public static void SeedData(BrewedDbContext context)
         {
-            if (!context.Categories.Any())
+            // ha m√°r vannak kateg√≥ri√°k, felt√©telezz√ºk, hogy le van magozva
+            if (context.Categories.Any())
+                return;
+
+            using var tx = context.Database.BeginTransaction();
+
+            // ----- KATEG√ìRI√ÅK -----
+            var categories = new List<Category>
+        {
+            new() { Name = "Espresso",     Description = "Er≈ës, koncentr√°lt k√°v√©k espresso alapon" },
+            new() { Name = "Cappuccino",   Description = "Tejhabos k√°v√©k√ºl√∂nlegess√©gek" },
+            new() { Name = "Latte",        Description = "Tejes k√°v√©k l√°gy √≠zvil√°ggal" },
+            new() { Name = "Specialty",    Description = "K√ºl√∂nleges k√°v√©kre√°ci√≥k" },
+            new() { Name = "Cold Brew",    Description = "Hideg f≈ëz√©s≈± k√°v√©k" },
+            new() { Name = "S√ºtem√©nyek",   Description = "Frissen s√ºlt p√©ks√ºtik √©s desszertek" },
+            new() { Name = "Szendvicsek",  Description = "Friss szendvicsek √©s snackek" }
+        };
+            context.Categories.AddRange(categories);
+            context.SaveChanges();
+
+            // ----- TERM√âKEK -----
+            var products = new List<Product>
+        {
+            // Espresso
+            new() { Name = "Espresso", Description = "Klasszikus olasz espresso", Price = 590m,  StockQuantity = 100, ImageUrl = "/images/espresso.jpg",        RoastLevel="Medium-Dark", Origin="Blend", Category = categories[0] },
+            new() { Name = "Dupla Espresso", Description = "Dupla adag espresso", Price = 890m, StockQuantity = 100, ImageUrl = "/images/double-espresso.jpg", RoastLevel="Dark", Origin="Blend", Category = categories[0] },
+            new() { Name = "Americano", Description = "Espresso forr√≥ v√≠zzel", Price = 690m,   StockQuantity = 100, ImageUrl = "/images/americano.jpg",        RoastLevel="Medium", Origin="Blend", Category = categories[0] },
+
+            // Cappuccino
+            new() { Name = "Cappuccino", Description = "Espresso tejes habbal", Price = 890m,  StockQuantity = 100, ImageUrl = "/images/cappuccino.jpg",          RoastLevel="Medium", Origin="Blend", Category = categories[1] },
+            new() { Name = "Van√≠lia Cappuccino", Description = "Van√≠li√°s cappuccino", Price = 990m, StockQuantity = 100, ImageUrl = "/images/vanilla-cappuccino.jpg", RoastLevel="Medium", Origin="Blend", Category = categories[1] },
+            new() { Name = "Karamell Cappuccino", Description = "Karamell√°s cappuccino", Price = 990m, StockQuantity = 100, ImageUrl = "/images/caramel-cappuccino.jpg", RoastLevel="Medium", Origin="Blend", Category = categories[1] },
+
+            // Latte
+            new() { Name = "Caff√® Latte", Description = "Klasszikus tejesk√°v√©", Price = 990m, StockQuantity = 100, ImageUrl = "/images/latte.jpg",            RoastLevel="Light-Medium", Origin="Brazil", Category = categories[2] },
+            new() { Name = "Van√≠lia Latte", Description = "Van√≠li√°s latte", Price = 1090m,   StockQuantity = 100, ImageUrl = "/images/vanilla-latte.jpg",    RoastLevel="Light", Origin="Colombia", Category = categories[2] },
+            new() { Name = "Mocha Latte", Description = "Csokol√°d√©s latte", Price = 1190m,  StockQuantity = 100, ImageUrl = "/images/mocha-latte.jpg",       RoastLevel="Light", Origin="Peru", Category = categories[2] },
+            new() { Name = "Mandul√°s Latte", Description = "Mandula √≠zes√≠t√©s≈± latte", Price = 1090m, StockQuantity = 100, ImageUrl = "/images/almond-latte.jpg", RoastLevel="Light", Origin="Guatemala", Category = categories[2] },
+
+            // Specialty
+            new() { Name = "Flat White", Description = "Ausztr√°l specialty k√°v√©", Price = 1090m, StockQuantity = 100, ImageUrl = "/images/flat-white.jpg", RoastLevel="Medium", Origin="Australia", Category = categories[3] },
+            new() { Name = "Macchiato", Description = "Espresso tejhabbal", Price = 790m, StockQuantity = 100, ImageUrl = "/images/macchiato.jpg", RoastLevel="Medium-Dark", Origin="Italy", Category = categories[3] },
+            new() { Name = "Affogato", Description = "Espresso van√≠liafagylalttal", Price = 1290m, StockQuantity = 50, ImageUrl = "/images/affogato.jpg", RoastLevel="Dark", Origin="Blend", Category = categories[3] },
+            new() { Name = "Irish Coffee", Description = "K√°v√© whiskyvel √©s tejsz√≠nnel", Price = 1490m, StockQuantity = 50, ImageUrl = "/images/irish-coffee.jpg", RoastLevel="Dark", Origin="Ireland", Category = categories[3] },
+
+            // Cold Brew
+            new() { Name = "Cold Brew", Description = "Hideg f≈ëz√©s≈± k√°v√©", Price = 1090m, StockQuantity = 80, ImageUrl = "/images/cold-brew.jpg", RoastLevel="Medium", Origin="Kenya", Category = categories[4] },
+            new() { Name = "Iced Latte", Description = "Jeges latte", Price = 1190m, StockQuantity = 80, ImageUrl = "/images/iced-latte.jpg", RoastLevel="Light", Origin="Colombia", Category = categories[4] },
+            new() { Name = "Frappuccino", Description = "Jeges turmix k√°v√©", Price = 1390m, StockQuantity = 80, ImageUrl = "/images/frappuccino.jpg", RoastLevel="Medium", Origin="Blend", Category = categories[4] },
+
+            // S√ºtem√©nyek
+            new() { Name = "Croissant", Description = "Vajas croissant", Price = 690m, StockQuantity = 40, ImageUrl = "/images/croissant.jpg", Category = categories[5] },
+            new() { Name = "Csokis Muffin", Description = "Csokol√°d√©s muffin", Price = 790m, StockQuantity = 30, ImageUrl = "/images/choco-muffin.jpg", Category = categories[5] },
+            new() { Name = "√Åfony√°s Muffin", Description = "√Åfony√°s muffin", Price = 790m, StockQuantity = 30, ImageUrl = "/images/blueberry-muffin.jpg", Category = categories[5] },
+            new() { Name = "Brownie", Description = "Csokol√°d√©s brownie", Price = 890m, StockQuantity = 25, ImageUrl = "/images/brownie.jpg", Category = categories[5] },
+            new() { Name = "Sajttorta", Description = "New York-i sajttorta", Price = 1290m, StockQuantity = 20, ImageUrl = "/images/cheesecake.jpg", Category = categories[5] },
+
+            // Szendvicsek
+            new() { Name = "Club Sandwich", Description = "Csirke, bacon, sal√°ta, paradicsom", Price = 1590m, StockQuantity = 30, ImageUrl = "/images/club-sandwich.jpg", Category = categories[6] },
+            new() { Name = "Tonhalas Szendvics", Description = "Tonhal, sal√°ta, hagyma", Price = 1390m, StockQuantity = 30, ImageUrl = "/images/tuna-sandwich.jpg", Category = categories[6] },
+            new() { Name = "Veg√°n Wrap", Description = "Z√∂lds√©gekkel t√∂lt√∂tt tortilla", Price = 1290m, StockQuantity = 25, ImageUrl = "/images/vegan-wrap.jpg", Category = categories[6] },
+            new() { Name = "Mozzarella Panini", Description = "Mozzarella, paradicsom, bazsalikom", Price = 1490m, StockQuantity = 25, ImageUrl = "/images/panini.jpg", Category = categories[6] }
+        };
+            context.Products.AddRange(products);
+            context.SaveChanges();
+
+            // ----- FELHASZN√ÅL√ìK + C√çMEK -----
+            var users = new List<User>
+        {
+            new() { Name="Nagy J√°nos",  Email="nagy.janos@example.com",  PasswordHash="hashedpassword123", Role="RegisteredUser" },
+            new() { Name="Kov√°cs Anna", Email="kovacs.anna@example.com", PasswordHash="hashedpassword123", Role="RegisteredUser" },
+            new() { Name="Szab√≥ P√©ter",  Email="szabo.peter@example.com",  PasswordHash="hashedpassword123", Role="RegisteredUser" },
+            new() { Name="T√≥th Eszter",  Email="toth.eszter@example.com",  PasswordHash="hashedpassword123", Role="RegisteredUser" },
+            new() { Name="Moln√°r G√°bor", Email="molnar.gabor@example.com", PasswordHash="hashedpassword123", Role="RegisteredUser" }
+        };
+            context.Users.AddRange(users);
+            context.SaveChanges();
+
+            // minden usernek egy shipping c√≠m
+            var addresses = users.Select(u => new Address
             {
-                var categories = new List<Brewed.DataContext.Entities.Category>
-        {
-            new() { Name = "Espresso", Description = "Erıs, koncentr·lt k·vÈk espresso alapon" },
-            new() { Name = "Cappuccino", Description = "Tejhabos k·vÈk¸lˆnlegessÈgek" },
-            new() { Name = "Latte", Description = "Tejes k·vÈk l·gy Ìzvil·ggal" },
-            new() { Name = "Specialty", Description = "K¸lˆnleges k·vÈkre·ciÛk" },
-            new() { Name = "Cold Brew", Description = "Hideg fızÈs˚ k·vÈk" },
-            new() { Name = "S¸temÈnyek", Description = "Frissen s¸lt pÈks¸tik Ès desszertek" },
-            new() { Name = "Szendvicsek", Description = "Friss szendvicsek Ès snackek" }
-        };
+                FirstName = u.Name.Split(' ').Last(),
+                LastName = u.Name.Split(' ').First(),
+                AddressLine1 = "F≈ë utca 1.",
+                City = "Budapest",
+                PostalCode = "1011",
+                Country = "Hungary",
+                PhoneNumber = "+36 1 234 5678",
+                IsDefault = true,
+                AddressType = "Shipping",
+                UserId = u.Id
+            }).ToList();
 
-                context.Categories.AddRange(categories);
-                context.SaveChanges();
+            context.Addresses.AddRange(addresses);
+            context.SaveChanges();
 
-                var products = new List<Brewed.DataContext.Entities.Product>
-        {
-            // Espresso kategÛria
-            new() { Name = "Espresso", Description = "Klasszikus olasz espresso", Price = 590m, Stock = 100, ImageUrl = "/images/espresso.jpg", CategoryId = categories[0].Id },
-            new() { Name = "Dupla Espresso", Description = "Dupla adag espresso", Price = 890m, Stock = 100, ImageUrl = "/images/double-espresso.jpg", CategoryId = categories[0].Id },
-            new() { Name = "Americano", Description = "Espresso forrÛ vÌzzel", Price = 690m, Stock = 100, ImageUrl = "/images/americano.jpg", CategoryId = categories[0].Id },
-            
-            // Cappuccino kategÛria
-            new() { Name = "Cappuccino", Description = "Espresso tejes habbal", Price = 890m, Stock = 100, ImageUrl = "/images/cappuccino.jpg", CategoryId = categories[1].Id },
-            new() { Name = "VanÌlia Cappuccino", Description = "VanÌli·s cappuccino", Price = 990m, Stock = 100, ImageUrl = "/images/vanilla-cappuccino.jpg", CategoryId = categories[1].Id },
-            new() { Name = "Karamell Cappuccino", Description = "Karamell·s cappuccino", Price = 990m, Stock = 100, ImageUrl = "/images/caramel-cappuccino.jpg", CategoryId = categories[1].Id },
-            
-            // Latte kategÛria
-            new() { Name = "Caff? Latte", Description = "Klasszikus tejesk·vÈ", Price = 990m, Stock = 100, ImageUrl = "/images/latte.jpg", CategoryId = categories[2].Id },
-            new() { Name = "VanÌlia Latte", Description = "VanÌli·s latte", Price = 1090m, Stock = 100, ImageUrl = "/images/vanilla-latte.jpg", CategoryId = categories[2].Id },
-            new() { Name = "Mocha Latte", Description = "Csokol·dÈs latte", Price = 1190m, Stock = 100, ImageUrl = "/images/mocha-latte.jpg", CategoryId = categories[2].Id },
-            new() { Name = "Mandul·s Latte", Description = "Mandula ÌzesÌtÈs˚ latte", Price = 1090m, Stock = 100, ImageUrl = "/images/almond-latte.jpg", CategoryId = categories[2].Id },
-            
-            // Specialty kategÛria
-            new() { Name = "Flat White", Description = "Ausztr·l specialty k·vÈ", Price = 1090m, Stock = 100, ImageUrl = "/images/flat-white.jpg", CategoryId = categories[3].Id },
-            new() { Name = "Macchiato", Description = "Espresso tejhabbal", Price = 790m, Stock = 100, ImageUrl = "/images/macchiato.jpg", CategoryId = categories[3].Id },
-            new() { Name = "Affogato", Description = "Espresso vanÌliafagylalttal", Price = 1290m, Stock = 50, ImageUrl = "/images/affogato.jpg", CategoryId = categories[3].Id },
-            new() { Name = "Irish Coffee", Description = "K·vÈ whiskyvel Ès tejszÌnnel", Price = 1490m, Stock = 50, ImageUrl = "/images/irish-coffee.jpg", CategoryId = categories[3].Id },
-            
-            // Cold Brew kategÛria
-            new() { Name = "Cold Brew", Description = "Hideg fızÈs˚ k·vÈ", Price = 1090m, Stock = 80, ImageUrl = "/images/cold-brew.jpg", CategoryId = categories[4].Id },
-            new() { Name = "Iced Latte", Description = "Jeges latte", Price = 1190m, Stock = 80, ImageUrl = "/images/iced-latte.jpg", CategoryId = categories[4].Id },
-            new() { Name = "Frappuccino", Description = "Jeges turmix k·vÈ", Price = 1390m, Stock = 80, ImageUrl = "/images/frappuccino.jpg", CategoryId = categories[4].Id },
-            
-            // S¸temÈnyek kategÛria
-            new() { Name = "Croissant", Description = "Vajas croissant", Price = 690m, Stock = 40, ImageUrl = "/images/croissant.jpg", CategoryId = categories[5].Id },
-            new() { Name = "Csokis Muffin", Description = "Csokol·dÈs muffin", Price = 790m, Stock = 30, ImageUrl = "/images/choco-muffin.jpg", CategoryId = categories[5].Id },
-            new() { Name = "¡fony·s Muffin", Description = "¡fony·s muffin", Price = 790m, Stock = 30, ImageUrl = "/images/blueberry-muffin.jpg", CategoryId = categories[5].Id },
-            new() { Name = "Brownie", Description = "Csokol·dÈs brownie", Price = 890m, Stock = 25, ImageUrl = "/images/brownie.jpg", CategoryId = categories[5].Id },
-            new() { Name = "Sajttorta", Description = "New York-i sajttorta", Price = 1290m, Stock = 20, ImageUrl = "/images/cheesecake.jpg", CategoryId = categories[5].Id },
-            
-            // Szendvicsek kategÛria
-            new() { Name = "Club Sandwich", Description = "Csirke, bacon, sal·ta, paradicsom", Price = 1590m, Stock = 30, ImageUrl = "/images/club-sandwich.jpg", CategoryId = categories[6].Id },
-            new() { Name = "Tonhalas Szendvics", Description = "Tonhal, sal·ta, hagyma", Price = 1390m, Stock = 30, ImageUrl = "/images/tuna-sandwich.jpg", CategoryId = categories[6].Id },
-            new() { Name = "Veg·n Wrap", Description = "ZˆldsÈgekkel tˆltˆtt tortilla", Price = 1290m, Stock = 25, ImageUrl = "/images/vegan-wrap.jpg", CategoryId = categories[6].Id },
-            new() { Name = "Mozzarella Panini", Description = "Mozzarella, paradicsom, bazsalikom", Price = 1490m, Stock = 25, ImageUrl = "/images/panini.jpg", CategoryId = categories[6].Id }
-        };
+            // ----- RENDEL√âSEK + T√âTELEK -----
+            var rnd = new Random();
+            var orders = new List<Order>();
+            var orderItems = new List<OrderItem>();
 
-                context.Products.AddRange(products);
-                context.SaveChanges();
+            foreach (var u in users)
+            {
+                int orderCount = rnd.Next(1, 4);
+                var shipAddrId = addresses.First(a => a.UserId == u.Id).Id;
 
-                var users = new List<Brewed.DataContext.Entities.User>
-        {
-            new() {
-                Name = "Nagy J·nos",
-                Email = "nagy.janos@example.com",
-                PasswordHash = "hashedpassword123" // Ez csak placeholder, valÛdi hashelt jelszÛt kell ide Ìrni
-            },
-            new() {
-                Name = "Kov·cs Anna",
-                Email = "kovacs.anna@example.com",
-                PasswordHash = "hashedpassword123"
-            },
-            new() {
-                Name = "SzabÛ PÈter",
-                Email = "szabo.peter@example.com",
-                PasswordHash = "hashedpassword123"
-            },
-            new() {
-                Name = "TÛth Eszter",
-                Email = "toth.eszter@example.com",
-                PasswordHash = "hashedpassword123"
-            },
-            new() {
-                Name = "Moln·r G·bor",
-                Email = "molnar.gabor@example.com",
-                PasswordHash = "hashedpassword123"
-            }
-        };
-
-                context.Users.AddRange(users);
-                context.SaveChanges();
-
-                var random = new Random();
-                var orders = new List<Brewed.DataContext.Entities.Order>();
-                var orderItems = new List<Brewed.DataContext.Entities.OrderItem>();
-
-                foreach (var user in users)
+                for (int i = 0; i < orderCount; i++)
                 {
-                    var orderCount = random.Next(1, 5);
-
-                    for (int i = 0; i < orderCount; i++)
+                    var created = DateTime.UtcNow.AddDays(-rnd.Next(1, 30));
+                    var order = new Order
                     {
-                        var order = new Brewed.DataContext.Entities.Order
-                        {
-                            UserId = user.Id,
-                            CreatedAt = DateTime.UtcNow.AddDays(-random.Next(1, 60)),
-                            TotalPrice = 0
-                        };
+                        UserId = u.Id,
+                        ShippingAddressId = shipAddrId,
+                        BillingAddressId = null,
+                        OrderNumber = $"ORD-{u.Id:D3}-{Guid.NewGuid().ToString("N")[..6].ToUpper()}",
+                        OrderDate = created,
+                        Status = "Processing",
+                        PaymentMethod = "Card",
+                        PaymentStatus = "Pending",
+                        CouponCode = string.Empty,
+                        Notes = string.Empty,
+                        SubTotal = 0m,
+                        ShippingCost = 0m,
+                        Discount = 0m,
+                        TotalAmount = 0m
+                    };
+                    orders.Add(order);
+                }
+            }
 
-                        orders.Add(order);
-                    }
+            context.Orders.AddRange(orders);
+            context.SaveChanges();
+
+            foreach (var o in orders)
+            {
+                var itemCount = rnd.Next(1, 4);
+                var picked = products.OrderBy(_ => rnd.Next()).Take(itemCount).ToList();
+
+                decimal sub = 0m;
+                foreach (var p in picked)
+                {
+                    var qty = rnd.Next(1, 3);
+                    var unit = p.Price;
+                    var line = new OrderItem
+                    {
+                        OrderId = o.Id,
+                        ProductId = p.Id,
+                        Quantity = qty,
+                        UnitPrice = unit,
+                        TotalPrice = unit * qty
+                    };
+                    sub += line.TotalPrice;
+                    orderItems.Add(line);
                 }
 
-                context.Orders.AddRange(orders);
-                context.SaveChanges();
-
-                foreach (var order in orders)
-                {
-                    var itemCount = random.Next(1, 6);
-                    var selectedProducts = products.OrderBy(x => random.Next()).Take(itemCount).ToList();
-
-                    decimal totalPrice = 0;
-
-                    foreach (var product in selectedProducts)
-                    {
-                        var quantity = random.Next(1, 4);
-
-                        var orderItem = new Brewed.DataContext.Entities.OrderItem
-                        {
-                            OrderId = order.Id,
-                            ProductId = product.Id,
-                            Quantity = quantity,
-                            UnitPrice = product.Price
-                        };
-
-                        orderItems.Add(orderItem);
-                        totalPrice += product.Price * quantity;
-                    }
-
-                    order.TotalPrice = totalPrice;
-                }
-
-                context.OrderItems.AddRange(orderItems);
-                context.Orders.UpdateRange(orders);
-                context.SaveChanges();
+                o.SubTotal = sub;
+                o.ShippingCost = sub >= 5000m ? 0m : 690m;
+                o.Discount = 0m;
+                o.TotalAmount = o.SubTotal + o.ShippingCost - o.Discount;
             }
-        }*/
+
+            context.OrderItems.AddRange(orderItems);
+            context.Orders.UpdateRange(orders);
+            context.SaveChanges();
+
+            tx.Commit();
+        }
     }
 }

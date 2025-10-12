@@ -24,7 +24,7 @@ namespace Brewed.DataContext.Entities
         public string AddressLine1 { get; set; }
 
         [StringLength(200)]
-        public string AddressLine2 { get; set; }
+        public string? AddressLine2 { get; set; }
 
         [Required]
         [StringLength(100)]

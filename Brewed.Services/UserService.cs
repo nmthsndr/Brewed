@@ -1,16 +1,14 @@
-﻿using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Brewed.DataContext.Context;
 using Brewed.DataContext.Dtos;
 using Brewed.DataContext.Entities;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Brewed.Services
 {
@@ -43,13 +41,8 @@ namespace Brewed.Services
                 throw new Exception("Email already exists");
             }
 
-            var user = new User
-            {
-                Name = userDto.Name,
-                Email = userDto.Email,
-                PasswordHash = HashPassword(userDto.Password),
-                Role = "RegisteredUser"
-            };
+            var user = _mapper.Map<User>(userDto);
+            user.PasswordHash = HashPassword(userDto.Password);
 
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
@@ -114,9 +107,7 @@ namespace Brewed.Services
                 throw new Exception("Email already exists");
             }
 
-            user.Name = userDto.Name;
-            user.Email = userDto.Email;
-
+            _mapper.Map(userDto, user);
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
 
@@ -138,7 +129,6 @@ namespace Brewed.Services
             return true;
         }
 
-        // Simple SHA256 password hashing
         private string HashPassword(string password)
         {
             using (var sha256 = SHA256.Create())
