@@ -15,6 +15,7 @@ import Profile from "../pages/Profile";
 import Categories from "../pages/Categories";
 import Coupons  from "../pages/Coupons";
 import AdminDashboard from "../pages/AdminDashboard";
+import Users from "../pages/Users";
 
 const Routing = () => {
   const { isLoggedIn } = useAuth();
