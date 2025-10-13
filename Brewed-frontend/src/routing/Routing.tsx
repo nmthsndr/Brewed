@@ -4,6 +4,7 @@ import BasicLayout from "../components/Layout/BasicLayout";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import ForgotPassword from "../pages/ForgotPassword";
+import ConfirmEmail from "../pages/ConfirmEmail";
 import Dashboard from "../pages/Dashboard";
 import Products from "../pages/Products";
 import ProductDetail from "../pages/ProductDetail";
@@ -12,7 +13,7 @@ import Checkout from "../pages/Checkout";
 import Orders from "../pages/Orders";
 import Profile from "../pages/Profile";
 import Categories from "../pages/Categories";
-import Coupons from "../pages/Coupons";
+import Coupons  from "../pages/Coupons";
 import AdminDashboard from "../pages/AdminDashboard";
 
 const Routing = () => {
@@ -24,6 +25,7 @@ const Routing = () => {
       <Route path="/login" element={!isLoggedIn ? <Login /> : <Navigate to="/app/dashboard" />} />
       <Route path="/register" element={!isLoggedIn ? <Register /> : <Navigate to="/app/dashboard" />} />
       <Route path="/forgot-password" element={!isLoggedIn ? <ForgotPassword /> : <Navigate to="/app/dashboard" />} />
+      <Route path="/confirm-email" element={<ConfirmEmail />} />
 
       {/* Protected Routes */}
       <Route path="/app" element={isLoggedIn ? <BasicLayout /> : <Navigate to="/login" />}>

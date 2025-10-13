@@ -54,19 +54,23 @@ namespace Brewed.Services
             await client.SendMailAsync(message);
         }
 
-        public async Task SendEmailConfirmationAsync(string email, string name, string confirmationToken)
+        public async Task SendEmailConfirmationAsync(string email, string name, string verificationCode)
         {
-            var subject = "Confirm your email address - Brewed";
-            var confirmUrl = $"{_configuration["AppUrl"]}/confirm-email?token={confirmationToken}";
+            var subject = "Email megerősítés - Brewed Coffee";
 
             var body = $@"
-                <h2>Hi {name}!</h2>
-                <p>Thank you for registering at Brewed!</p>
-                <p>Please confirm your email address by clicking the link below:</p>
-                <a href='{confirmUrl}' style='background-color: #8B4513; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Confirm Email</a>
-                <p>If you didn't register, please ignore this email.</p>
-                <p>Best regards,<br/>Brewed Team</p>
-            ";
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                <h2>Szia {name}!</h2>
+                <p>Köszönjük, hogy regisztráltál a Brewed Coffee oldalán!</p>
+                <p>Az email címed megerősítéséhez kérjük, add meg az alábbi 6 jegyű kódot:</p>
+                <div style='background-color: #f5f5f5; padding: 20px; text-align: center; margin: 20px 0; border-radius: 8px;'>
+                    <h1 style='color: #8B4513; font-size: 36px; letter-spacing: 8px; margin: 0;'>{verificationCode}</h1>
+                </div>
+                <p>Ez a kód 24 óráig érvényes.</p>
+                <p>Ha nem te regisztráltál, kérjük, hagyd figyelmen kívül ezt az emailt.</p>
+                <p>Üdvözlettel,<br/>Brewed Coffee csapata</p>
+            </div>
+        ";
 
             await SendEmailAsync(email, subject, body);
         }

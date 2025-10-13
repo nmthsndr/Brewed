@@ -107,8 +107,8 @@ const Auth = {
     axiosInstance.post<{ token: string }>(`/api/users/login`, { email, password }),
   register: (userData: UserRegisterDto) =>
     axiosInstance.post<IUser>(`/api/users/register`, userData),
-  confirmEmail: (token: string) =>
-    axiosInstance.post(`/api/users/confirm-email`, { token }),
+  confirmEmail: (code: string) =>
+    axiosInstance.post(`/api/users/confirm-email`, { code }), // Token helyett Code
   forgotPassword: (email: string) =>
     axiosInstance.post(`/api/users/forgot-password`, { email }),
   resetPassword: (token: string, newPassword: string) =>

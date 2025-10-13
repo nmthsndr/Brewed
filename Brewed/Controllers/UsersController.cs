@@ -133,12 +133,12 @@ namespace Brewed.API.Controllers
         {
             try
             {
-                await _userService.ConfirmEmailAsync(dto.Token);
+                await _userService.ConfirmEmailAsync(dto.Code);
                 return Ok(new { Message = "Email confirmed successfully" });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new { Message = ex.Message });
             }
         }
 

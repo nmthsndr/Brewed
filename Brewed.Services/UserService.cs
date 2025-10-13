@@ -54,12 +54,12 @@ namespace Brewed.Services
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            // Generate email confirmation token
-            var token = GenerateToken();
+            // Generate 6-digit verification code
+            var verificationCode = GenerateVerificationCode();
             var userToken = new UserToken
             {
                 UserId = user.Id,
-                Token = token,
+                Token = verificationCode,
                 TokenType = "EmailConfirmation",
                 ExpiresAt = DateTime.UtcNow.AddHours(24)
             };
@@ -67,10 +67,16 @@ namespace Brewed.Services
             await _context.UserTokens.AddAsync(userToken);
             await _context.SaveChangesAsync();
 
-            // Send confirmation email
-            await _emailService.SendEmailConfirmationAsync(user.Email, user.Name, token);
+            // Send confirmation email with code
+            await _emailService.SendEmailConfirmationAsync(user.Email, user.Name, verificationCode);
 
             return _mapper.Map<UserDto>(user);
+        }
+
+        private string GenerateVerificationCode()
+        {
+            var random = new Random();
+            return random.Next(100000, 999999).ToString();
         }
 
         public async Task<string> LoginAsync(UserLoginDto userDto)
@@ -159,25 +165,25 @@ namespace Brewed.Services
             return true;
         }
 
-        public async Task<bool> ConfirmEmailAsync(string token)
+        public async Task<bool> ConfirmEmailAsync(string code)
         {
             var userToken = await _context.UserTokens
                 .Include(ut => ut.User)
-                .FirstOrDefaultAsync(ut => ut.Token == token && ut.TokenType == "EmailConfirmation");
+                .FirstOrDefaultAsync(ut => ut.Token == code && ut.TokenType == "EmailConfirmation");
 
             if (userToken == null)
             {
-                throw new Exception("Invalid token");
+                throw new Exception("Invalid verification code");
             }
 
             if (userToken.IsUsed)
             {
-                throw new Exception("Token already used");
+                throw new Exception("Verification code already used");
             }
 
             if (userToken.ExpiresAt < DateTime.UtcNow)
             {
-                throw new Exception("Token expired");
+                throw new Exception("Verification code expired");
             }
 
             userToken.User.EmailConfirmed = true;

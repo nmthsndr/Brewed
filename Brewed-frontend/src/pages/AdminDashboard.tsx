@@ -1,6 +1,6 @@
 import { Title, Text } from "@mantine/core";
 
-export const AdminDashboard = () => {
+const AdminDashboard = () => {
   return (
     <div style={{ padding: '20px' }}>
       <Title order={2} mb="lg">Admin Dashboard</Title>
@@ -8,3 +8,5 @@ export const AdminDashboard = () => {
     </div>
   );
 };
+
+export default AdminDashboard;

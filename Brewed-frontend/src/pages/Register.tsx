@@ -33,6 +33,7 @@ const Register = () => {
     },
   });
 
+
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
     try {
@@ -44,11 +45,11 @@ const Register = () => {
 
       notifications.show({
         title: 'Success',
-        message: 'Registration successful! Please check your email to confirm your account.',
+        message: 'Registration successful! Please check your email for the verification code.',
         color: 'green',
       });
 
-      navigate('/login');
+      navigate('/confirm-email'); // Itt irányítsuk a confirmation oldalra
     } catch (error: any) {
       notifications.show({
         title: 'Registration Failed',

@@ -80,9 +80,10 @@
             {
                 options.AddPolicy("AllowAll", policy =>
                 {
-                    policy.AllowAnyOrigin()
+                    policy.WithOrigins("http://localhost:3000")
                           .AllowAnyMethod()
-                          .AllowAnyHeader();
+                          .AllowAnyHeader()
+                          .AllowCredentials();
                 });
             });
 
@@ -131,13 +132,13 @@
                 app.UseSwaggerUI(c =>
                 {
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Brewed API v1");
-                    c.RoutePrefix = string.Empty; // Swagger lesz a root page
+                    c.RoutePrefix = string.Empty;
                 });
             }
 
-            app.UseHttpsRedirection();
-            app.UseStaticFiles(); // Static files support for images
-            app.UseCors("AllowAll");
+            app.UseCors("AllowAll");  // ← ELSŐ helyre!
+            // app.UseHttpsRedirection();  // ← Ki van commentelve
+            app.UseStaticFiles();
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
