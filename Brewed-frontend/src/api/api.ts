@@ -222,7 +222,18 @@ const Users = {
   updateProfile: (userData: UserUpdateDto) =>
     axiosInstance.put<IUser>(`/api/users/profile`, userData),
   deleteProfile: () =>
-    axiosInstance.delete(`/api/users/profile`)
+    axiosInstance.delete(`/api/users/profile`),
+  // ADMIN ENDPOINTS
+  getAllUsers: () =>
+    axiosInstance.get<IUser[]>(`/api/users`),
+  getUser: (userId: number) =>
+    axiosInstance.get<IUser>(`/api/users/${userId}`),
+  createUser: (userData: UserRegisterDto) =>
+    axiosInstance.post<IUser>(`/api/users`, userData),
+  updateUser: (userId: number, userData: UserUpdateDto) =>
+    axiosInstance.put<IUser>(`/api/users/${userId}`, userData),
+  deleteUser: (userId: number) =>
+    axiosInstance.delete(`/api/users/${userId}`)
 };
 
 const Dashboard = {

@@ -7,11 +7,14 @@
         public string Description { get; set; } = null!;
         public decimal Price { get; set; }
         public int StockQuantity { get; set; }
-        public string RoastLevel { get; set; } = "N/A"; // Light, Medium, Dark
+        public string RoastLevel { get; set; } = "N/A";
         public string Origin { get; set; } = "N/A";
         public bool IsCaffeineFree { get; set; } = false;
         public bool IsOrganic { get; set; } = false;
         public string ImageUrl { get; set; } = null!;
+
+        // Foreign Key
+        public int CategoryId { get; set; }
 
         public virtual Category Category { get; set; }
         public virtual ICollection<ProductImage> ProductImages { get; set; }

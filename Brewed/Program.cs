@@ -188,35 +188,35 @@
             context.Categories.AddRange(categories);
             context.SaveChanges();
 
-            // TERMÉKEK
+            // TERMÉKEK - CategoryId használatával!
             var products = new List<Product>
             {
-                new() { Name = "Espresso", Description = "Klasszikus olasz espresso", Price = 590m, StockQuantity = 100, ImageUrl = "/images/espresso.jpg", RoastLevel="Medium-Dark", Origin="Blend", Category = categories[0] },
-                new() { Name = "Dupla Espresso", Description = "Dupla adag espresso", Price = 890m, StockQuantity = 100, ImageUrl = "/images/double-espresso.jpg", RoastLevel="Dark", Origin="Blend", Category = categories[0] },
-                new() { Name = "Americano", Description = "Espresso forró vízzel", Price = 690m, StockQuantity = 100, ImageUrl = "/images/americano.jpg", RoastLevel="Medium", Origin="Blend", Category = categories[0] },
-                new() { Name = "Cappuccino", Description = "Espresso tejes habbal", Price = 890m, StockQuantity = 100, ImageUrl = "/images/cappuccino.jpg", RoastLevel="Medium", Origin="Blend", Category = categories[1] },
-                new() { Name = "Vanília Cappuccino", Description = "Vaníliás cappuccino", Price = 990m, StockQuantity = 100, ImageUrl = "/images/vanilla-cappuccino.jpg", RoastLevel="Medium", Origin="Blend", Category = categories[1] },
-                new() { Name = "Karamell Cappuccino", Description = "Karamellás cappuccino", Price = 990m, StockQuantity = 100, ImageUrl = "/images/caramel-cappuccino.jpg", RoastLevel="Medium", Origin="Blend", Category = categories[1] },
-                new() { Name = "Caffè Latte", Description = "Klasszikus tejeskávé", Price = 990m, StockQuantity = 100, ImageUrl = "/images/latte.jpg", RoastLevel="Light-Medium", Origin="Brazil", Category = categories[2] },
-                new() { Name = "Vanília Latte", Description = "Vaníliás latte", Price = 1090m, StockQuantity = 100, ImageUrl = "/images/vanilla-latte.jpg", RoastLevel="Light", Origin="Colombia", Category = categories[2] },
-                new() { Name = "Mocha Latte", Description = "Csokoládés latte", Price = 1190m, StockQuantity = 100, ImageUrl = "/images/mocha-latte.jpg", RoastLevel="Light", Origin="Peru", Category = categories[2] },
-                new() { Name = "Mandulás Latte", Description = "Mandula ízesítésű latte", Price = 1090m, StockQuantity = 100, ImageUrl = "/images/almond-latte.jpg", RoastLevel="Light", Origin="Guatemala", Category = categories[2] },
-                new() { Name = "Flat White", Description = "Ausztrál specialty kávé", Price = 1090m, StockQuantity = 100, ImageUrl = "/images/flat-white.jpg", RoastLevel="Medium", Origin="Australia", Category = categories[3] },
-                new() { Name = "Macchiato", Description = "Espresso tejhabbal", Price = 790m, StockQuantity = 100, ImageUrl = "/images/macchiato.jpg", RoastLevel="Medium-Dark", Origin="Italy", Category = categories[3] },
-                new() { Name = "Affogato", Description = "Espresso vaníliafagylalttal", Price = 1290m, StockQuantity = 50, ImageUrl = "/images/affogato.jpg", RoastLevel="Dark", Origin="Blend", Category = categories[3] },
-                new() { Name = "Irish Coffee", Description = "Kávé whiskyvel és tejszínnel", Price = 1490m, StockQuantity = 50, ImageUrl = "/images/irish-coffee.jpg", RoastLevel="Dark", Origin="Ireland", Category = categories[3] },
-                new() { Name = "Cold Brew", Description = "Hideg főzésű kávé", Price = 1090m, StockQuantity = 80, ImageUrl = "/images/cold-brew.jpg", RoastLevel="Medium", Origin="Kenya", Category = categories[4] },
-                new() { Name = "Iced Latte", Description = "Jeges latte", Price = 1190m, StockQuantity = 80, ImageUrl = "/images/iced-latte.jpg", RoastLevel="Light", Origin="Colombia", Category = categories[4] },
-                new() { Name = "Frappuccino", Description = "Jeges turmix kávé", Price = 1390m, StockQuantity = 80, ImageUrl = "/images/frappuccino.jpg", RoastLevel="Medium", Origin="Blend", Category = categories[4] },
-                new() { Name = "Croissant", Description = "Vajas croissant", Price = 690m, StockQuantity = 40, ImageUrl = "/images/croissant.jpg", Category = categories[5] },
-                new() { Name = "Csokis Muffin", Description = "Csokoládés muffin", Price = 790m, StockQuantity = 30, ImageUrl = "/images/choco-muffin.jpg", Category = categories[5] },
-                new() { Name = "Áfonyás Muffin", Description = "Áfonyás muffin", Price = 790m, StockQuantity = 30, ImageUrl = "/images/blueberry-muffin.jpg", Category = categories[5] },
-                new() { Name = "Brownie", Description = "Csokoládés brownie", Price = 890m, StockQuantity = 25, ImageUrl = "/images/brownie.jpg", Category = categories[5] },
-                new() { Name = "Sajttorta", Description = "New York-i sajttorta", Price = 1290m, StockQuantity = 20, ImageUrl = "/images/cheesecake.jpg", Category = categories[5] },
-                new() { Name = "Club Sandwich", Description = "Csirke, bacon, saláta, paradicsom", Price = 1590m, StockQuantity = 30, ImageUrl = "/images/club-sandwich.jpg", Category = categories[6] },
-                new() { Name = "Tonhalas Szendvics", Description = "Tonhal, saláta, hagyma", Price = 1390m, StockQuantity = 30, ImageUrl = "/images/tuna-sandwich.jpg", Category = categories[6] },
-                new() { Name = "Vegán Wrap", Description = "Zöldségekkel töltött tortilla", Price = 1290m, StockQuantity = 25, ImageUrl = "/images/vegan-wrap.jpg", Category = categories[6] },
-                new() { Name = "Mozzarella Panini", Description = "Mozzarella, paradicsom, bazsalikom", Price = 1490m, StockQuantity = 25, ImageUrl = "/images/panini.jpg", Category = categories[6] }
+                new() { Name = "Espresso", Description = "Klasszikus olasz espresso", Price = 590m, StockQuantity = 100, ImageUrl = "/images/espresso.jpg", RoastLevel="Medium-Dark", Origin="Blend", CategoryId = 1 },
+                new() { Name = "Dupla Espresso", Description = "Dupla adag espresso", Price = 890m, StockQuantity = 100, ImageUrl = "/images/double-espresso.jpg", RoastLevel="Dark", Origin="Blend", CategoryId = 1 },
+                new() { Name = "Americano", Description = "Espresso forró vízzel", Price = 690m, StockQuantity = 100, ImageUrl = "/images/americano.jpg", RoastLevel="Medium", Origin="Blend", CategoryId = 1 },
+                new() { Name = "Cappuccino", Description = "Espresso tejes habbal", Price = 890m, StockQuantity = 100, ImageUrl = "/images/cappuccino.jpg", RoastLevel="Medium", Origin="Blend", CategoryId = 2 },
+                new() { Name = "Vanília Cappuccino", Description = "Vaníliás cappuccino", Price = 990m, StockQuantity = 100, ImageUrl = "/images/vanilla-cappuccino.jpg", RoastLevel="Medium", Origin="Blend", CategoryId = 2 },
+                new() { Name = "Karamell Cappuccino", Description = "Karamellás cappuccino", Price = 990m, StockQuantity = 100, ImageUrl = "/images/caramel-cappuccino.jpg", RoastLevel="Medium", Origin="Blend", CategoryId = 2 },
+                new() { Name = "Caffè Latte", Description = "Klasszikus tejeskávé", Price = 990m, StockQuantity = 100, ImageUrl = "/images/latte.jpg", RoastLevel="Light-Medium", Origin="Brazil", CategoryId = 3 },
+                new() { Name = "Vanília Latte", Description = "Vaníliás latte", Price = 1090m, StockQuantity = 100, ImageUrl = "/images/vanilla-latte.jpg", RoastLevel="Light", Origin="Colombia", CategoryId = 3 },
+                new() { Name = "Mocha Latte", Description = "Csokoládés latte", Price = 1190m, StockQuantity = 100, ImageUrl = "/images/mocha-latte.jpg", RoastLevel="Light", Origin="Peru", CategoryId = 3 },
+                new() { Name = "Mandulás Latte", Description = "Mandula ízesítésű latte", Price = 1090m, StockQuantity = 100, ImageUrl = "/images/almond-latte.jpg", RoastLevel="Light", Origin="Guatemala", CategoryId = 3 },
+                new() { Name = "Flat White", Description = "Ausztrál specialty kávé", Price = 1090m, StockQuantity = 100, ImageUrl = "/images/flat-white.jpg", RoastLevel="Medium", Origin="Australia", CategoryId = 4 },
+                new() { Name = "Macchiato", Description = "Espresso tejhabbal", Price = 790m, StockQuantity = 100, ImageUrl = "/images/macchiato.jpg", RoastLevel="Medium-Dark", Origin="Italy", CategoryId = 4 },
+                new() { Name = "Affogato", Description = "Espresso vaníliafagylalttal", Price = 1290m, StockQuantity = 50, ImageUrl = "/images/affogato.jpg", RoastLevel="Dark", Origin="Blend", CategoryId = 4 },
+                new() { Name = "Irish Coffee", Description = "Kávé whiskyvel és tejszínnel", Price = 1490m, StockQuantity = 50, ImageUrl = "/images/irish-coffee.jpg", RoastLevel="Dark", Origin="Ireland", CategoryId = 4 },
+                new() { Name = "Cold Brew", Description = "Hideg főzésű kávé", Price = 1090m, StockQuantity = 80, ImageUrl = "/images/cold-brew.jpg", RoastLevel="Medium", Origin="Kenya", CategoryId = 5 },
+                new() { Name = "Iced Latte", Description = "Jeges latte", Price = 1190m, StockQuantity = 80, ImageUrl = "/images/iced-latte.jpg", RoastLevel="Light", Origin="Colombia", CategoryId = 5 },
+                new() { Name = "Frappuccino", Description = "Jeges turmix kávé", Price = 1390m, StockQuantity = 80, ImageUrl = "/images/frappuccino.jpg", RoastLevel="Medium", Origin="Blend", CategoryId = 5 },
+                new() { Name = "Croissant", Description = "Vajas croissant", Price = 690m, StockQuantity = 40, ImageUrl = "/images/croissant.jpg", CategoryId = 6 },
+                new() { Name = "Csokis Muffin", Description = "Csokoládés muffin", Price = 790m, StockQuantity = 30, ImageUrl = "/images/choco-muffin.jpg", CategoryId = 6 },
+                new() { Name = "Áfonyás Muffin", Description = "Áfonyás muffin", Price = 790m, StockQuantity = 30, ImageUrl = "/images/blueberry-muffin.jpg", CategoryId = 6 },
+                new() { Name = "Brownie", Description = "Csokoládés brownie", Price = 890m, StockQuantity = 25, ImageUrl = "/images/brownie.jpg", CategoryId = 6 },
+                new() { Name = "Sajttorta", Description = "New York-i sajttorta", Price = 1290m, StockQuantity = 20, ImageUrl = "/images/cheesecake.jpg", CategoryId = 6 },
+                new() { Name = "Club Sandwich", Description = "Csirke, bacon, saláta, paradicsom", Price = 1590m, StockQuantity = 30, ImageUrl = "/images/club-sandwich.jpg", CategoryId = 7 },
+                new() { Name = "Tonhalas Szendvics", Description = "Tonhal, saláta, hagyma", Price = 1390m, StockQuantity = 30, ImageUrl = "/images/tuna-sandwich.jpg", CategoryId = 7 },
+                new() { Name = "Vegán Wrap", Description = "Zöldségekkel töltött tortilla", Price = 1290m, StockQuantity = 25, ImageUrl = "/images/vegan-wrap.jpg", CategoryId = 7 },
+                new() { Name = "Mozzarella Panini", Description = "Mozzarella, paradicsom, bazsalikom", Price = 1490m, StockQuantity = 25, ImageUrl = "/images/panini.jpg", CategoryId = 7 }
             };
             context.Products.AddRange(products);
             context.SaveChanges();

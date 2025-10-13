@@ -50,11 +50,11 @@ namespace Brewed.DataContext.Context
                 .HasForeignKey<Cart>(c => c.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Category Relationships
+            // Category-Product Relationship
             modelBuilder.Entity<Category>()
                 .HasMany(c => c.Products)
                 .WithOne(p => p.Category)
-                .HasForeignKey("CategoryId")
+                .HasForeignKey(p => p.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Product Relationships
@@ -127,16 +127,14 @@ namespace Brewed.DataContext.Context
                 .HasIndex(i => i.InvoiceNumber)
                 .IsUnique();
 
-            // Composite unique index for Review (one review per user per product)
             modelBuilder.Entity<Review>()
                 .HasIndex(r => new { r.UserId, r.ProductId })
                 .IsUnique();
 
-            // Index for Cart SessionId
             modelBuilder.Entity<Cart>()
                 .HasIndex(c => c.SessionId);
 
-            // Decimal precision configuration
+            // Decimal precision
             modelBuilder.Entity<Product>()
                 .Property(p => p.Price)
                 .HasPrecision(18, 2);
@@ -182,7 +180,6 @@ namespace Brewed.DataContext.Context
             modelBuilder.Entity<UserToken>()
                 .HasIndex(ut => ut.Token);
 
-            // Coupon Indexes
             modelBuilder.Entity<Coupon>()
                 .HasIndex(c => c.Code)
                 .IsUnique();

@@ -23,6 +23,9 @@ namespace Brewed.Services
         Task<bool> ForgotPasswordAsync(string email);
         Task<bool> ResetPasswordAsync(string token, string newPassword);
         Task<bool> ChangePasswordAsync(int userId, string currentPassword, string newPassword);
+        Task<List<UserDto>> GetAllUsersAsync();
+        Task<UserDto> CreateUserByAdminAsync(UserRegisterDto userDto);
+        Task<UserDto> UpdateUserByAdminAsync(int userId, UserUpdateDto userDto);
     }
 
     public class UserService : IUserService
@@ -88,12 +91,6 @@ namespace Brewed.Services
                 throw new UnauthorizedAccessException("Invalid credentials");
             }
 
-            // Optional: Require email confirmation
-            // if (!user.EmailConfirmed)
-            // {
-            //     throw new UnauthorizedAccessException("Please confirm your email address");
-            // }
-
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
             var expireDays = int.Parse(_configuration["Jwt:ExpireDays"]);
@@ -143,7 +140,9 @@ namespace Brewed.Services
                 throw new Exception("Email already exists");
             }
 
-            _mapper.Map(userDto, user);
+            user.Name = userDto.Name;
+            user.Email = userDto.Email;
+
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
 
@@ -202,7 +201,6 @@ namespace Brewed.Services
 
             if (user == null)
             {
-                // Don't reveal if user exists
                 return true;
             }
 
@@ -273,6 +271,52 @@ namespace Brewed.Services
             await _context.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task<List<UserDto>> GetAllUsersAsync()
+        {
+            var users = await _context.Users.ToListAsync();
+            return _mapper.Map<List<UserDto>>(users);
+        }
+
+        public async Task<UserDto> CreateUserByAdminAsync(UserRegisterDto userDto)
+        {
+            if (await _context.Users.AnyAsync(u => u.Email == userDto.Email))
+            {
+                throw new Exception("Email already exists");
+            }
+
+            var user = _mapper.Map<User>(userDto);
+            user.PasswordHash = HashPassword(userDto.Password);
+            user.EmailConfirmed = true; // Admin created users are auto-confirmed
+
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+
+            return _mapper.Map<UserDto>(user);
+        }
+
+        public async Task<UserDto> UpdateUserByAdminAsync(int userId, UserUpdateDto userDto)
+        {
+            var user = await _context.Users.FindAsync(userId);
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException("User not found");
+            }
+
+            if (await _context.Users.AnyAsync(u => u.Email == userDto.Email && u.Id != userId))
+            {
+                throw new Exception("Email already exists");
+            }
+
+            user.Name = userDto.Name;
+            user.Email = userDto.Email;
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            return _mapper.Map<UserDto>(user);
         }
 
         private string HashPassword(string password)

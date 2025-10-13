@@ -10,7 +10,7 @@ const UserMenuDropdown = () => {
   const items = [
     {
       label: "Profile",
-      onClick: () => navigate('profile'),
+      onClick: () => navigate('/app/profile'),
       icon: IconUserCircle
     },
     {
@@ -30,7 +30,7 @@ const UserMenuDropdown = () => {
           <Group gap={7}>
             <Avatar radius="xl" size={30} color="blue" />
             <Text fw={500} size="sm" lh={1} mr={3}>
-              {email}
+              {email || 'User'}
             </Text>
             <IconChevronDown style={{ width: rem(12), height: rem(12) }} stroke={1.5} />
           </Group>

@@ -36,9 +36,9 @@ namespace Brewed.Services
                 .AsQueryable();
 
             // Filters
-            if (filter.CategoryId.HasValue)
+            if (filter.CategoryId.HasValue && filter.CategoryId.Value > 0)
             {
-                query = query.Where(p => p.Category.Id == filter.CategoryId.Value);
+                query = query.Where(p => p.CategoryId == filter.CategoryId.Value);
             }
 
             if (!string.IsNullOrEmpty(filter.Search))
@@ -104,8 +104,8 @@ namespace Brewed.Services
                 IsCaffeineFree = p.IsCaffeineFree,
                 IsOrganic = p.IsOrganic,
                 ImageUrl = p.ImageUrl,
-                CategoryId = p.Category.Id,
-                CategoryName = p.Category.Name,
+                CategoryId = p.Category?.Id ?? 0,
+                CategoryName = p.Category?.Name ?? "Unknown",
                 AverageRating = p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0,
                 ReviewCount = p.Reviews.Count,
                 ProductImages = p.ProductImages.Select(pi => new ProductImageDto
@@ -151,8 +151,8 @@ namespace Brewed.Services
                 IsCaffeineFree = product.IsCaffeineFree,
                 IsOrganic = product.IsOrganic,
                 ImageUrl = product.ImageUrl,
-                CategoryId = product.Category.Id,
-                CategoryName = product.Category.Name,
+                CategoryId = product.Category?.Id ?? 0,
+                CategoryName = product.Category?.Name ?? "Unknown",
                 AverageRating = product.Reviews.Any() ? product.Reviews.Average(r => r.Rating) : 0,
                 ReviewCount = product.Reviews.Count,
                 ProductImages = product.ProductImages.Select(pi => new ProductImageDto

@@ -1,4 +1,4 @@
-import { Box, Burger, Flex, Image, Badge } from "@mantine/core";
+import { Box, Burger, Flex, Image, Badge, Text } from "@mantine/core";
 import { IconShoppingCart } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -24,7 +24,6 @@ const Header = ({ opened, toggle }: any) => {
 
   useEffect(() => {
     loadCartCount();
-    // Poll cart every 30 seconds
     const interval = setInterval(loadCartCount, 30000);
     return () => clearInterval(interval);
   }, [isLoggedIn]);

@@ -13,7 +13,7 @@ import Checkout from "../pages/Checkout";
 import Orders from "../pages/Orders";
 import Profile from "../pages/Profile";
 import Categories from "../pages/Categories";
-import Coupons  from "../pages/Coupons";
+import Coupons from "../pages/Coupons";
 import AdminDashboard from "../pages/AdminDashboard";
 import Users from "../pages/Users";
 
@@ -40,6 +40,7 @@ const Routing = () => {
         <Route path="categories" element={<Categories />} />
         <Route path="coupons" element={<Coupons />} />
         <Route path="admin-dashboard" element={<AdminDashboard />} />
+        <Route path="users" element={<Users />} />  {/* ÚJ SOR */}
       </Route>
 
       {/* Default Route */}

@@ -46,7 +46,15 @@ const useAuth = () => {
     setUserId(null);
   };
 
-  return { login, logout, token, email, isLoggedIn, role, userId };
+  return { 
+    login, 
+    logout, 
+    token, 
+    email: email || 'User', 
+    isLoggedIn, 
+    role, 
+    userId 
+  };
 };
 
 export default useAuth;
