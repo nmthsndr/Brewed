@@ -56,55 +56,61 @@ export function NavbarMinimal({ toggle }: any) {
   const { logout, role } = useAuth();
 
   const menuItems = [
-  {
-    icon: IconHome,
-    label: "Dashboard",
-    url: "dashboard",
-    roles: ['Admin', 'RegisteredUser']
-  },
-  {
-    icon: IconShoppingBag,
-    label: "Products",
-    url: "products",
-    roles: ['Admin', 'RegisteredUser']
-  },
-  {
-    icon: IconCategory,
-    label: "Categories",
-    url: "categories",
-    roles: ['Admin']
-  },
-  {
-    icon: IconShoppingCart,
-    label: "Cart",
-    url: "cart",
-    roles: ['Admin', 'RegisteredUser']
-  },
-  {
-    icon: IconPackage,
-    label: "Orders",
-    url: "orders",
-    roles: ['Admin', 'RegisteredUser']
-  },
-  {
-    icon: IconTicket,
-    label: "Coupons",
-    url: "coupons",
-    roles: ['Admin']
-  },
-  {
-    icon: IconUsers,
-    label: "Users",
-    url: "users",
-    roles: ['Admin']
-  },
-  {
-    icon: IconChartBar,
-    label: "Analytics",
-    url: "admin-dashboard",
-    roles: ['Admin']
-  }
-];
+    {
+      icon: IconHome,
+      label: "Dashboard",
+      url: "dashboard",
+      roles: ['Admin', 'RegisteredUser']
+    },
+    {
+      icon: IconShoppingBag,
+      label: "Products",
+      url: "products",
+      roles: ['Admin', 'RegisteredUser']
+    },
+    {
+      icon: IconCategory,
+      label: "Manage Products",
+      url: "admin-products",
+      roles: ['Admin']
+    },
+    {
+      icon: IconCategory,
+      label: "Categories",
+      url: "categories",
+      roles: ['Admin']
+    },
+    {
+      icon: IconShoppingCart,
+      label: "Cart",
+      url: "cart",
+      roles: ['Admin', 'RegisteredUser']
+    },
+    {
+      icon: IconPackage,
+      label: "Orders",
+      url: "orders",
+      roles: ['Admin', 'RegisteredUser']
+    },
+    {
+      icon: IconTicket,
+      label: "Coupons",
+      url: "coupons",
+      roles: ['Admin']
+    },
+    {
+      icon: IconUsers,
+      label: "Users",
+      url: "users",
+      roles: ['Admin']
+    },
+    {
+      icon: IconChartBar,
+      label: "Analytics",
+      url: "admin-dashboard",
+      roles: ['Admin']
+    }
+  ];
 
   const onLogout = () => {
     logout();
@@ -113,11 +119,12 @@ export function NavbarMinimal({ toggle }: any) {
 
   useEffect(() => {
     const currentPath = location.pathname.split('/').pop() || '';
-    setActive(menuItems.findIndex(m => currentPath === m.url));
-  }, [location.pathname]);
+    const filteredItems = menuItems.filter(item => role && item.roles.includes(role));
+    setActive(filteredItems.findIndex(m => currentPath === m.url));
+  }, [location.pathname, role]);
 
   const links = menuItems
-    .filter(item => item.roles.includes(role || ''))
+    .filter(item => role && item.roles.includes(role))
     .map((link, index) => (
       <NavbarLink
         color="blue"

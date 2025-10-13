@@ -13,23 +13,35 @@ const useAuth = () => {
       const res = await api.Auth.login(email, password);
       const token = res.data.token;
       
+      console.log("Login successful, token received:", token);
+      
+      // Token mentése
       setToken(token);
       localStorage.setItem(tokenKeyName, token);
       
+      // Token dekódolása
       const decodedToken: any = jwtDecode(token);
+      console.log("Decoded token:", decodedToken);
       
+      // Role kinyerése
       const userRole = decodedToken[roleTokenKey];
-      const userEmail = decodedToken[emailTokenKey];
-      const id = decodedToken[userIdTokenKey];
-      
+      console.log("User role:", userRole);
       setRole(userRole);
       localStorage.setItem(roleKeyName, userRole);
       
+      // Email kinyerése
+      const userEmail = decodedToken[emailTokenKey];
+      console.log("User email:", userEmail);
       setEmail(userEmail);
       localStorage.setItem(emailKeyName, userEmail);
       
+      // UserId kinyerése
+      const id = decodedToken[userIdTokenKey];
+      console.log("User ID:", id);
       setUserId(id);
       localStorage.setItem(userIdKeyName, id);
+      
+      console.log("All data saved to localStorage");
       
       return true;
     } catch (error) {
@@ -39,6 +51,7 @@ const useAuth = () => {
   };
 
   const logout = () => {
+    console.log("Logging out, clearing localStorage");
     localStorage.clear();
     setToken(null);
     setEmail(null);

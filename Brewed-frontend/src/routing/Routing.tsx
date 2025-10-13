@@ -16,9 +16,10 @@ import Categories from "../pages/Categories";
 import Coupons from "../pages/Coupons";
 import AdminDashboard from "../pages/AdminDashboard";
 import Users from "../pages/Users";
+import AdminProducts from "../pages/AdminProducts";
 
 const Routing = () => {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, role } = useAuth();
 
   return (
     <Routes>
@@ -37,10 +38,17 @@ const Routing = () => {
         <Route path="checkout" element={<Checkout />} />
         <Route path="orders" element={<Orders />} />
         <Route path="profile" element={<Profile />} />
-        <Route path="categories" element={<Categories />} />
-        <Route path="coupons" element={<Coupons />} />
-        <Route path="admin-dashboard" element={<AdminDashboard />} />
-        <Route path="users" element={<Users />} />  {/* ÚJ SOR */}
+        
+        {/* Admin Only Routes */}
+        {role === 'Admin' && (
+          <>
+            <Route path="admin-products" element={<AdminProducts />} />
+            <Route path="categories" element={<Categories />} />
+            <Route path="coupons" element={<Coupons />} />
+            <Route path="admin-dashboard" element={<AdminDashboard />} />
+            <Route path="users" element={<Users />} />
+          </>
+        )}
       </Route>
 
       {/* Default Route */}
