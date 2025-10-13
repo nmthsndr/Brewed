@@ -21,6 +21,8 @@ namespace Brewed.Services
     {
         private readonly BrewedDbContext _context;
         private readonly IMapper _mapper;
+        private readonly ICouponService _couponService;
+        private readonly IEmailService _emailService;
 
         public OrderService(BrewedDbContext context, IMapper mapper)
         {
@@ -157,8 +159,11 @@ namespace Brewed.Services
                 TotalAmount = totalAmount
             };
             await _context.Invoices.AddAsync(invoice);
-
             await _context.SaveChangesAsync();
+
+            // After saving order and invoice
+            var user = await _context.Users.FindAsync(userId);
+            await _emailService.SendOrderConfirmationAsync(user.Email, user.Name, order.OrderNumber, order.TotalAmount);
 
             return await GetOrderByIdAsync(order.Id, userId);
         }
@@ -262,6 +267,10 @@ namespace Brewed.Services
             _context.Orders.Update(order);
             await _context.SaveChangesAsync();
 
+            // After updating order status
+            var user = await _context.Users.FindAsync(order.UserId);
+            await _emailService.SendOrderStatusUpdateAsync(user.Email, user.Name, order.OrderNumber, order.Status);
+
             return await GetOrderByIdAsync(orderId, order.UserId, true);
         }
 
@@ -347,12 +356,18 @@ namespace Brewed.Services
             if (subTotal >= 5000) return 500;
             return 1000;
         }
+        
 
+        public OrderService(BrewedDbContext context, IMapper mapper, ICouponService couponService, IEmailService emailService)
+        {
+            _context = context;
+            _mapper = mapper;
+            _couponService = couponService;
+            _emailService = emailService;
+        }
         private async Task<decimal> ApplyCouponAsync(string couponCode, decimal orderAmount)
         {
-            // This would integrate with a CouponService
-            // For now, return 0
-            return 0;
+            return await _couponService.ApplyCouponAsync(couponCode, orderAmount);
         }
     }
 }

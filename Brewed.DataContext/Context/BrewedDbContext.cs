@@ -16,6 +16,8 @@ namespace Brewed.DataContext.Context
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Invoice> Invoices { get; set; }
+        public DbSet<UserToken> UserTokens { get; set; }
+        public DbSet<Coupon> Coupons { get; set; }
 
         public BrewedDbContext(DbContextOptions<BrewedDbContext> options) : base(options)
         {
@@ -170,6 +172,20 @@ namespace Brewed.DataContext.Context
             modelBuilder.Entity<Invoice>()
                 .Property(i => i.TotalAmount)
                 .HasPrecision(18, 2);
+
+            modelBuilder.Entity<UserToken>()
+                .HasOne(ut => ut.User)
+                .WithMany(u => u.UserTokens)
+                .HasForeignKey(ut => ut.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserToken>()
+                .HasIndex(ut => ut.Token);
+
+            // Coupon Indexes
+            modelBuilder.Entity<Coupon>()
+                .HasIndex(c => c.Code)
+                .IsUnique();
 
             base.OnModelCreating(modelBuilder);
         }

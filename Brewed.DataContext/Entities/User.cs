@@ -18,5 +18,7 @@ namespace Brewed.DataContext.Entities
         public virtual ICollection<Review> Reviews { get; set; }
         public virtual ICollection<Address> Addresses { get; set; }
         public virtual Cart Cart { get; set; }
+        public bool EmailConfirmed { get; set; } = false;
+        public virtual ICollection<UserToken> UserTokens { get; set; }
     }
 }
