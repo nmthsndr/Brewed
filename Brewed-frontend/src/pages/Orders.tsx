@@ -85,7 +85,7 @@ const Orders = () => {
                       <Badge color={getStatusColor(order.status)}>
                         {order.status}
                       </Badge>
-                      <Text fw={700}>${order.totalAmount.toFixed(2)}</Text>
+                      <Text fw={700}>€{order.totalAmount.toFixed(2)}</Text>
                     </Group>
                   </Group>
                 </Accordion.Control>
@@ -105,7 +105,7 @@ const Orders = () => {
                           <Table.Tr key={item.id}>
                             <Table.Td>{item.productName}</Table.Td>
                             <Table.Td>{item.quantity}</Table.Td>
-                            <Table.Td>${item.totalPrice.toFixed(2)}</Table.Td>
+                            <Table.Td>€{item.totalPrice.toFixed(2)}</Table.Td>
                           </Table.Tr>
                         ))}
                       </Table.Tbody>
@@ -121,12 +121,12 @@ const Orders = () => {
 
                     <Group justify="space-between" mt="md">
                       <div>
-                        <Text size="sm">Subtotal: ${order.subTotal.toFixed(2)}</Text>
-                        <Text size="sm">Shipping: ${order.shippingCost.toFixed(2)}</Text>
+                        <Text size="sm">Subtotal: €{order.subTotal.toFixed(2)}</Text>
+                        <Text size="sm">Shipping: €{order.shippingCost.toFixed(2)}</Text>
                         {order.discount > 0 && (
-                          <Text size="sm" c="green">Discount: -${order.discount.toFixed(2)}</Text>
+                          <Text size="sm" c="green">Discount: -€{order.discount.toFixed(2)}</Text>
                         )}
-                        <Text fw={700}>Total: ${order.totalAmount.toFixed(2)}</Text>
+                        <Text fw={700}>Total: €{order.totalAmount.toFixed(2)}</Text>
                       </div>
                     </Group>
                   </Stack>

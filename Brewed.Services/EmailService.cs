@@ -112,7 +112,7 @@ namespace Brewed.Services
                         <p>Thank you for your order!</p>
                         <h3 style='color: #8B4513;'>Order Details:</h3>
                         <p><strong>Order Number:</strong> {orderNumber}</p>
-                        <p><strong>Total Amount:</strong> ${totalAmount:N2}</p>
+                        <p><strong>Total Amount:</strong> €{totalAmount:N2}</p>
                         <p>Your order is being processed. We'll notify you about the shipping status soon.</p>
                         <p>You can view your order details in your <a href='{_configuration["AppUrl"]}/orders/{orderNumber}' style='color: #8B4513;'>account</a>.</p>
                         <p style='color: #333; margin-top: 30px;'>Best regards,<br/><span style='color: #8B4513; font-weight: bold;'>Brewed Team</span></p>

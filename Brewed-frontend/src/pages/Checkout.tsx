@@ -206,23 +206,23 @@ const Checkout = () => {
             <Stack gap="xs">
               <Group justify="space-between">
                 <Text>Subtotal:</Text>
-                <Text>${cart.subTotal.toFixed(2)}</Text>
+                <Text>€{cart.subTotal.toFixed(2)}</Text>
               </Group>
               <Group justify="space-between">
                 <Text>Shipping:</Text>
-                <Text>{shippingCost === 0 ? 'FREE' : `$${shippingCost.toFixed(2)}`}</Text>
+                <Text>{shippingCost === 0 ? 'FREE' : `€${shippingCost.toFixed(2)}`}</Text>
               </Group>
               {couponDiscount > 0 && (
                 <Group justify="space-between" c="green">
                   <Text>Discount:</Text>
-                  <Text>-${couponDiscount.toFixed(2)}</Text>
+                  <Text>-€{couponDiscount.toFixed(2)}</Text>
                 </Group>
               )}
               <Divider />
               <Group justify="space-between">
                 <Text fw={700} size="lg">Total:</Text>
                 <Text fw={700} size="lg" c="blue">
-                  ${totalAmount.toFixed(2)}
+                  €{totalAmount.toFixed(2)}
                 </Text>
               </Group>
               <Button fullWidth size="lg" type="submit" mt="md">

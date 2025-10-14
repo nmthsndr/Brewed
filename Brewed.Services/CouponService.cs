@@ -153,32 +153,32 @@ namespace Brewed.Services
 
             if (coupon == null)
             {
-                result.Message = "Kuponkód nem található";
+                result.Message = "Coupon code not found";
                 return result;
             }
 
             if (!coupon.IsActive)
             {
-                result.Message = "Ez a kupon már nem aktív";
+                result.Message = "This coupon is no longer active";
                 return result;
             }
 
             var now = DateTime.UtcNow;
             if (now < coupon.StartDate)
             {
-                result.Message = $"Ez a kupon csak {coupon.StartDate:yyyy.MM.dd}-tól érvényes";
+                result.Message = $"This coupon is valid from {coupon.StartDate:yyyy.MM.dd}";
                 return result;
             }
 
             if (now > coupon.EndDate)
             {
-                result.Message = "Ez a kupon lejárt";
+                result.Message = "This coupon has expired";
                 return result;
             }
 
             if (coupon.MinimumOrderAmount.HasValue && orderAmount < coupon.MinimumOrderAmount.Value)
             {
-                result.Message = $"A minimális rendelési érték {coupon.MinimumOrderAmount.Value:N0} Ft";
+                result.Message = $"Minimum order amount is €{coupon.MinimumOrderAmount.Value:N2}";
                 return result;
             }
 
@@ -197,7 +197,7 @@ namespace Brewed.Services
             discount = Math.Min(discount, orderAmount);
 
             result.IsValid = true;
-            result.Message = "Kupon sikeresen alkalmazva";
+            result.Message = "Coupon applied successfully";
             result.DiscountAmount = discount;
             result.Coupon = _mapper.Map<CouponDto>(coupon);
 

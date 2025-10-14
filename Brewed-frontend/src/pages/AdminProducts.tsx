@@ -242,7 +242,7 @@ const AdminProducts = () => {
                   <Text fw={500}>{product.name}</Text>
                 </Table.Td>
                 <Table.Td>{product.categoryName}</Table.Td>
-                <Table.Td>${product.price.toFixed(2)}</Table.Td>
+                <Table.Td>€{product.price.toFixed(2)}</Table.Td>
                 <Table.Td>
                   <Badge color={product.stockQuantity > 10 ? 'green' : product.stockQuantity > 0 ? 'yellow' : 'red'}>
                     {product.stockQuantity}
@@ -304,7 +304,7 @@ const AdminProducts = () => {
 
             <Group grow>
               <NumberInput
-                label="Price ($)"
+                label="Price (€)"
                 placeholder="0.00"
                 required
                 min={0}

@@ -53,7 +53,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
               border: 'none'
             }}
           >
-            ${product.price}
+            €{product.price}
           </Badge>
         </Group>
 

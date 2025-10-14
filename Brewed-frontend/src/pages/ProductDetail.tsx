@@ -189,7 +189,7 @@ const ProductDetail = () => {
             )}
 
             <Text size="xl" fw={700} c="blue">
-              ${product.price.toFixed(2)}
+            €{product.price.toFixed(2)}
             </Text>
 
             <Text>{product.description}</Text>

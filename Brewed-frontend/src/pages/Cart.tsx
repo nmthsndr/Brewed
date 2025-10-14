@@ -153,7 +153,7 @@ const Cart = () => {
                     </div>
                   </Group>
                 </Table.Td>
-                <Table.Td>${item.price.toFixed(2)}</Table.Td>
+                <Table.Td>€{item.price.toFixed(2)}</Table.Td>
                 <Table.Td>
                   <NumberInput
                     value={item.quantity}
@@ -164,7 +164,7 @@ const Cart = () => {
                   />
                 </Table.Td>
                 <Table.Td>
-                  <Text fw={500}>${item.totalPrice.toFixed(2)}</Text>
+                  <Text fw={500}>€{item.totalPrice.toFixed(2)}</Text>
                 </Table.Td>
                 <Table.Td>
                   <ActionIcon
@@ -185,12 +185,12 @@ const Cart = () => {
         <Stack>
           <Group justify="space-between">
             <Text fw={500}>Subtotal:</Text>
-            <Text>${cart.subTotal.toFixed(2)}</Text>
+            <Text>€{cart.subTotal.toFixed(2)}</Text>
           </Group>
           <Divider />
           <Group justify="space-between">
             <Text fw={700} size="lg">Total:</Text>
-            <Text fw={700} size="lg" c="blue">${cart.subTotal.toFixed(2)}</Text>
+            <Text fw={700} size="lg" c="blue">€{cart.subTotal.toFixed(2)}</Text>
           </Group>
           <Button
             fullWidth

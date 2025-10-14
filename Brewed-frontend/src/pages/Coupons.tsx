@@ -187,11 +187,11 @@ const Coupons = () => {
                 <Table.Td>
                   {coupon.discountType === 'Percentage' 
                     ? `${coupon.discountValue}%` 
-                    : `${coupon.discountValue} Ft`}
+                    : `€${coupon.discountValue}`}
                 </Table.Td>
                 <Table.Td>
                   {coupon.minimumOrderAmount 
-                    ? `${coupon.minimumOrderAmount} Ft` 
+                    ? `€${coupon.minimumOrderAmount}` 
                     : '-'}
                 </Table.Td>
                 <Table.Td>
@@ -252,20 +252,20 @@ const Coupons = () => {
               required
               data={[
                 { value: 'Percentage', label: 'Percentage (%)' },
-                { value: 'FixedAmount', label: 'Fixed Amount (Ft)' }
+                { value: 'FixedAmount', label: 'Fixed Amount (€)' }
               ]}
               {...form.getInputProps('discountType')}
             />
 
             <NumberInput
-              label="Discount Value"
+              label="Discount Value (€)"
               required
               min={0}
               {...form.getInputProps('discountValue')}
             />
 
             <NumberInput
-              label="Minimum Order Amount (Ft)"
+              label="Minimum Order Amount (€)"
               min={0}
               {...form.getInputProps('minimumOrderAmount')}
             />

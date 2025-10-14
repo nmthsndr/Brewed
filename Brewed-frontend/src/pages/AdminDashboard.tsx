@@ -62,10 +62,10 @@ const AdminDashboard = () => {
   const statCards = [
     {
       title: 'Total Revenue',
-      value: `${stats.totalRevenue.toFixed(0)} Ft`,
+      value: `€${stats.totalRevenue.toFixed(0)}`,
       icon: IconCurrencyDollar,
       color: 'blue',
-      description: `${stats.monthlyRevenue.toFixed(0)} Ft this month`
+      description: `€${stats.monthlyRevenue.toFixed(0)} this month`
     },
     {
       title: 'Total Orders',
@@ -146,7 +146,7 @@ const AdminDashboard = () => {
                     <Badge>{product.totalSold}</Badge>
                   </Table.Td>
                   <Table.Td>
-                    <Text size="sm">{product.totalRevenue.toFixed(0)} Ft</Text>
+                    <Text size="sm">€{product.totalRevenue.toFixed(0)}</Text>
                   </Table.Td>
                 </Table.Tr>
               ))}
@@ -175,7 +175,7 @@ const AdminDashboard = () => {
                     <Text size="sm">{order.customerName}</Text>
                   </Table.Td>
                   <Table.Td>
-                    <Text size="sm">{order.totalAmount.toFixed(0)} Ft</Text>
+                    <Text size="sm">€{order.totalAmount.toFixed(0)}</Text>
                   </Table.Td>
                   <Table.Td>
                     <Badge color={getStatusColor(order.status)}>
