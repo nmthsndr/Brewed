@@ -27,7 +27,7 @@
                 cfg.AddProfile<AutoMapperProfile>();
             });
 
-            // Services - MINDEN SERVICE REGISZTRÁLÁSA
+            // Services
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IAddressService, AddressService>();
             builder.Services.AddScoped<ICartService, CartService>();
@@ -39,7 +39,6 @@
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IDashboardService, DashboardService>();
 
-            // FileUploadService - Special registration with webRootPath
             builder.Services.AddScoped<IFileUploadService>(provider =>
             {
                 var env = provider.GetRequiredService<IWebHostEnvironment>();
@@ -75,7 +74,6 @@
             builder.Services.AddAuthorization();
             builder.Services.AddControllers();
 
-            // CORSPolicy
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll", policy =>
@@ -87,15 +85,14 @@
                 });
             });
 
-            // Swagger with JWT support
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Title = "Brewed Coffee API",
+                    Title = "Brewed API",
                     Version = "v1",
-                    Description = "Kávé webshop API - Teljes dokumentáció"
+                    Description = "Coffee Shop API - Complete Documentation"
                 });
 
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -105,7 +102,7 @@
                     Scheme = "bearer",
                     BearerFormat = "JWT",
                     In = ParameterLocation.Header,
-                    Description = "JWT Authorization header. Írd be: {token}"
+                    Description = "JWT Authorization header. Enter: {token}"
                 });
 
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -136,8 +133,7 @@
                 });
             }
 
-            app.UseCors("AllowAll");  // ← ELSŐ helyre!
-            // app.UseHttpsRedirection();  // ← Ki van commentelve
+            app.UseCors("AllowAll");
             app.UseStaticFiles();
             app.UseAuthentication();
             app.UseAuthorization();
@@ -150,11 +146,7 @@
                 try
                 {
                     var context = services.GetRequiredService<BrewedDbContext>();
-
-                    // Apply migrations
                     context.Database.Migrate();
-
-                    // Seed data
                     SeedData(context);
                 }
                 catch (Exception ex)
@@ -174,54 +166,51 @@
 
             using var tx = context.Database.BeginTransaction();
 
-            // KATEGÓRIÁK
             var categories = new List<Category>
             {
-                new() { Name = "Espresso", Description = "Erős, koncentrált kávék espresso alapon" },
-                new() { Name = "Cappuccino", Description = "Tejhabos kávékülönlegességek" },
-                new() { Name = "Latte", Description = "Tejes kávék lágy ízvilággal" },
-                new() { Name = "Specialty", Description = "Különleges kávékreációk" },
-                new() { Name = "Cold Brew", Description = "Hideg főzésű kávék" },
-                new() { Name = "Sütemények", Description = "Frissen sült péksütik és desszertek" },
-                new() { Name = "Szendvicsek", Description = "Friss szendvicsek és snackek" }
+                new() { Name = "Espresso", Description = "Strong, concentrated espresso-based coffees" },
+                new() { Name = "Cappuccino", Description = "Espresso with steamed milk foam" },
+                new() { Name = "Latte", Description = "Milk coffees with smooth flavor" },
+                new() { Name = "Specialty", Description = "Special coffee creations" },
+                new() { Name = "Cold Brew", Description = "Cold brewed coffees" },
+                new() { Name = "Pastries", Description = "Freshly baked pastries and desserts" },
+                new() { Name = "Sandwiches", Description = "Fresh sandwiches and snacks" }
             };
             context.Categories.AddRange(categories);
             context.SaveChanges();
 
-            // TERMÉKEK - CategoryId használatával!
             var products = new List<Product>
             {
-                new() { Name = "Espresso", Description = "Klasszikus olasz espresso", Price = 590m, StockQuantity = 100, ImageUrl = "/images/espresso.jpg", RoastLevel="Medium-Dark", Origin="Blend", CategoryId = 1 },
-                new() { Name = "Dupla Espresso", Description = "Dupla adag espresso", Price = 890m, StockQuantity = 100, ImageUrl = "/images/double-espresso.jpg", RoastLevel="Dark", Origin="Blend", CategoryId = 1 },
-                new() { Name = "Americano", Description = "Espresso forró vízzel", Price = 690m, StockQuantity = 100, ImageUrl = "/images/americano.jpg", RoastLevel="Medium", Origin="Blend", CategoryId = 1 },
-                new() { Name = "Cappuccino", Description = "Espresso tejes habbal", Price = 890m, StockQuantity = 100, ImageUrl = "/images/cappuccino.jpg", RoastLevel="Medium", Origin="Blend", CategoryId = 2 },
-                new() { Name = "Vanília Cappuccino", Description = "Vaníliás cappuccino", Price = 990m, StockQuantity = 100, ImageUrl = "/images/vanilla-cappuccino.jpg", RoastLevel="Medium", Origin="Blend", CategoryId = 2 },
-                new() { Name = "Karamell Cappuccino", Description = "Karamellás cappuccino", Price = 990m, StockQuantity = 100, ImageUrl = "/images/caramel-cappuccino.jpg", RoastLevel="Medium", Origin="Blend", CategoryId = 2 },
-                new() { Name = "Caffè Latte", Description = "Klasszikus tejeskávé", Price = 990m, StockQuantity = 100, ImageUrl = "/images/latte.jpg", RoastLevel="Light-Medium", Origin="Brazil", CategoryId = 3 },
-                new() { Name = "Vanília Latte", Description = "Vaníliás latte", Price = 1090m, StockQuantity = 100, ImageUrl = "/images/vanilla-latte.jpg", RoastLevel="Light", Origin="Colombia", CategoryId = 3 },
-                new() { Name = "Mocha Latte", Description = "Csokoládés latte", Price = 1190m, StockQuantity = 100, ImageUrl = "/images/mocha-latte.jpg", RoastLevel="Light", Origin="Peru", CategoryId = 3 },
-                new() { Name = "Mandulás Latte", Description = "Mandula ízesítésű latte", Price = 1090m, StockQuantity = 100, ImageUrl = "/images/almond-latte.jpg", RoastLevel="Light", Origin="Guatemala", CategoryId = 3 },
-                new() { Name = "Flat White", Description = "Ausztrál specialty kávé", Price = 1090m, StockQuantity = 100, ImageUrl = "/images/flat-white.jpg", RoastLevel="Medium", Origin="Australia", CategoryId = 4 },
-                new() { Name = "Macchiato", Description = "Espresso tejhabbal", Price = 790m, StockQuantity = 100, ImageUrl = "/images/macchiato.jpg", RoastLevel="Medium-Dark", Origin="Italy", CategoryId = 4 },
-                new() { Name = "Affogato", Description = "Espresso vaníliafagylalttal", Price = 1290m, StockQuantity = 50, ImageUrl = "/images/affogato.jpg", RoastLevel="Dark", Origin="Blend", CategoryId = 4 },
-                new() { Name = "Irish Coffee", Description = "Kávé whiskyvel és tejszínnel", Price = 1490m, StockQuantity = 50, ImageUrl = "/images/irish-coffee.jpg", RoastLevel="Dark", Origin="Ireland", CategoryId = 4 },
-                new() { Name = "Cold Brew", Description = "Hideg főzésű kávé", Price = 1090m, StockQuantity = 80, ImageUrl = "/images/cold-brew.jpg", RoastLevel="Medium", Origin="Kenya", CategoryId = 5 },
-                new() { Name = "Iced Latte", Description = "Jeges latte", Price = 1190m, StockQuantity = 80, ImageUrl = "/images/iced-latte.jpg", RoastLevel="Light", Origin="Colombia", CategoryId = 5 },
-                new() { Name = "Frappuccino", Description = "Jeges turmix kávé", Price = 1390m, StockQuantity = 80, ImageUrl = "/images/frappuccino.jpg", RoastLevel="Medium", Origin="Blend", CategoryId = 5 },
-                new() { Name = "Croissant", Description = "Vajas croissant", Price = 690m, StockQuantity = 40, ImageUrl = "/images/croissant.jpg", CategoryId = 6 },
-                new() { Name = "Csokis Muffin", Description = "Csokoládés muffin", Price = 790m, StockQuantity = 30, ImageUrl = "/images/choco-muffin.jpg", CategoryId = 6 },
-                new() { Name = "Áfonyás Muffin", Description = "Áfonyás muffin", Price = 790m, StockQuantity = 30, ImageUrl = "/images/blueberry-muffin.jpg", CategoryId = 6 },
-                new() { Name = "Brownie", Description = "Csokoládés brownie", Price = 890m, StockQuantity = 25, ImageUrl = "/images/brownie.jpg", CategoryId = 6 },
-                new() { Name = "Sajttorta", Description = "New York-i sajttorta", Price = 1290m, StockQuantity = 20, ImageUrl = "/images/cheesecake.jpg", CategoryId = 6 },
-                new() { Name = "Club Sandwich", Description = "Csirke, bacon, saláta, paradicsom", Price = 1590m, StockQuantity = 30, ImageUrl = "/images/club-sandwich.jpg", CategoryId = 7 },
-                new() { Name = "Tonhalas Szendvics", Description = "Tonhal, saláta, hagyma", Price = 1390m, StockQuantity = 30, ImageUrl = "/images/tuna-sandwich.jpg", CategoryId = 7 },
-                new() { Name = "Vegán Wrap", Description = "Zöldségekkel töltött tortilla", Price = 1290m, StockQuantity = 25, ImageUrl = "/images/vegan-wrap.jpg", CategoryId = 7 },
-                new() { Name = "Mozzarella Panini", Description = "Mozzarella, paradicsom, bazsalikom", Price = 1490m, StockQuantity = 25, ImageUrl = "/images/panini.jpg", CategoryId = 7 }
+                new() { Name = "Espresso", Description = "Classic Italian espresso", Price = 590m, StockQuantity = 100, ImageUrl = "/images/espresso.jpg", RoastLevel="Medium-Dark", Origin="Blend", CategoryId = 1 },
+                new() { Name = "Double Espresso", Description = "Double shot of espresso", Price = 890m, StockQuantity = 100, ImageUrl = "/images/double-espresso.jpg", RoastLevel="Dark", Origin="Blend", CategoryId = 1 },
+                new() { Name = "Americano", Description = "Espresso with hot water", Price = 690m, StockQuantity = 100, ImageUrl = "/images/americano.jpg", RoastLevel="Medium", Origin="Blend", CategoryId = 1 },
+                new() { Name = "Cappuccino", Description = "Espresso with milk foam", Price = 890m, StockQuantity = 100, ImageUrl = "/images/cappuccino.jpg", RoastLevel="Medium", Origin="Blend", CategoryId = 2 },
+                new() { Name = "Vanilla Cappuccino", Description = "Vanilla cappuccino", Price = 990m, StockQuantity = 100, ImageUrl = "/images/vanilla-cappuccino.jpg", RoastLevel="Medium", Origin="Blend", CategoryId = 2 },
+                new() { Name = "Caramel Cappuccino", Description = "Caramel cappuccino", Price = 990m, StockQuantity = 100, ImageUrl = "/images/caramel-cappuccino.jpg", RoastLevel="Medium", Origin="Blend", CategoryId = 2 },
+                new() { Name = "Caffè Latte", Description = "Classic milk coffee", Price = 990m, StockQuantity = 100, ImageUrl = "/images/latte.jpg", RoastLevel="Light-Medium", Origin="Brazil", CategoryId = 3 },
+                new() { Name = "Vanilla Latte", Description = "Vanilla latte", Price = 1090m, StockQuantity = 100, ImageUrl = "/images/vanilla-latte.jpg", RoastLevel="Light", Origin="Colombia", CategoryId = 3 },
+                new() { Name = "Mocha Latte", Description = "Chocolate latte", Price = 1190m, StockQuantity = 100, ImageUrl = "/images/mocha-latte.jpg", RoastLevel="Light", Origin="Peru", CategoryId = 3 },
+                new() { Name = "Almond Latte", Description = "Almond flavored latte", Price = 1090m, StockQuantity = 100, ImageUrl = "/images/almond-latte.jpg", RoastLevel="Light", Origin="Guatemala", CategoryId = 3 },
+                new() { Name = "Flat White", Description = "Australian specialty coffee", Price = 1090m, StockQuantity = 100, ImageUrl = "/images/flat-white.jpg", RoastLevel="Medium", Origin="Australia", CategoryId = 4 },
+                new() { Name = "Macchiato", Description = "Espresso with milk foam", Price = 790m, StockQuantity = 100, ImageUrl = "/images/macchiato.jpg", RoastLevel="Medium-Dark", Origin="Italy", CategoryId = 4 },
+                new() { Name = "Affogato", Description = "Espresso with vanilla ice cream", Price = 1290m, StockQuantity = 50, ImageUrl = "/images/affogato.jpg", RoastLevel="Dark", Origin="Blend", CategoryId = 4 },
+                new() { Name = "Irish Coffee", Description = "Coffee with whiskey and cream", Price = 1490m, StockQuantity = 50, ImageUrl = "/images/irish-coffee.jpg", RoastLevel="Dark", Origin="Ireland", CategoryId = 4 },
+                new() { Name = "Cold Brew", Description = "Cold brewed coffee", Price = 1090m, StockQuantity = 80, ImageUrl = "/images/cold-brew.jpg", RoastLevel="Medium", Origin="Kenya", CategoryId = 5 },
+                new() { Name = "Iced Latte", Description = "Iced latte", Price = 1190m, StockQuantity = 80, ImageUrl = "/images/iced-latte.jpg", RoastLevel="Light", Origin="Colombia", CategoryId = 5 },
+                new() { Name = "Frappuccino", Description = "Iced blended coffee", Price = 1390m, StockQuantity = 80, ImageUrl = "/images/frappuccino.jpg", RoastLevel="Medium", Origin="Blend", CategoryId = 5 },
+                new() { Name = "Croissant", Description = "Butter croissant", Price = 690m, StockQuantity = 40, ImageUrl = "/images/croissant.jpg", CategoryId = 6 },
+                new() { Name = "Chocolate Muffin", Description = "Chocolate muffin", Price = 790m, StockQuantity = 30, ImageUrl = "/images/choco-muffin.jpg", CategoryId = 6 },
+                new() { Name = "Blueberry Muffin", Description = "Blueberry muffin", Price = 790m, StockQuantity = 30, ImageUrl = "/images/blueberry-muffin.jpg", CategoryId = 6 },
+                new() { Name = "Brownie", Description = "Chocolate brownie", Price = 890m, StockQuantity = 25, ImageUrl = "/images/brownie.jpg", CategoryId = 6 },
+                new() { Name = "Cheesecake", Description = "New York cheesecake", Price = 1290m, StockQuantity = 20, ImageUrl = "/images/cheesecake.jpg", CategoryId = 6 },
+                new() { Name = "Club Sandwich", Description = "Chicken, bacon, lettuce, tomato", Price = 1590m, StockQuantity = 30, ImageUrl = "/images/club-sandwich.jpg", CategoryId = 7 },
+                new() { Name = "Tuna Sandwich", Description = "Tuna, lettuce, onion", Price = 1390m, StockQuantity = 30, ImageUrl = "/images/tuna-sandwich.jpg", CategoryId = 7 },
+                new() { Name = "Vegan Wrap", Description = "Tortilla with vegetables", Price = 1290m, StockQuantity = 25, ImageUrl = "/images/vegan-wrap.jpg", CategoryId = 7 },
+                new() { Name = "Mozzarella Panini", Description = "Mozzarella, tomato, basil", Price = 1490m, StockQuantity = 25, ImageUrl = "/images/panini.jpg", CategoryId = 7 }
             };
             context.Products.AddRange(products);
             context.SaveChanges();
 
-            // ADMIN USER
             var adminUser = new User
             {
                 Name = "Admin User",
@@ -233,26 +222,24 @@
             context.Users.Add(adminUser);
             context.SaveChanges();
 
-            // DEMO USERS
             var users = new List<User>
             {
-                new() { Name="Nagy János", Email="nagy.janos@example.com", PasswordHash=Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes("Password123"))), Role="RegisteredUser", EmailConfirmed=true },
-                new() { Name="Kovács Anna", Email="kovacs.anna@example.com", PasswordHash=Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes("Password123"))), Role="RegisteredUser", EmailConfirmed=true },
-                new() { Name="Szabó Péter", Email="szabo.peter@example.com", PasswordHash=Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes("Password123"))), Role="RegisteredUser", EmailConfirmed=true }
+                new() { Name="John Smith", Email="john.smith@example.com", PasswordHash=Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes("Password123"))), Role="RegisteredUser", EmailConfirmed=true },
+                new() { Name="Anna Johnson", Email="anna.johnson@example.com", PasswordHash=Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes("Password123"))), Role="RegisteredUser", EmailConfirmed=true },
+                new() { Name="Peter Williams", Email="peter.williams@example.com", PasswordHash=Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes("Password123"))), Role="RegisteredUser", EmailConfirmed=true }
             };
             context.Users.AddRange(users);
             context.SaveChanges();
 
-            // CÍMEK
             var addresses = users.Select(u => new Address
             {
-                FirstName = u.Name.Split(' ').Last(),
-                LastName = u.Name.Split(' ').First(),
-                AddressLine1 = "Fő utca 1.",
-                City = "Budapest",
-                PostalCode = "1011",
-                Country = "Hungary",
-                PhoneNumber = "+36 1 234 5678",
+                FirstName = u.Name.Split(' ').First(),
+                LastName = u.Name.Split(' ').Last(),
+                AddressLine1 = "Main Street 1",
+                City = "New York",
+                PostalCode = "10001",
+                Country = "USA",
+                PhoneNumber = "+1 555 123 4567",
                 IsDefault = true,
                 AddressType = "Shipping",
                 UserId = u.Id
@@ -260,12 +247,11 @@
             context.Addresses.AddRange(addresses);
             context.SaveChanges();
 
-            // KUPONOK
             var coupons = new List<Coupon>
             {
-                new() { Code = "WELCOME10", Description = "10% kedvezmény új vásárlóknak", DiscountType = "Percentage", DiscountValue = 10m, MinimumOrderAmount = 3000m, StartDate = DateTime.UtcNow.AddDays(-30), EndDate = DateTime.UtcNow.AddDays(30), IsActive = true },
-                new() { Code = "SUMMER2025", Description = "Nyári akció - 500 Ft kedvezmény", DiscountType = "FixedAmount", DiscountValue = 500m, MinimumOrderAmount = 5000m, StartDate = DateTime.UtcNow.AddDays(-10), EndDate = DateTime.UtcNow.AddDays(60), IsActive = true },
-                new() { Code = "FREESHIP", Description = "Ingyenes szállítás 10000 Ft felett", DiscountType = "FixedAmount", DiscountValue = 1000m, MinimumOrderAmount = 10000m, StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddDays(90), IsActive = true }
+                new() { Code = "WELCOME10", Description = "10% discount for new customers", DiscountType = "Percentage", DiscountValue = 10m, MinimumOrderAmount = 3000m, StartDate = DateTime.UtcNow.AddDays(-30), EndDate = DateTime.UtcNow.AddDays(30), IsActive = true },
+                new() { Code = "SUMMER2025", Description = "Summer sale - $5 off", DiscountType = "FixedAmount", DiscountValue = 500m, MinimumOrderAmount = 5000m, StartDate = DateTime.UtcNow.AddDays(-10), EndDate = DateTime.UtcNow.AddDays(60), IsActive = true },
+                new() { Code = "FREESHIP", Description = "Free shipping over $100", DiscountType = "FixedAmount", DiscountValue = 1000m, MinimumOrderAmount = 10000m, StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddDays(90), IsActive = true }
             };
             context.Coupons.AddRange(coupons);
             context.SaveChanges();

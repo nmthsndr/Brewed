@@ -12,7 +12,25 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
   const navigate = useNavigate();
 
   return (
-    <Card shadow="sm" padding="lg" radius="md" withBorder>
+    <Card 
+      shadow="sm" 
+      padding="lg" 
+      radius="md" 
+      withBorder
+      style={{
+        borderColor: '#D4A373',
+        transition: 'all 0.3s ease',
+        cursor: 'pointer'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-5px)';
+        e.currentTarget.style.boxShadow = '0 8px 16px rgba(139, 69, 19, 0.2)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = '';
+      }}
+    >
       <Card.Section>
         <Image
           src={product.imageUrl}
@@ -26,10 +44,15 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
 
       <Stack mt="md" gap="xs">
         <Group justify="space-between" align="flex-start">
-          <Text fw={500} size="lg" lineClamp={1}>
+          <Text fw={500} size="lg" lineClamp={1} style={{ color: '#8B4513' }}>
             {product.name}
           </Text>
-          <Badge color="blue" variant="light">
+          <Badge 
+            style={{
+              background: 'linear-gradient(135deg, #D4A373 0%, #8B4513 100%)',
+              border: 'none'
+            }}
+          >
             ${product.price}
           </Badge>
         </Group>
@@ -39,13 +62,17 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
         </Text>
 
         <Group gap="xs">
-          <Badge size="sm" variant="dot" color={product.stockQuantity > 0 ? "green" : "red"}>
+          <Badge 
+            size="sm" 
+            variant="dot" 
+            color={product.stockQuantity > 0 ? "green" : "red"}
+          >
             {product.stockQuantity > 0 ? "In Stock" : "Out of Stock"}
           </Badge>
           {product.reviewCount > 0 && (
             <Group gap={4}>
-              <IconStar size={16} fill="gold" color="gold" />
-              <Text size="sm">
+              <IconStar size={16} fill="#D4A373" color="#8B4513" />
+              <Text size="sm" style={{ color: '#8B4513' }}>
                 {product.averageRating.toFixed(1)} ({product.reviewCount})
               </Text>
             </Group>
@@ -57,6 +84,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
             variant="light"
             fullWidth
             onClick={() => navigate(`/app/products/${product.id}`)}
+            color="brown"
           >
             View Details
           </Button>
@@ -64,6 +92,10 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
             <Button
               leftSection={<IconShoppingCart size={18} />}
               onClick={() => onAddToCart(product.id)}
+              style={{
+                background: 'linear-gradient(135deg, #D4A373 0%, #8B4513 100%)',
+                border: 'none'
+              }}
             >
               Add
             </Button>

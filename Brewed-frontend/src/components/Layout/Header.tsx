@@ -32,11 +32,16 @@ const Header = ({ opened, toggle }: any) => {
     <Flex
       justify="space-between"
       align="center"
-      style={{ height: "100%", paddingLeft: '20px', paddingRight: '20px' }}
+      style={{ 
+        height: "100%", 
+        paddingLeft: '20px', 
+        paddingRight: '20px',
+        background: 'linear-gradient(90deg, rgba(212, 163, 115, 0.1) 0%, rgba(139, 69, 19, 0.1) 100%)'
+      }}
     >
       <Image
         src="/logo.png"
-        alt="Brewed Coffee Logo"
+        alt="Brewed Logo"
         w={100}
         style={{ cursor: 'pointer' }}
         onClick={() => navigate('/app/dashboard')}
@@ -47,7 +52,7 @@ const Header = ({ opened, toggle }: any) => {
           style={{ position: 'relative', cursor: 'pointer' }}
           onClick={() => navigate('/app/cart')}
         >
-          <IconShoppingCart size={24} />
+          <IconShoppingCart size={24} color="#8B4513" />
           {cartItemCount > 0 && (
             <Badge
               size="sm"
@@ -58,7 +63,9 @@ const Header = ({ opened, toggle }: any) => {
                 right: -8,
                 padding: 0,
                 minWidth: 20,
-                height: 20
+                height: 20,
+                background: 'linear-gradient(135deg, #D4A373 0%, #8B4513 100%)',
+                border: 'none'
               }}
             >
               {cartItemCount}
@@ -68,7 +75,7 @@ const Header = ({ opened, toggle }: any) => {
         <UserMenuDropdown />
       </Box>
 
-      <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+      <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" color="#8B4513" />
     </Flex>
   );
 };

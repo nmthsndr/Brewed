@@ -56,19 +56,21 @@ namespace Brewed.Services
 
         public async Task SendEmailConfirmationAsync(string email, string name, string verificationCode)
         {
-            var subject = "Email megerősítés - Brewed Coffee";
+            var subject = "Email Confirmation - Brewed";
 
             var body = $@"
-            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
-                <h2>Szia {name}!</h2>
-                <p>Köszönjük, hogy regisztráltál a Brewed Coffee oldalán!</p>
-                <p>Az email címed megerősítéséhez kérjük, add meg az alábbi 6 jegyű kódot:</p>
-                <div style='background-color: #f5f5f5; padding: 20px; text-align: center; margin: 20px 0; border-radius: 8px;'>
-                    <h1 style='color: #8B4513; font-size: 36px; letter-spacing: 8px; margin: 0;'>{verificationCode}</h1>
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #D4A373 0%, #8B4513 100%); padding: 40px; border-radius: 10px;'>
+                <div style='background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
+                    <h2 style='color: #8B4513; margin-bottom: 20px;'>Hello {name}!</h2>
+                    <p style='color: #333; font-size: 16px; line-height: 1.6;'>Thank you for registering at Brewed!</p>
+                    <p style='color: #333; font-size: 16px; line-height: 1.6;'>To confirm your email address, please enter the following 6-digit code:</p>
+                    <div style='background: linear-gradient(135deg, #D4A373 0%, #8B4513 100%); padding: 25px; text-align: center; margin: 30px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
+                        <h1 style='color: white; font-size: 42px; letter-spacing: 10px; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);'>{verificationCode}</h1>
+                    </div>
+                    <p style='color: #666; font-size: 14px;'>This code is valid for 24 hours.</p>
+                    <p style='color: #666; font-size: 14px;'>If you didn't register, please ignore this email.</p>
+                    <p style='color: #333; font-size: 16px; margin-top: 30px;'>Best regards,<br/><span style='color: #8B4513; font-weight: bold;'>Brewed Team</span></p>
                 </div>
-                <p>Ez a kód 24 óráig érvényes.</p>
-                <p>Ha nem te regisztráltál, kérjük, hagyd figyelmen kívül ezt az emailt.</p>
-                <p>Üdvözlettel,<br/>Brewed Coffee csapata</p>
             </div>
         ";
 
@@ -77,17 +79,23 @@ namespace Brewed.Services
 
         public async Task SendPasswordResetAsync(string email, string name, string resetToken)
         {
-            var subject = "Jelszó visszaállítás - Brewed Coffee";
+            var subject = "Password Reset - Brewed";
             var resetUrl = $"{_configuration["AppUrl"]}/reset-password?token={resetToken}";
 
             var body = $@"
-                <h2>Szia {name}!</h2>
-                <p>Kaptunk egy jelszó visszaállítási kérelmet a fiókodhoz.</p>
-                <p>Az alábbi linkre kattintva állíthatsz be új jelszót:</p>
-                <a href='{resetUrl}' style='background-color: #8B4513; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Új jelszó beállítása</a>
-                <p>Ez a link 24 óráig érvényes.</p>
-                <p>Ha nem te kérted a jelszó visszaállítást, kérjük, hagyd figyelmen kívül ezt az emailt.</p>
-                <p>Üdvözlettel,<br/>Brewed Coffee csapata</p>
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #D4A373 0%, #8B4513 100%); padding: 40px; border-radius: 10px;'>
+                    <div style='background: white; padding: 30px; border-radius: 8px;'>
+                        <h2 style='color: #8B4513;'>Hello {name}!</h2>
+                        <p>We received a password reset request for your account.</p>
+                        <p>Click the button below to set a new password:</p>
+                        <div style='text-align: center; margin: 30px 0;'>
+                            <a href='{resetUrl}' style='background: linear-gradient(135deg, #D4A373 0%, #8B4513 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;'>Reset Password</a>
+                        </div>
+                        <p style='color: #666; font-size: 14px;'>This link is valid for 24 hours.</p>
+                        <p style='color: #666; font-size: 14px;'>If you didn't request a password reset, please ignore this email.</p>
+                        <p style='color: #333; margin-top: 30px;'>Best regards,<br/><span style='color: #8B4513; font-weight: bold;'>Brewed Team</span></p>
+                    </div>
+                </div>
             ";
 
             await SendEmailAsync(email, subject, body);
@@ -95,17 +103,21 @@ namespace Brewed.Services
 
         public async Task SendOrderConfirmationAsync(string email, string name, string orderNumber, decimal totalAmount)
         {
-            var subject = $"Rendelés visszaigazolás - {orderNumber}";
+            var subject = $"Order Confirmation - {orderNumber}";
 
             var body = $@"
-                <h2>Szia {name}!</h2>
-                <p>Köszönjük a rendelésedet!</p>
-                <h3>Rendelés részletei:</h3>
-                <p><strong>Rendelésszám:</strong> {orderNumber}</p>
-                <p><strong>Végösszeg:</strong> {totalAmount:N0} Ft</p>
-                <p>A rendelésed feldolgozás alatt van. Hamarosan értesítünk a szállítás állapotáról.</p>
-                <p>A rendelésed részleteit megtekintheted a <a href='{_configuration["AppUrl"]}/orders/{orderNumber}'>fiókodban</a>.</p>
-                <p>Üdvözlettel,<br/>Brewed Coffee csapata</p>
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #D4A373 0%, #8B4513 100%); padding: 40px; border-radius: 10px;'>
+                    <div style='background: white; padding: 30px; border-radius: 8px;'>
+                        <h2 style='color: #8B4513;'>Hello {name}!</h2>
+                        <p>Thank you for your order!</p>
+                        <h3 style='color: #8B4513;'>Order Details:</h3>
+                        <p><strong>Order Number:</strong> {orderNumber}</p>
+                        <p><strong>Total Amount:</strong> ${totalAmount:N2}</p>
+                        <p>Your order is being processed. We'll notify you about the shipping status soon.</p>
+                        <p>You can view your order details in your <a href='{_configuration["AppUrl"]}/orders/{orderNumber}' style='color: #8B4513;'>account</a>.</p>
+                        <p style='color: #333; margin-top: 30px;'>Best regards,<br/><span style='color: #8B4513; font-weight: bold;'>Brewed Team</span></p>
+                    </div>
+                </div>
             ";
 
             await SendEmailAsync(email, subject, body);
@@ -113,25 +125,29 @@ namespace Brewed.Services
 
         public async Task SendOrderStatusUpdateAsync(string email, string name, string orderNumber, string status)
         {
-            var subject = $"Rendelés státusz frissítés - {orderNumber}";
+            var subject = $"Order Status Update - {orderNumber}";
 
             var statusMessages = new Dictionary<string, string>
             {
-                ["Processing"] = "feldolgozás alatt van",
-                ["Shipped"] = "feladásra került",
-                ["Delivered"] = "kézbesítésre került",
-                ["Cancelled"] = "törölve lett"
+                ["Processing"] = "is being processed",
+                ["Shipped"] = "has been shipped",
+                ["Delivered"] = "has been delivered",
+                ["Cancelled"] = "has been cancelled"
             };
 
-            var statusText = statusMessages.GetValueOrDefault(status, "frissítve lett");
+            var statusText = statusMessages.GetValueOrDefault(status, "has been updated");
 
             var body = $@"
-                <h2>Szia {name}!</h2>
-                <p>A(z) <strong>{orderNumber}</strong> számú rendelésed {statusText}.</p>
-                {(status == "Shipped" ? "<p>A csomag hamarosan megérkezik hozzád!</p>" : "")}
-                {(status == "Delivered" ? "<p>Reméljük, elégedett vagy a termékekkel! Kérjük, oszd meg velünk véleményedet!</p>" : "")}
-                <p>A rendelésed részleteit megtekintheted a <a href='{_configuration["AppUrl"]}/orders/{orderNumber}'>fiókodban</a>.</p>
-                <p>Üdvözlettel,<br/>Brewed Coffee csapata</p>
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #D4A373 0%, #8B4513 100%); padding: 40px; border-radius: 10px;'>
+                    <div style='background: white; padding: 30px; border-radius: 8px;'>
+                        <h2 style='color: #8B4513;'>Hello {name}!</h2>
+                        <p>Your order <strong>{orderNumber}</strong> {statusText}.</p>
+                        {(status == "Shipped" ? "<p>Your package will arrive soon!</p>" : "")}
+                        {(status == "Delivered" ? "<p>We hope you're satisfied with your products! Please share your feedback with us!</p>" : "")}
+                        <p>You can view your order details in your <a href='{_configuration["AppUrl"]}/orders/{orderNumber}' style='color: #8B4513;'>account</a>.</p>
+                        <p style='color: #333; margin-top: 30px;'>Best regards,<br/><span style='color: #8B4513; font-weight: bold;'>Brewed Team</span></p>
+                    </div>
+                </div>
             ";
 
             await SendEmailAsync(email, subject, body);
@@ -140,13 +156,15 @@ namespace Brewed.Services
         public async Task SendLowStockAlertAsync(string productName, int currentStock)
         {
             var adminEmail = _configuration["Email:AdminEmail"];
-            var subject = $"⚠️ Alacsony készlet - {productName}";
+            var subject = $"Low Stock Alert - {productName}";
 
             var body = $@"
-                <h2>Alacsony készlet riasztás</h2>
-                <p><strong>Termék:</strong> {productName}</p>
-                <p><strong>Jelenlegi készlet:</strong> {currentStock} db</p>
-                <p>Kérjük, ellenőrizd a raktárkészletet és rendeld meg az újratöltést!</p>
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                    <h2 style='color: #8B4513;'>Low Stock Alert</h2>
+                    <p><strong>Product:</strong> {productName}</p>
+                    <p><strong>Current Stock:</strong> {currentStock} pcs</p>
+                    <p>Please check the inventory and order a restock!</p>
+                </div>
             ";
 
             await SendEmailAsync(adminEmail, subject, body);

@@ -70,6 +70,14 @@ const Login = () => {
               placeholder="your.email@example.com"
               radius="md"
               {...form.getInputProps('email')}
+              styles={{
+                input: {
+                  borderColor: '#D4A373',
+                  '&:focus': {
+                    borderColor: '#8B4513'
+                  }
+                }
+              }}
             />
 
             <PasswordInput
@@ -78,6 +86,14 @@ const Login = () => {
               placeholder="Your password"
               radius="md"
               {...form.getInputProps('password')}
+              styles={{
+                input: {
+                  borderColor: '#D4A373',
+                  '&:focus': {
+                    borderColor: '#8B4513'
+                  }
+                }
+              }}
             />
           </Stack>
 
@@ -85,13 +101,21 @@ const Login = () => {
             <Anchor
               component="button"
               type="button"
-              c="dimmed"
+              c="#8B4513"
               onClick={() => navigate('/forgot-password')}
               size="xs"
             >
               Forgot your password?
             </Anchor>
-            <Button type="submit" radius="xl" loading={loading}>
+            <Button 
+              type="submit" 
+              radius="xl" 
+              loading={loading}
+              style={{
+                background: 'linear-gradient(135deg, #D4A373 0%, #8B4513 100%)',
+                border: 'none'
+              }}
+            >
               Login
             </Button>
           </Group>
@@ -104,6 +128,7 @@ const Login = () => {
               type="button"
               onClick={() => navigate('/register')}
               size="sm"
+              c="#8B4513"
             >
               Don't have an account? Register
             </Anchor>
