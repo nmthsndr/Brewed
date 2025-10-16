@@ -267,13 +267,13 @@ const AddressManagement = () => {
             <Group grow>
               <TextInput
                 label="City"
-                placeholder="New York"
+                placeholder="Veszprém"
                 required
                 {...form.getInputProps('city')}
               />
               <TextInput
                 label="Postal Code"
-                placeholder="10001"
+                placeholder="8200"
                 required
                 {...form.getInputProps('postalCode')}
               />
@@ -281,7 +281,7 @@ const AddressManagement = () => {
 
             <TextInput
               label="Country"
-              placeholder="USA"
+              placeholder="Hungary"
               required
               {...form.getInputProps('country')}
             />
