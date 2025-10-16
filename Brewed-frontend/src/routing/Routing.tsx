@@ -17,6 +17,7 @@ import Coupons from "../pages/Coupons";
 import AdminDashboard from "../pages/AdminDashboard";
 import Users from "../pages/Users";
 import AdminProducts from "../pages/AdminProducts";
+import ResetPassword from "../pages/ResetPassword";
 
 const Routing = () => {
   const { isLoggedIn, role } = useAuth();
@@ -27,6 +28,7 @@ const Routing = () => {
       <Route path="/login" element={!isLoggedIn ? <Login /> : <Navigate to="/app/dashboard" />} />
       <Route path="/register" element={!isLoggedIn ? <Register /> : <Navigate to="/app/dashboard" />} />
       <Route path="/forgot-password" element={!isLoggedIn ? <ForgotPassword /> : <Navigate to="/app/dashboard" />} />
+      <Route path="/reset-password" element={!isLoggedIn ? <ResetPassword /> : <Navigate to="/app/dashboard" />} />
       <Route path="/confirm-email" element={<ConfirmEmail />} />
 
       {/* Protected Routes */}

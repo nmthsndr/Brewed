@@ -77,26 +77,25 @@ namespace Brewed.Services
             await SendEmailAsync(email, subject, body);
         }
 
-        public async Task SendPasswordResetAsync(string email, string name, string resetToken)
+        public async Task SendPasswordResetAsync(string email, string name, string resetCode)
         {
             var subject = "Password Reset - Brewed";
-            var resetUrl = $"{_configuration["AppUrl"]}/reset-password?token={resetToken}";
 
             var body = $@"
-                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #D4A373 0%, #8B4513 100%); padding: 40px; border-radius: 10px;'>
-                    <div style='background: white; padding: 30px; border-radius: 8px;'>
-                        <h2 style='color: #8B4513;'>Hello {name}!</h2>
-                        <p>We received a password reset request for your account.</p>
-                        <p>Click the button below to set a new password:</p>
-                        <div style='text-align: center; margin: 30px 0;'>
-                            <a href='{resetUrl}' style='background: linear-gradient(135deg, #D4A373 0%, #8B4513 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;'>Reset Password</a>
-                        </div>
-                        <p style='color: #666; font-size: 14px;'>This link is valid for 24 hours.</p>
-                        <p style='color: #666; font-size: 14px;'>If you didn't request a password reset, please ignore this email.</p>
-                        <p style='color: #333; margin-top: 30px;'>Best regards,<br/><span style='color: #8B4513; font-weight: bold;'>Brewed Team</span></p>
-                    </div>
+        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #D4A373 0%, #8B4513 100%); padding: 40px; border-radius: 10px;'>
+            <div style='background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
+                <h2 style='color: #8B4513; margin-bottom: 20px;'>Hello {name}!</h2>
+                <p style='color: #333; font-size: 16px; line-height: 1.6;'>We received a password reset request for your account.</p>
+                <p style='color: #333; font-size: 16px; line-height: 1.6;'>To reset your password, please enter the following 6-digit code:</p>
+                <div style='background: linear-gradient(135deg, #D4A373 0%, #8B4513 100%); padding: 25px; text-align: center; margin: 30px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
+                    <h1 style='color: white; font-size: 42px; letter-spacing: 10px; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);'>{resetCode}</h1>
                 </div>
-            ";
+                <p style='color: #666; font-size: 14px;'>This code is valid for 1 hour.</p>
+                <p style='color: #666; font-size: 14px;'>If you didn't request a password reset, please ignore this email and your password will remain unchanged.</p>
+                <p style='color: #333; font-size: 16px; margin-top: 30px;'>Best regards,<br/><span style='color: #8B4513; font-weight: bold;'>Brewed Team</span></p>
+            </div>
+        </div>
+    ";
 
             await SendEmailAsync(email, subject, body);
         }

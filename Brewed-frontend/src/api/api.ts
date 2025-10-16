@@ -108,11 +108,11 @@ const Auth = {
   register: (userData: UserRegisterDto) =>
     axiosInstance.post<IUser>(`/api/users/register`, userData),
   confirmEmail: (code: string) =>
-    axiosInstance.post(`/api/users/confirm-email`, { code }), // Token helyett Code
+    axiosInstance.post(`/api/users/confirm-email`, { code }),
   forgotPassword: (email: string) =>
     axiosInstance.post(`/api/users/forgot-password`, { email }),
-  resetPassword: (token: string, newPassword: string) =>
-    axiosInstance.post(`/api/users/reset-password`, { token, newPassword }),
+  resetPassword: (code: string, newPassword: string) =>
+    axiosInstance.post(`/api/users/reset-password`, { code, newPassword }),
   changePassword: (currentPassword: string, newPassword: string) =>
     axiosInstance.post(`/api/users/change-password`, { currentPassword, newPassword })
 };

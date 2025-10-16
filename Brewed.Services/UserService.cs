@@ -204,11 +204,12 @@ namespace Brewed.Services
                 return true;
             }
 
-            var token = GenerateToken();
+            var verificationCode = GenerateVerificationCode();
+
             var userToken = new UserToken
             {
                 UserId = user.Id,
-                Token = token,
+                Token = verificationCode,
                 TokenType = "PasswordReset",
                 ExpiresAt = DateTime.UtcNow.AddHours(1)
             };
@@ -216,30 +217,30 @@ namespace Brewed.Services
             await _context.UserTokens.AddAsync(userToken);
             await _context.SaveChangesAsync();
 
-            await _emailService.SendPasswordResetAsync(user.Email, user.Name, token);
+            await _emailService.SendPasswordResetAsync(user.Email, user.Name, verificationCode);
 
             return true;
         }
 
-        public async Task<bool> ResetPasswordAsync(string token, string newPassword)
+        public async Task<bool> ResetPasswordAsync(string code, string newPassword)
         {
             var userToken = await _context.UserTokens
                 .Include(ut => ut.User)
-                .FirstOrDefaultAsync(ut => ut.Token == token && ut.TokenType == "PasswordReset");
+                .FirstOrDefaultAsync(ut => ut.Token == code && ut.TokenType == "PasswordReset");
 
             if (userToken == null)
             {
-                throw new Exception("Invalid token");
+                throw new Exception("Invalid verification code");
             }
 
             if (userToken.IsUsed)
             {
-                throw new Exception("Token already used");
+                throw new Exception("Verification code already used");
             }
 
             if (userToken.ExpiresAt < DateTime.UtcNow)
             {
-                throw new Exception("Token expired");
+                throw new Exception("Verification code expired");
             }
 
             userToken.User.PasswordHash = HashPassword(newPassword);

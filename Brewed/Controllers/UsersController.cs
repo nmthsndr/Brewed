@@ -229,12 +229,12 @@ namespace Brewed.API.Controllers
         {
             try
             {
-                await _userService.ResetPasswordAsync(dto.Token, dto.NewPassword);
+                await _userService.ResetPasswordAsync(dto.Code, dto.NewPassword);
                 return Ok(new { Message = "Password reset successfully" });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new { Message = ex.Message });
             }
         }
 
