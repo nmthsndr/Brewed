@@ -56,7 +56,6 @@ namespace Brewed.Services
 
         public async Task<AddressDto> CreateAddressAsync(int userId, AddressCreateDto addressDto)
         {
-            // If this is set as default, unset other defaults
             if (addressDto.IsDefault)
             {
                 var existingDefaults = await _context.Addresses
@@ -105,7 +104,6 @@ namespace Brewed.Services
                 throw new UnauthorizedAccessException("You don't have permission to update this address");
             }
 
-            // If this is being set as default, unset other defaults
             if (addressDto.IsDefault && !address.IsDefault)
             {
                 var existingDefaults = await _context.Addresses

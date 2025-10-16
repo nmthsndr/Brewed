@@ -23,19 +23,19 @@ const useAuth = () => {
       const decodedToken: any = jwtDecode(token);
       console.log("Decoded token:", decodedToken);
       
-      // Role kinyerése
+      // Role
       const userRole = decodedToken[roleTokenKey];
       console.log("User role:", userRole);
       setRole(userRole);
       localStorage.setItem(roleKeyName, userRole);
       
-      // Email kinyerése
+      // Email
       const userEmail = decodedToken[emailTokenKey];
       console.log("User email:", userEmail);
       setEmail(userEmail);
       localStorage.setItem(emailKeyName, userEmail);
       
-      // UserId kinyerése
+      // UserId
       const id = decodedToken[userIdTokenKey];
       console.log("User ID:", id);
       setUserId(id);
