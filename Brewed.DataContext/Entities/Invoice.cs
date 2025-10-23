@@ -21,7 +21,7 @@ namespace Brewed.DataContext.Entities
         public decimal TotalAmount { get; set; }
 
         [StringLength(200)]
-        public string PdfUrl { get; set; }
+        public string? PdfUrl { get; set; }
 
         public int OrderId { get; set; }
 

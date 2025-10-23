@@ -52,6 +52,28 @@ namespace Brewed.API.Controllers
         }
 
         [Authorize]
+        [HttpGet("product/{productId}/user-review")]
+        public async Task<IActionResult> GetUserReviewForProduct(int productId)
+        {
+            try
+            {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var review = await _reviewService.GetUserReviewForProductAsync(userId, productId);
+
+                if (review == null)
+                {
+                    return Ok(new { hasReviewed = false, review = (ReviewDto?)null });
+                }
+
+                return Ok(new { hasReviewed = true, review });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateReview([FromBody] ReviewCreateDto reviewDto)
         {

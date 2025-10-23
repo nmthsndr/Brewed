@@ -12,6 +12,7 @@ namespace Brewed.Services
         Task<PaginatedResultDto<ReviewDto>> GetAllReviewsAsync(int page, int pageSize);
         Task<ReviewDto> CreateReviewAsync(int userId, ReviewCreateDto reviewDto);
         Task<bool> DeleteReviewAsync(int reviewId, int userId, bool isAdmin = false);
+        Task<ReviewDto?> GetUserReviewForProductAsync(int userId, int productId);
     }
 
     public class ReviewService : IReviewService
@@ -173,6 +174,32 @@ namespace Brewed.Services
             await _context.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task<ReviewDto?> GetUserReviewForProductAsync(int userId, int productId)
+        {
+            var review = await _context.Reviews
+                .Include(r => r.User)
+                .Include(r => r.Product)
+                .FirstOrDefaultAsync(r => r.UserId == userId && r.ProductId == productId);
+
+            if (review == null)
+            {
+                return null;
+            }
+
+            return new ReviewDto
+            {
+                Id = review.Id,
+                Rating = review.Rating,
+                Title = review.Title,
+                Comment = review.Comment,
+                CreatedAt = review.CreatedAt,
+                UserName = review.User.Name,
+                UserId = review.UserId,
+                ProductId = review.ProductId,
+                ProductName = review.Product?.Name
+            };
         }
     }
 }

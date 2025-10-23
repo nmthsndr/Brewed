@@ -3,6 +3,7 @@ using Brewed.Dtos;
 using Brewed.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Brewed.API.Controllers
 {
@@ -57,7 +58,7 @@ namespace Brewed.API.Controllers
         {
             try
             {
-                var userIdClaim = User.FindFirst("id")?.Value;
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
                 {
                     return Unauthorized("User ID not found in token");

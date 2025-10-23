@@ -152,12 +152,16 @@ namespace Brewed.Services
             // Clear cart
             _context.CartItems.RemoveRange(cart.CartItems);
 
-            // Create invoice
+            // Save order first to get the generated ID
+            await _context.SaveChangesAsync();
+
+            // Create invoice with the saved order's ID
             var invoice = new Invoice
             {
                 InvoiceNumber = GenerateInvoiceNumber(),
                 OrderId = order.Id,
-                TotalAmount = totalAmount
+                TotalAmount = totalAmount,
+                PdfUrl = string.Empty // Will be generated later
             };
             await _context.Invoices.AddAsync(invoice);
             await _context.SaveChangesAsync();

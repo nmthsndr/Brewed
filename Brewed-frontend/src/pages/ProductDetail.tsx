@@ -37,6 +37,8 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [hasPurchased, setHasPurchased] = useState(false);
+  const [hasReviewed, setHasReviewed] = useState(false);
+  const [userReview, setUserReview] = useState<IReview | null>(null);
 
   const reviewForm = useForm<ReviewCreateDto>({
     initialValues: {
@@ -54,14 +56,14 @@ const ProductDetail = () => {
   const loadProduct = async () => {
     try {
       setLoading(true);
-      console.log("Loading product with ID:", id);
+      //console.log("Loading product with ID:", id);
 
       if (!id || isNaN(parseInt(id))) {
         throw new Error("Invalid product ID");
       }
 
       const response = await api.Products.getProduct(parseInt(id));
-      console.log("Product loaded successfully:", response.data);
+      //console.log("Product loaded successfully:", response.data);
       setProduct(response.data);
       reviewForm.setFieldValue('productId', response.data.id);
     } catch (error) {
@@ -102,11 +104,30 @@ const ProductDetail = () => {
     }
   };
 
+  const checkUserReview = async () => {
+    if (!isLoggedIn || !id) {
+      setHasReviewed(false);
+      setUserReview(null);
+      return;
+    }
+
+    try {
+      const response = await api.Reviews.getUserReviewForProduct(parseInt(id));
+      setHasReviewed(response.data.hasReviewed);
+      setUserReview(response.data.review);
+    } catch (error) {
+      console.error("Failed to check user review:", error);
+      setHasReviewed(false);
+      setUserReview(null);
+    }
+  };
+
   useEffect(() => {
     if (id) {
       loadProduct();
       loadReviews();
       checkPurchaseStatus();
+      checkUserReview();
     }
   }, [id, isLoggedIn]);
 
@@ -139,6 +160,7 @@ const ProductDetail = () => {
       });
       reviewForm.reset();
       await loadReviews();
+      await checkUserReview();
     } catch (error: any) {
       notifications.show({
         title: 'Error',
@@ -158,6 +180,7 @@ const ProductDetail = () => {
           color: 'green',
         });
         await loadReviews();
+        await checkUserReview();
       } catch (error) {
         notifications.show({
           title: 'Error',
@@ -283,6 +306,17 @@ const ProductDetail = () => {
               <Text c="dimmed" ta="center">
                 You can only review products you have purchased and received
               </Text>
+            ) : hasReviewed && userReview ? (
+              <Stack>
+                <Text c="dimmed" ta="center" mb="md">
+                  You have already reviewed this product
+                </Text>
+                <ReviewCard
+                  review={userReview}
+                  canDelete={true}
+                  onDelete={handleDeleteReview}
+                />
+              </Stack>
             ) : (
               <form onSubmit={reviewForm.onSubmit(handleSubmitReview)}>
                 <Stack>
