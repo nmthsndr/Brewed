@@ -17,6 +17,8 @@ import Coupons from "../pages/Coupons";
 import AdminDashboard from "../pages/AdminDashboard";
 import Users from "../pages/Users";
 import AdminProducts from "../pages/AdminProducts";
+import AdminOrders from "../pages/AdminOrders";
+import AdminReviews from "../pages/AdminReviews";
 import ResetPassword from "../pages/ResetPassword";
 
 const Routing = () => {
@@ -48,6 +50,8 @@ const Routing = () => {
             <Route path="categories" element={<Categories />} />
             <Route path="coupons" element={<Coupons />} />
             <Route path="admin-dashboard" element={<AdminDashboard />} />
+            <Route path="admin-orders" element={<AdminOrders />} />
+            <Route path="admin-reviews" element={<AdminReviews />} />
             <Route path="users" element={<Users />} />
           </>
         )}

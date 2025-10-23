@@ -336,6 +336,12 @@ namespace Brewed.Services
                     IssueDate = order.Invoice.IssueDate,
                     TotalAmount = order.Invoice.TotalAmount,
                     PdfUrl = order.Invoice.PdfUrl
+                } : null,
+                User = order.User != null ? new OrderUserDto
+                {
+                    Id = order.User.Id,
+                    Name = order.User.Name,
+                    Email = order.User.Email
                 } : null
             };
         }
@@ -355,7 +361,7 @@ namespace Brewed.Services
             if (subTotal >= 50) return 0; // Free shipping over 50 euros
             return 10;
         }
-        
+
 
         public OrderService(BrewedDbContext context, IMapper mapper, ICouponService couponService, IEmailService emailService)
         {

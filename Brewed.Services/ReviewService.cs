@@ -9,6 +9,7 @@ namespace Brewed.Services
     public interface IReviewService
     {
         Task<PaginatedResultDto<ReviewDto>> GetProductReviewsAsync(int productId, int page, int pageSize);
+        Task<PaginatedResultDto<ReviewDto>> GetAllReviewsAsync(int page, int pageSize);
         Task<ReviewDto> CreateReviewAsync(int userId, ReviewCreateDto reviewDto);
         Task<bool> DeleteReviewAsync(int reviewId, int userId, bool isAdmin = false);
     }
@@ -28,6 +29,7 @@ namespace Brewed.Services
         {
             var query = _context.Reviews
                 .Include(r => r.User)
+                .Include(r => r.Product)
                 .Where(r => r.ProductId == productId)
                 .OrderByDescending(r => r.CreatedAt);
 
@@ -46,7 +48,46 @@ namespace Brewed.Services
                 Comment = r.Comment,
                 CreatedAt = r.CreatedAt,
                 UserName = r.User.Name,
-                UserId = r.UserId
+                UserId = r.UserId,
+                ProductId = r.ProductId,
+                ProductName = r.Product?.Name
+            }).ToList();
+
+            return new PaginatedResultDto<ReviewDto>
+            {
+                Items = reviewDtos,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
+        }
+
+        public async Task<PaginatedResultDto<ReviewDto>> GetAllReviewsAsync(int page, int pageSize)
+        {
+            var query = _context.Reviews
+                .Include(r => r.User)
+                .Include(r => r.Product)
+                .OrderByDescending(r => r.CreatedAt);
+
+            var totalCount = await query.CountAsync();
+
+            var reviews = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var reviewDtos = reviews.Select(r => new ReviewDto
+            {
+                Id = r.Id,
+                Rating = r.Rating,
+                Title = r.Title,
+                Comment = r.Comment,
+                CreatedAt = r.CreatedAt,
+                UserName = r.User.Name,
+                UserId = r.UserId,
+                ProductId = r.ProductId,
+                ProductName = r.Product?.Name
             }).ToList();
 
             return new PaginatedResultDto<ReviewDto>

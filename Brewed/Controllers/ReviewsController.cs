@@ -17,6 +17,23 @@ namespace Brewed.API.Controllers
             _reviewService = reviewService;
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<IActionResult> GetAllReviews(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var reviews = await _reviewService.GetAllReviewsAsync(page, pageSize);
+                return Ok(reviews);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpGet("product/{productId}")]
         public async Task<IActionResult> GetProductReviews(
             int productId,

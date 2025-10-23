@@ -11,7 +11,8 @@ import {
   IconTicket,
   IconCategory,
   IconUsers,
-  IconChartBar
+  IconChartBar,
+  IconClipboardList
 } from "@tabler/icons-react";
 import classes from "./NavbarMinimalColored.module.css";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -90,7 +91,19 @@ export function NavbarMinimal({ toggle }: any) {
       icon: IconPackage,
       label: "Orders",
       url: "orders",
-      roles: ['Admin', 'RegisteredUser']
+      roles: ['RegisteredUser']
+    },
+    {
+      icon: IconClipboardList,
+      label: "All Orders",
+      url: "admin-orders",
+      roles: ['Admin']
+    },
+    {
+      icon: IconStar,
+      label: "Reviews",
+      url: "admin-reviews",
+      roles: ['Admin']
     },
     {
       icon: IconTicket,

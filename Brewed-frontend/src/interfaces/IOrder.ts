@@ -18,6 +18,11 @@ export interface IOrder {
   billingAddress?: IAddress;
   items: IOrderItem[];
   invoice?: IInvoice;
+  user?: {
+    id: number;
+    name: string;
+    email: string;
+  };
 }
 
 export interface IOrderItem {

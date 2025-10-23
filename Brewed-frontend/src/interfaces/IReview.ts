@@ -6,4 +6,6 @@ export interface IReview {
   createdAt: string;
   userName: string;
   userId: number;
+  productId?: number;
+  productName?: string;
 }

@@ -195,6 +195,10 @@ const Reviews = {
     axiosInstance.get<PaginatedResult<IReview>>(`/api/reviews/product/${productId}`, {
       params: { page, pageSize }
     }),
+  getAllReviews: (page?: number, pageSize?: number) =>
+    axiosInstance.get<PaginatedResult<IReview>>(`/api/reviews`, {
+      params: { page, pageSize }
+    }),
   createReview: (reviewData: ReviewCreateDto) =>
     axiosInstance.post<IReview>(`/api/reviews`, reviewData),
   deleteReview: (id: number) =>

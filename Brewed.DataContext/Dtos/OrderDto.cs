@@ -26,6 +26,14 @@ namespace Brewed.DataContext.Dtos
         public AddressDto BillingAddress { get; set; }
         public List<OrderItemDto> Items { get; set; }
         public InvoiceDto Invoice { get; set; }
+        public OrderUserDto User { get; set; }
+    }
+
+    public class OrderUserDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Email { get; set; }
     }
 
     public class OrderItemDto
