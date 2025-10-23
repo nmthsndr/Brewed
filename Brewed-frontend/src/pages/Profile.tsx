@@ -12,6 +12,7 @@ import {
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { IconUser, IconMapPin, IconLock } from "@tabler/icons-react";
+import { useSearchParams } from "react-router-dom";
 import api from "../api/api";
 import AddressManagement from "../components/AddressManagement";
 import { notifications } from "@mantine/notifications";
@@ -20,6 +21,8 @@ import useAuth from "../hooks/useAuth";
 const Profile = () => {
   const [loading, setLoading] = useState(false);
   const { email } = useAuth();
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'profile');
 
   const profileForm = useForm({
     initialValues: {
@@ -109,12 +112,19 @@ const Profile = () => {
     }
   };
 
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
+
   return (
     <div style={{ padding: '20px', position: 'relative' }}>
       <LoadingOverlay visible={loading} />
       <Title order={2} mb="lg">My Profile</Title>
 
-      <Tabs defaultValue="profile">
+      <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'profile')}>
         <Tabs.List>
           <Tabs.Tab value="profile" leftSection={<IconUser size={16} />}>
             Profile Information

@@ -10,7 +10,8 @@ import {
   Divider,
   Text,
   Card,
-  LoadingOverlay
+  LoadingOverlay,
+  Checkbox
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useNavigate } from "react-router-dom";
@@ -26,6 +27,7 @@ const Checkout = () => {
   const [loading, setLoading] = useState(true);
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [shippingCost, setShippingCost] = useState(0);
+  const [sameAsShipping, setSameAsShipping] = useState(true);
 
   const form = useForm<OrderCreateDto>({
     initialValues: {
@@ -37,7 +39,13 @@ const Checkout = () => {
     },
     validate: {
       shippingAddressId: (val) => (val === 0 ? 'Please select a shipping address' : null),
-      paymentMethod: (val) => (!val ? 'Please select a payment method' : null)
+      paymentMethod: (val) => (!val ? 'Please select a payment method' : null),
+      billingAddressId: (val, values) => {
+        if (!sameAsShipping && !val) {
+          return 'Please select a billing address';
+        }
+        return null;
+      }
     }
   });
 
@@ -112,7 +120,14 @@ const Checkout = () => {
   const handleSubmit = async (values: OrderCreateDto) => {
     try {
       setLoading(true);
-      await api.Orders.createOrder(values);
+
+      // If "same as shipping" is checked, set billing address to shipping address
+      const orderData = {
+        ...values,
+        billingAddressId: sameAsShipping ? values.shippingAddressId : values.billingAddressId
+      };
+
+      await api.Orders.createOrder(orderData);
       notifications.show({
         title: 'Success',
         message: 'Order placed successfully!',
@@ -164,10 +179,47 @@ const Checkout = () => {
               <Button
                 variant="light"
                 mt="md"
-                onClick={() => navigate('/app/profile')}
+                onClick={() => navigate('/app/profile?tab=addresses')}
               >
                 Add New Address
               </Button>
+            </Paper>
+
+            <Paper withBorder p="lg">
+              <Title order={4} mb="md">Billing Address</Title>
+              <Checkbox
+                label="Same as shipping address"
+                checked={sameAsShipping}
+                onChange={(e) => {
+                  setSameAsShipping(e.currentTarget.checked);
+                  if (e.currentTarget.checked) {
+                    form.setFieldValue('billingAddressId', undefined);
+                  }
+                }}
+                mb="md"
+              />
+              {!sameAsShipping && (
+                <>
+                  <Select
+                    label="Select Billing Address"
+                    placeholder="Choose billing address"
+                    required
+                    data={addresses.map(addr => ({
+                      value: addr.id.toString(),
+                      label: `${addr.firstName} ${addr.lastName} - ${addr.addressLine1}, ${addr.city}`
+                    }))}
+                    value={form.values.billingAddressId?.toString()}
+                    onChange={(val) => form.setFieldValue('billingAddressId', val ? parseInt(val) : undefined)}
+                  />
+                  <Button
+                    variant="light"
+                    mt="md"
+                    onClick={() => navigate('/app/profile?tab=addresses')}
+                  >
+                    Add New Address
+                  </Button>
+                </>
+              )}
             </Paper>
 
             <Paper withBorder p="lg">
