@@ -11,10 +11,12 @@ namespace Brewed.API.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
+        private readonly IOrderService _orderService;
 
-        public ProductsController(IProductService productService)
+        public ProductsController(IProductService productService, IOrderService orderService)
         {
             _productService = productService;
+            _orderService = orderService;
         }
 
         [HttpGet]
@@ -42,6 +44,27 @@ namespace Brewed.API.Controllers
             catch (KeyNotFoundException)
             {
                 return NotFound("Product not found");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpGet("{productId}/has-purchased")]
+        public async Task<IActionResult> HasPurchasedProduct(int productId)
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst("id")?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Unauthorized("User ID not found in token");
+                }
+
+                var hasPurchased = await _orderService.HasUserPurchasedProductAsync(userId, productId);
+                return Ok(new { hasPurchased });
             }
             catch (Exception ex)
             {

@@ -15,6 +15,7 @@ namespace Brewed.Services
         Task<PaginatedResultDto<OrderDto>> GetAllOrdersAsync(string status, int page, int pageSize);
         Task<OrderDto> UpdateOrderStatusAsync(int orderId, OrderStatusUpdateDto statusDto);
         Task<InvoiceDto> GetInvoiceAsync(int orderId, int userId, bool isAdmin = false);
+        Task<bool> HasUserPurchasedProductAsync(int userId, int productId);
     }
 
     public class OrderService : IOrderService
@@ -373,6 +374,18 @@ namespace Brewed.Services
         private async Task<decimal> ApplyCouponAsync(string couponCode, decimal orderAmount)
         {
             return await _couponService.ApplyCouponAsync(couponCode, orderAmount);
+        }
+
+        public async Task<bool> HasUserPurchasedProductAsync(int userId, int productId)
+        {
+            // Check if user has any delivered orders containing this product
+            var hasPurchased = await _context.Orders
+                .Include(o => o.OrderItems)
+                .AnyAsync(o => o.UserId == userId
+                    && o.Status == "Delivered"
+                    && o.OrderItems.Any(oi => oi.ProductId == productId));
+
+            return hasPurchased;
         }
     }
 }

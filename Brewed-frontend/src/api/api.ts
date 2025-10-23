@@ -122,6 +122,8 @@ const Products = {
     axiosInstance.get<PaginatedResult<IProduct>>(`/api/products`, { params: filter }),
   getProduct: (id: number) =>
     axiosInstance.get<IProduct>(`/api/products/${id}`),
+  hasPurchasedProduct: (productId: number) =>
+    axiosInstance.get<{ hasPurchased: boolean }>(`/api/products/${productId}/has-purchased`),
   createProduct: (productData: ProductCreateDto) =>
     axiosInstance.post<IProduct>(`/api/products`, productData),
   updateProduct: (id: number, productData: Partial<ProductCreateDto>) =>

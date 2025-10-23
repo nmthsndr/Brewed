@@ -16,7 +16,8 @@ import {
   Card,
   Rating,
   Textarea,
-  ActionIcon
+  ActionIcon,
+  TextInput
 } from "@mantine/core";
 import { IconShoppingCart, IconArrowLeft, IconStar } from "@tabler/icons-react";
 import { useForm } from "@mantine/form";
@@ -30,11 +31,12 @@ import useAuth from "../hooks/useAuth";
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { userId } = useAuth();
+  const { userId, isLoggedIn } = useAuth();
   const [product, setProduct] = useState<IProduct | null>(null);
   const [reviews, setReviews] = useState<IReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const [hasPurchased, setHasPurchased] = useState(false);
 
   const reviewForm = useForm<ReviewCreateDto>({
     initialValues: {
@@ -52,7 +54,14 @@ const ProductDetail = () => {
   const loadProduct = async () => {
     try {
       setLoading(true);
-      const response = await api.Products.getProduct(parseInt(id!));
+      console.log("Loading product with ID:", id);
+
+      if (!id || isNaN(parseInt(id))) {
+        throw new Error("Invalid product ID");
+      }
+
+      const response = await api.Products.getProduct(parseInt(id));
+      console.log("Product loaded successfully:", response.data);
       setProduct(response.data);
       reviewForm.setFieldValue('productId', response.data.id);
     } catch (error) {
@@ -62,6 +71,8 @@ const ProductDetail = () => {
         message: 'Failed to load product details',
         color: 'red',
       });
+      // Navigate back to products page on error
+      navigate('/app/products');
     } finally {
       setLoading(false);
     }
@@ -76,12 +87,28 @@ const ProductDetail = () => {
     }
   };
 
+  const checkPurchaseStatus = async () => {
+    if (!isLoggedIn || !id) {
+      setHasPurchased(false);
+      return;
+    }
+
+    try {
+      const response = await api.Products.hasPurchasedProduct(parseInt(id));
+      setHasPurchased(response.data.hasPurchased);
+    } catch (error) {
+      console.error("Failed to check purchase status:", error);
+      setHasPurchased(false);
+    }
+  };
+
   useEffect(() => {
     if (id) {
       loadProduct();
       loadReviews();
+      checkPurchaseStatus();
     }
-  }, [id]);
+  }, [id, isLoggedIn]);
 
   const handleAddToCart = async () => {
     if (!product) return;
@@ -248,30 +275,40 @@ const ProductDetail = () => {
         <Grid.Col span={{ base: 12, md: 6 }}>
           <Card withBorder p="lg">
             <Title order={4} mb="md">Write a Review</Title>
-            <form onSubmit={reviewForm.onSubmit(handleSubmitReview)}>
-              <Stack>
-                <div>
-                  <Text size="sm" fw={500} mb="xs">Rating</Text>
-                  <Rating {...reviewForm.getInputProps('rating')} size="lg" />
-                </div>
+            {!isLoggedIn ? (
+              <Text c="dimmed" ta="center">
+                Please log in to write a review
+              </Text>
+            ) : !hasPurchased ? (
+              <Text c="dimmed" ta="center">
+                You can only review products you have purchased and received
+              </Text>
+            ) : (
+              <form onSubmit={reviewForm.onSubmit(handleSubmitReview)}>
+                <Stack>
+                  <div>
+                    <Text size="sm" fw={500} mb="xs">Rating</Text>
+                    <Rating {...reviewForm.getInputProps('rating')} size="lg" />
+                  </div>
 
-                <TextInput
-                  label="Title (Optional)"
-                  placeholder="Summary of your review"
-                  {...reviewForm.getInputProps('title')}
-                />
+                  <TextInput
+                    label="Title (Optional)"
+                    placeholder="Summary of your review"
+                    {...reviewForm.getInputProps('title')}
+                  />
 
-                <Textarea
-                  label="Review"
-                  placeholder="Share your thoughts about this product"
-                  required
-                  minRows={4}
-                  {...reviewForm.getInputProps('comment')}
-                />
+                  <Textarea
+                    label="Review"
+                    placeholder="Share your thoughts about this product"
+                    required
+                    minRows={4}
+                    {...reviewForm.getInputProps('comment')}
+                  />
 
-                <Button type="submit">Submit Review</Button>
-              </Stack>
-            </form>
+                  <Button type="submit">Submit Review</Button>
+                </Stack>
+              </form>
+            )}
           </Card>
         </Grid.Col>
 
