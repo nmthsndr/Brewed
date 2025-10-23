@@ -62,6 +62,7 @@ namespace Brewed.Services
             // Top 5 Products
             var topProducts = await _context.OrderItems
                 .Include(oi => oi.Product)
+                .Where(oi => oi.Product != null)
                 .GroupBy(oi => new { oi.ProductId, oi.Product.Name, oi.Product.ImageUrl })
                 .Select(g => new TopProductDto
                 {
@@ -78,6 +79,7 @@ namespace Brewed.Services
             // Recent 10 Orders
             var recentOrders = await _context.Orders
                 .Include(o => o.User)
+                .Where(o => o.User != null)
                 .OrderByDescending(o => o.OrderDate)
                 .Take(10)
                 .Select(o => new RecentOrderDto
@@ -93,22 +95,33 @@ namespace Brewed.Services
 
             // Monthly Revenue Chart (Last 6 months)
             var sixMonthsAgo = now.AddMonths(-6);
-            var monthlyRevenueChart = await _context.Orders
+            var monthlyRevenueData = await _context.Orders
                 .Where(o => o.Status == "Delivered" && o.OrderDate >= sixMonthsAgo)
                 .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month })
-                .Select(g => new MonthlyRevenueDto
+                .Select(g => new
                 {
-                    Month = $"{g.Key.Year}-{g.Key.Month:D2}",
+                    Year = g.Key.Year,
+                    Month = g.Key.Month,
                     Revenue = g.Sum(o => o.TotalAmount),
                     OrderCount = g.Count()
                 })
-                .OrderBy(m => m.Month)
                 .ToListAsync();
+            var monthlyRevenueChart = monthlyRevenueData
+               .Select(m => new MonthlyRevenueDto
+               {
+                   Month = $"{m.Year}-{m.Month:D2}",
+                   Revenue = m.Revenue,
+                   OrderCount = m.OrderCount
+               })
+               .OrderBy(m => m.Month)
+               .ToList();
+
 
             // Category Sales
             var categorySales = await _context.OrderItems
                 .Include(oi => oi.Product)
                 .ThenInclude(p => p.Category)
+                .Where(oi => oi.Product != null && oi.Product.Category != null)
                 .GroupBy(oi => oi.Product.Category.Name)
                 .Select(g => new CategorySalesDto
                 {
