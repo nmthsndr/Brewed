@@ -39,13 +39,11 @@ namespace Brewed.Dtos
         [Range(0, int.MaxValue)]
         public int StockQuantity { get; set; }
 
-        [Required]
         [StringLength(50)]
-        public string RoastLevel { get; set; }
+        public string RoastLevel { get; set; } = "N/A";
 
-        [Required]
         [StringLength(100)]
-        public string Origin { get; set; }
+        public string Origin { get; set; } = "N/A";
 
         public bool IsCaffeineFree { get; set; }
 
@@ -76,13 +74,11 @@ namespace Brewed.Dtos
         [Range(0, int.MaxValue)]
         public int StockQuantity { get; set; }
 
-        [Required]
         [StringLength(50)]
-        public string RoastLevel { get; set; }
+        public string RoastLevel { get; set; } = "N/A";
 
-        [Required]
         [StringLength(100)]
-        public string Origin { get; set; }
+        public string Origin { get; set; } = "N/A";
 
         public bool IsCaffeineFree { get; set; }
 

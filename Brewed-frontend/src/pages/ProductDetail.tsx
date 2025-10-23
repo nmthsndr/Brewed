@@ -39,6 +39,7 @@ const ProductDetail = () => {
   const [hasPurchased, setHasPurchased] = useState(false);
   const [hasReviewed, setHasReviewed] = useState(false);
   const [userReview, setUserReview] = useState<IReview | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string>('');
 
   const reviewForm = useForm<ReviewCreateDto>({
     initialValues: {
@@ -65,6 +66,16 @@ const ProductDetail = () => {
       const response = await api.Products.getProduct(parseInt(id));
       //console.log("Product loaded successfully:", response.data);
       setProduct(response.data);
+
+      // Set initial selected image - prefer productImages first, then imageUrls, then imageUrl
+      if (response.data.productImages && response.data.productImages.length > 0) {
+        setSelectedImage(response.data.productImages[0].imageUrl);
+      } else if (response.data.imageUrls && response.data.imageUrls.length > 0) {
+        setSelectedImage(response.data.imageUrls[0]);
+      } else {
+        setSelectedImage(response.data.imageUrl);
+      }
+
       reviewForm.setFieldValue('productId', response.data.id);
     } catch (error) {
       console.error("Failed to load product:", error);
@@ -208,13 +219,59 @@ const ProductDetail = () => {
 
       <Grid>
         <Grid.Col span={{ base: 12, md: 6 }}>
-          <Image
-            src={product.imageUrl}
-            alt={product.name}
-            radius="md"
-            height={400}
-            fit="cover"
-          />
+          <Stack gap="sm">
+            <Image
+              src={selectedImage || product.imageUrl}
+              alt={product.name}
+              radius="md"
+              height={400}
+              fit="cover"
+            />
+            {/* Thumbnail images */}
+            {(product.productImages && product.productImages.length > 1) && (
+              <Group gap="xs">
+                {product.productImages.map((img) => (
+                  <Image
+                    key={img.id}
+                    src={img.imageUrl}
+                    alt={`${product.name} - ${img.displayOrder}`}
+                    radius="sm"
+                    height={80}
+                    width={80}
+                    fit="cover"
+                    style={{
+                      cursor: 'pointer',
+                      border: selectedImage === img.imageUrl ? '2px solid #228be6' : '2px solid transparent',
+                      transition: 'border 0.2s'
+                    }}
+                    onClick={() => setSelectedImage(img.imageUrl)}
+                  />
+                ))}
+              </Group>
+            )}
+            {/* Fallback to imageUrls if no productImages */}
+            {(!product.productImages || product.productImages.length === 0) && product.imageUrls && product.imageUrls.length > 1 && (
+              <Group gap="xs">
+                {product.imageUrls.map((url, index) => (
+                  <Image
+                    key={index}
+                    src={url}
+                    alt={`${product.name} - ${index + 1}`}
+                    radius="sm"
+                    height={80}
+                    width={80}
+                    fit="cover"
+                    style={{
+                      cursor: 'pointer',
+                      border: selectedImage === url ? '2px solid #228be6' : '2px solid transparent',
+                      transition: 'border 0.2s'
+                    }}
+                    onClick={() => setSelectedImage(url)}
+                  />
+                ))}
+              </Group>
+            )}
+          </Stack>
         </Grid.Col>
 
         <Grid.Col span={{ base: 12, md: 6 }}>
@@ -244,26 +301,29 @@ const ProductDetail = () => {
 
             <Text>{product.description}</Text>
 
-            <Paper withBorder p="md">
-              <Stack gap="xs">
-                <Group>
-                  <Text fw={500}>Roast Level:</Text>
-                  <Text>{product.roastLevel}</Text>
-                </Group>
-                <Group>
-                  <Text fw={500}>Origin:</Text>
-                  <Text>{product.origin}</Text>
-                </Group>
-                <Group>
-                  <Text fw={500}>Caffeine Free:</Text>
-                  <Text>{product.isCaffeineFree ? 'Yes' : 'No'}</Text>
-                </Group>
-                <Group>
-                  <Text fw={500}>Organic:</Text>
-                  <Text>{product.isOrganic ? 'Yes' : 'No'}</Text>
-                </Group>
-              </Stack>
-            </Paper>
+            {/* Show coffee-specific fields only for Coffee Beans category */}
+            {product.categoryName === "Coffee Beans" && (
+              <Paper withBorder p="md">
+                <Stack gap="xs">
+                  <Group>
+                    <Text fw={500}>Roast Level:</Text>
+                    <Text>{product.roastLevel}</Text>
+                  </Group>
+                  <Group>
+                    <Text fw={500}>Origin:</Text>
+                    <Text>{product.origin}</Text>
+                  </Group>
+                  <Group>
+                    <Text fw={500}>Caffeine Free:</Text>
+                    <Text>{product.isCaffeineFree ? 'Yes' : 'No'}</Text>
+                  </Group>
+                  <Group>
+                    <Text fw={500}>Organic:</Text>
+                    <Text>{product.isOrganic ? 'Yes' : 'No'}</Text>
+                  </Group>
+                </Stack>
+              </Paper>
+            )}
 
             {product.stockQuantity > 0 && (
               <Group>

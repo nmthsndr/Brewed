@@ -74,8 +74,8 @@ const AdminProducts = () => {
       description: '',
       price: 0,
       stockQuantity: 0,
-      roastLevel: 'Medium',
-      origin: '',
+      roastLevel: 'N/A',
+      origin: 'N/A',
       isCaffeineFree: false,
       isOrganic: false,
       imageUrl: '',
@@ -86,7 +86,22 @@ const AdminProducts = () => {
       description: (value) => !value ? 'Description is required' : null,
       price: (value) => value <= 0 ? 'Price must be greater than 0' : null,
       stockQuantity: (value) => value < 0 ? 'Stock cannot be negative' : null,
-      origin: (value) => !value ? 'Origin is required' : null,
+      origin: (value, values) => {
+        // Only require origin for Coffee Beans category
+        const selectedCategory = categories.find(c => c.id === values.categoryId);
+        if (selectedCategory?.name === 'Coffee Beans' && !value) {
+          return 'Origin is required for coffee beans';
+        }
+        return null;
+      },
+      roastLevel: (value, values) => {
+        // Only require roast level for Coffee Beans category
+        const selectedCategory = categories.find(c => c.id === values.categoryId);
+        if (selectedCategory?.name === 'Coffee Beans' && !value) {
+          return 'Roast level is required for coffee beans';
+        }
+        return null;
+      },
       categoryId: (value) => !value ? 'Category is required' : null
     }
   });
@@ -400,26 +415,29 @@ const AdminProducts = () => {
               onChange={(value) => form.setFieldValue('categoryId', value ? parseInt(value) : 0)}
             />
 
-            <Group grow>
-              <Select
-                label="Roast Level"
-                required
-                data={[
-                  { value: 'Light', label: 'Light' },
-                  { value: 'Light-Medium', label: 'Light-Medium' },
-                  { value: 'Medium', label: 'Medium' },
-                  { value: 'Medium-Dark', label: 'Medium-Dark' },
-                  { value: 'Dark', label: 'Dark' }
-                ]}
-                {...form.getInputProps('roastLevel')}
-              />
-              <TextInput
-                label="Origin"
-                placeholder="e.g. Colombia"
-                required
-                {...form.getInputProps('origin')}
-              />
-            </Group>
+            {/* Show coffee-specific fields only for Coffee Beans category */}
+            {categories.find(c => c.id === form.values.categoryId)?.name === 'Coffee Beans' && (
+              <Group grow>
+                <Select
+                  label="Roast Level"
+                  required
+                  data={[
+                    { value: 'Light', label: 'Light' },
+                    { value: 'Light-Medium', label: 'Light-Medium' },
+                    { value: 'Medium', label: 'Medium' },
+                    { value: 'Medium-Dark', label: 'Medium-Dark' },
+                    { value: 'Dark', label: 'Dark' }
+                  ]}
+                  {...form.getInputProps('roastLevel')}
+                />
+                <TextInput
+                  label="Origin"
+                  placeholder="e.g. Colombia"
+                  required
+                  {...form.getInputProps('origin')}
+                />
+              </Group>
+            )}
 
             <Stack gap="xs">
               <Text size="sm" fw={500}>Product Images</Text>
@@ -471,16 +489,19 @@ const AdminProducts = () => {
               )}
             </Stack>
 
-            <Group grow>
-              <Switch
-                label="Organic"
-                {...form.getInputProps('isOrganic', { type: 'checkbox' })}
-              />
-              <Switch
-                label="Caffeine Free"
-                {...form.getInputProps('isCaffeineFree', { type: 'checkbox' })}
-              />
-            </Group>
+            {/* Show coffee-specific switches only for Coffee Beans category */}
+            {categories.find(c => c.id === form.values.categoryId)?.name === 'Coffee Beans' && (
+              <Group grow>
+                <Switch
+                  label="Organic"
+                  {...form.getInputProps('isOrganic', { type: 'checkbox' })}
+                />
+                <Switch
+                  label="Caffeine Free"
+                  {...form.getInputProps('isCaffeineFree', { type: 'checkbox' })}
+                />
+              </Group>
+            )}
 
             <Group justify="flex-end" mt="md">
               <Button variant="outline" onClick={close}>Cancel</Button>

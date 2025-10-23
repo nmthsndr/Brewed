@@ -143,7 +143,7 @@ namespace Brewed.Services
                         <p>Your order <strong>{orderNumber}</strong> {statusText}.</p>
                         {(status == "Shipped" ? "<p>Your package will arrive soon!</p>" : "")}
                         {(status == "Delivered" ? "<p>We hope you're satisfied with your products! Please share your feedback with us!</p>" : "")}
-                        <p>You can view your order details in your <a href='{_configuration["AppUrl"]}/orders/{orderNumber}' style='color: #8B4513;'>account</a>.</p>
+                        <p>You can view your order details in your account.</p>
                         <p style='color: #333; margin-top: 30px;'>Best regards,<br/><span style='color: #8B4513; font-weight: bold;'>Brewed Team</span></p>
                     </div>
                 </div>
