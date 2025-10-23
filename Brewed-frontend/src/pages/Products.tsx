@@ -11,7 +11,8 @@ import {
   Paper,
   Stack,
   MultiSelect,
-  NumberInput
+  NumberInput,
+  Checkbox
 } from "@mantine/core";
 import { IconSearch, IconFilter } from "@tabler/icons-react";
 import { useDebouncedValue } from "@mantine/hooks";
@@ -102,6 +103,12 @@ const Products = () => {
     setPage(1);
   };
 
+  // Check if selected category is coffee beans
+  const selectedCategory = categories.find(c => c.id === filters.categoryId);
+  const isCoffeeBeanCategory = selectedCategory?.name.toLowerCase().includes('bean') ||
+                                selectedCategory?.name.toLowerCase().includes('coffee bean') ||
+                                selectedCategory?.name.toLowerCase().includes('kávébab');
+
   return (
     <div style={{ padding: '20px', position: 'relative' }}>
       <LoadingOverlay visible={loading} />
@@ -125,27 +132,59 @@ const Products = () => {
                 placeholder="All categories"
                 clearable
                 data={categories.map(c => ({ value: c.id.toString(), label: c.name }))}
-                value={filters.categoryId?.toString()}
-                onChange={(value) => setFilters({ ...filters, categoryId: value ? parseInt(value) : undefined })}
+                value={filters.categoryId?.toString() || null}
+                onChange={(value) => {
+                  const newFilters = {
+                    ...filters,
+                    categoryId: value ? parseInt(value) : undefined
+                  };
+                  // Clear roast level, organic, and caffeine-free if not coffee beans
+                  const isCoffeeBean = value && categories.find(c => c.id === parseInt(value))?.name.toLowerCase().includes('bean');
+                  if (!isCoffeeBean) {
+                    newFilters.roastLevel = undefined;
+                    newFilters.isOrganic = undefined;
+                    newFilters.isCaffeineFree = undefined;
+                  }
+                  setFilters(newFilters);
+                }}
               />
             </Grid.Col>
 
-            <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
-              <Select
-                label="Roast Level"
-                placeholder="Any"
-                clearable
-                data={[
-                  { value: 'Light', label: 'Light' },
-                  { value: 'Light-Medium', label: 'Light-Medium' },
-                  { value: 'Medium', label: 'Medium' },
-                  { value: 'Medium-Dark', label: 'Medium-Dark' },
-                  { value: 'Dark', label: 'Dark' }
-                ]}
-                value={filters.roastLevel}
-                onChange={(value) => setFilters({ ...filters, roastLevel: value || undefined })}
-              />
-            </Grid.Col>
+            {isCoffeeBeanCategory && (
+              <>
+                <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
+                  <Select
+                    label="Roast Level"
+                    placeholder="Any"
+                    clearable
+                    data={[
+                      { value: 'Light', label: 'Light' },
+                      { value: 'Light-Medium', label: 'Light-Medium' },
+                      { value: 'Medium', label: 'Medium' },
+                      { value: 'Medium-Dark', label: 'Medium-Dark' },
+                      { value: 'Dark', label: 'Dark' }
+                    ]}
+                    value={filters.roastLevel || null}
+                    onChange={(value) => setFilters({ ...filters, roastLevel: value || undefined })}
+                  />
+                </Grid.Col>
+
+                <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
+                  <Stack gap="xs">
+                    <Checkbox
+                      label="Organic"
+                      checked={filters.isOrganic || false}
+                      onChange={(e) => setFilters({ ...filters, isOrganic: e.currentTarget.checked ? true : undefined })}
+                    />
+                    <Checkbox
+                      label="Caffeine Free"
+                      checked={filters.isCaffeineFree || false}
+                      onChange={(e) => setFilters({ ...filters, isCaffeineFree: e.currentTarget.checked ? true : undefined })}
+                    />
+                  </Stack>
+                </Grid.Col>
+              </>
+            )}
 
             <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
               <Select

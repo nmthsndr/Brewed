@@ -9,7 +9,8 @@ import {
   TextInput,
   Stack,
   LoadingOverlay,
-  Checkbox
+  Checkbox,
+  Select
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
@@ -291,6 +292,17 @@ const AddressManagement = () => {
               placeholder="+1 (555) 123-4567"
               required
               {...form.getInputProps('phoneNumber')}
+            />
+
+            <Select
+              label="Address Type"
+              placeholder="Select address type"
+              required
+              data={[
+                { value: 'Shipping', label: 'Shipping Address' },
+                { value: 'Billing', label: 'Billing Address' }
+              ]}
+              {...form.getInputProps('addressType')}
             />
 
             <Checkbox

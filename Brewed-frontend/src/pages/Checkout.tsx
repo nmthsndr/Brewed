@@ -173,8 +173,9 @@ const Checkout = () => {
                   value: addr.id.toString(),
                   label: `${addr.firstName} ${addr.lastName} - ${addr.addressLine1}, ${addr.city}`
                 }))}
-                {...form.getInputProps('shippingAddressId')}
+                value={form.values.shippingAddressId > 0 ? form.values.shippingAddressId.toString() : null}
                 onChange={(val) => form.setFieldValue('shippingAddressId', val ? parseInt(val) : 0)}
+                error={form.errors.shippingAddressId}
               />
               <Button
                 variant="light"
