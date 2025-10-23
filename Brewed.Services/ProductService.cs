@@ -92,28 +92,35 @@ namespace Brewed.Services
                 .Take(filter.PageSize)
                 .ToListAsync();
 
-            var productDtos = products.Select(p => new ProductDto
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                Price = p.Price,
-                StockQuantity = p.StockQuantity,
-                RoastLevel = p.RoastLevel,
-                Origin = p.Origin,
-                IsCaffeineFree = p.IsCaffeineFree,
-                IsOrganic = p.IsOrganic,
-                ImageUrl = p.ImageUrl,
-                CategoryId = p.Category?.Id ?? 0,
-                CategoryName = p.Category?.Name ?? "Unknown",
-                AverageRating = p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0,
-                ReviewCount = p.Reviews.Count,
-                ProductImages = p.ProductImages.Select(pi => new ProductImageDto
+            var productDtos = products.Select(p => {
+                var imageUrls = !string.IsNullOrEmpty(p.ImageUrl)
+                    ? p.ImageUrl.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList()
+                    : new List<string>();
+
+                return new ProductDto
                 {
-                    Id = pi.Id,
-                    ImageUrl = pi.ImageUrl,
-                    DisplayOrder = pi.DisplayOrder
-                }).OrderBy(pi => pi.DisplayOrder).ToList()
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    StockQuantity = p.StockQuantity,
+                    RoastLevel = p.RoastLevel,
+                    Origin = p.Origin,
+                    IsCaffeineFree = p.IsCaffeineFree,
+                    IsOrganic = p.IsOrganic,
+                    ImageUrl = imageUrls.FirstOrDefault() ?? p.ImageUrl,
+                    ImageUrls = imageUrls,
+                    CategoryId = p.Category?.Id ?? 0,
+                    CategoryName = p.Category?.Name ?? "Unknown",
+                    AverageRating = p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0,
+                    ReviewCount = p.Reviews.Count,
+                    ProductImages = p.ProductImages.Select(pi => new ProductImageDto
+                    {
+                        Id = pi.Id,
+                        ImageUrl = pi.ImageUrl,
+                        DisplayOrder = pi.DisplayOrder
+                    }).OrderBy(pi => pi.DisplayOrder).ToList()
+                };
             }).ToList();
 
             return new PaginatedResultDto<ProductDto>
@@ -139,6 +146,10 @@ namespace Brewed.Services
                 throw new KeyNotFoundException("Product not found");
             }
 
+            var imageUrls = !string.IsNullOrEmpty(product.ImageUrl)
+                ? product.ImageUrl.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList()
+                : new List<string>();
+
             return new ProductDto
             {
                 Id = product.Id,
@@ -150,7 +161,8 @@ namespace Brewed.Services
                 Origin = product.Origin,
                 IsCaffeineFree = product.IsCaffeineFree,
                 IsOrganic = product.IsOrganic,
-                ImageUrl = product.ImageUrl,
+                ImageUrl = imageUrls.FirstOrDefault() ?? product.ImageUrl,
+                ImageUrls = imageUrls,
                 CategoryId = product.Category?.Id ?? 0,
                 CategoryName = product.Category?.Name ?? "Unknown",
                 AverageRating = product.Reviews.Any() ? product.Reviews.Average(r => r.Rating) : 0,

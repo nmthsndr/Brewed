@@ -43,7 +43,8 @@
             builder.Services.AddScoped<IFileUploadService>(provider =>
             {
                 var env = provider.GetRequiredService<IWebHostEnvironment>();
-                return new FileUploadService(env.WebRootPath);
+                // Pass WebRootPath or null - FileUploadService will handle null case
+                return new FileUploadService(env.WebRootPath ?? string.Empty);
             });
 
             // JWT Authentication

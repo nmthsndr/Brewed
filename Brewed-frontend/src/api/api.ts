@@ -249,6 +249,31 @@ const Dashboard = {
     axiosInstance.get(`/api/dashboard/top-customers`, { params: { count } })
 };
 
+const Files = {
+  uploadImage: (file: File, folder: string = 'products') => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return axiosInstance.post<{ url: string }>(`/api/files/upload?folder=${folder}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  },
+  uploadMultipleImages: (files: File[], folder: string = 'products') => {
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+    return axiosInstance.post<{ urls: string[] }>(`/api/files/upload-multiple?folder=${folder}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  },
+  deleteImage: (imageUrl: string) =>
+    axiosInstance.delete(`/api/files?imageUrl=${encodeURIComponent(imageUrl)}`)
+};
+
 const api = {
   Auth,
   Products,
@@ -259,7 +284,8 @@ const api = {
   Reviews,
   Coupons,
   Users,
-  Dashboard
+  Dashboard,
+  Files
 };
 
 export default api;

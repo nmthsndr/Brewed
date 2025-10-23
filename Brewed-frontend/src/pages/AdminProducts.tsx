@@ -15,11 +15,13 @@ import {
   Select,
   Switch,
   Badge,
-  Image
+  Image,
+  FileInput,
+  SimpleGrid
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
-import { IconEdit, IconTrash, IconPlus } from "@tabler/icons-react";
+import { IconEdit, IconTrash, IconPlus, IconUpload, IconX } from "@tabler/icons-react";
 import api from "../api/api";
 import { notifications } from "@mantine/notifications";
 
@@ -63,6 +65,8 @@ const AdminProducts = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [opened, { open, close }] = useDisclosure(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string>('');
 
   const form = useForm<ProductFormValues>({
     initialValues: {
@@ -83,7 +87,6 @@ const AdminProducts = () => {
       price: (value) => value <= 0 ? 'Price must be greater than 0' : null,
       stockQuantity: (value) => value < 0 ? 'Stock cannot be negative' : null,
       origin: (value) => !value ? 'Origin is required' : null,
-      imageUrl: (value) => !value ? 'Image URL is required' : null,
       categoryId: (value) => !value ? 'Category is required' : null
     }
   });
@@ -122,12 +125,16 @@ const AdminProducts = () => {
   const handleCreate = () => {
     setModalMode('create');
     form.reset();
+    setSelectedFiles([]);
+    setUploadedImageUrl('');
     open();
   };
 
   const handleEdit = (product: Product) => {
     setModalMode('edit');
     setSelectedProduct(product);
+    setSelectedFiles([]);
+    setUploadedImageUrl(product.imageUrl);
     form.setValues({
       name: product.name,
       description: product.description,
@@ -166,19 +173,82 @@ const AdminProducts = () => {
     }
   };
 
-  const handleSubmit = async (values: ProductFormValues) => {
+  const handleUploadImages = async () => {
+    if (selectedFiles.length === 0) {
+      notifications.show({
+        title: 'Error',
+        message: 'Please select at least one image',
+        color: 'red',
+      });
+      return;
+    }
+
     try {
       setLoading(true);
 
+      if (selectedFiles.length === 1) {
+        const response = await api.Files.uploadImage(selectedFiles[0], 'products');
+        setUploadedImageUrl(response.data.url);
+        form.setFieldValue('imageUrl', response.data.url);
+        notifications.show({
+          title: 'Success',
+          message: 'Image uploaded successfully',
+          color: 'green',
+        });
+      } else {
+        const response = await api.Files.uploadMultipleImages(selectedFiles, 'products');
+        // Join all uploaded images with semicolon separator
+        const joinedUrls = response.data.urls.join(';');
+        setUploadedImageUrl(joinedUrls);
+        form.setFieldValue('imageUrl', joinedUrls);
+        notifications.show({
+          title: 'Success',
+          message: `${response.data.urls.length} images uploaded successfully`,
+          color: 'green',
+        });
+      }
+
+      setSelectedFiles([]);
+    } catch (error: any) {
+      notifications.show({
+        title: 'Error',
+        message: error.response?.data?.error || 'Failed to upload images',
+        color: 'red',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (values: ProductFormValues) => {
+    // Check if image is uploaded
+    if (!uploadedImageUrl && !values.imageUrl) {
+      notifications.show({
+        title: 'Error',
+        message: 'Please upload an image',
+        color: 'red',
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Use uploaded image URL or existing image URL
+      const productData = {
+        ...values,
+        imageUrl: uploadedImageUrl || values.imageUrl
+      };
+
       if (modalMode === 'create') {
-        await api.Products.createProduct(values);
+        await api.Products.createProduct(productData);
         notifications.show({
           title: 'Success',
           message: 'Product created successfully',
           color: 'green',
         });
       } else if (selectedProduct) {
-        await api.Products.updateProduct(selectedProduct.id, values);
+        await api.Products.updateProduct(selectedProduct.id, productData);
         notifications.show({
           title: 'Success',
           message: 'Product updated successfully',
@@ -351,12 +421,55 @@ const AdminProducts = () => {
               />
             </Group>
 
-            <TextInput
-              label="Image URL"
-              placeholder="/images/products/..."
-              required
-              {...form.getInputProps('imageUrl')}
-            />
+            <Stack gap="xs">
+              <Text size="sm" fw={500}>Product Images</Text>
+              <FileInput
+                placeholder="Select images"
+                multiple
+                accept="image/*"
+                leftSection={<IconUpload size={16} />}
+                value={selectedFiles}
+                onChange={setSelectedFiles}
+              />
+              {selectedFiles.length > 0 && (
+                <Group gap="xs">
+                  <Button size="xs" onClick={handleUploadImages} leftSection={<IconUpload size={14} />}>
+                    Upload {selectedFiles.length} image{selectedFiles.length > 1 ? 's' : ''}
+                  </Button>
+                  <Button size="xs" variant="outline" color="red" onClick={() => setSelectedFiles([])} leftSection={<IconX size={14} />}>
+                    Clear
+                  </Button>
+                </Group>
+              )}
+              {uploadedImageUrl && (
+                <Stack gap="xs">
+                  <Text size="xs" c="dimmed">Uploaded Images ({uploadedImageUrl.split(';').length}):</Text>
+                  <SimpleGrid cols={3}>
+                    {uploadedImageUrl.split(';').map((url, index) => (
+                      <div key={index}>
+                        <Image src={url.trim()} alt={`Product ${index + 1}`} height={100} fit="contain" />
+                        <Text size="xs" c="dimmed" lineClamp={1}>{url.trim().split('/').pop()}</Text>
+                      </div>
+                    ))}
+                  </SimpleGrid>
+                </Stack>
+              )}
+              {selectedFiles.length > 0 && (
+                <SimpleGrid cols={3}>
+                  {Array.from(selectedFiles).map((file, index) => (
+                    <div key={index}>
+                      <Image
+                        src={URL.createObjectURL(file)}
+                        alt={`Preview ${index + 1}`}
+                        height={100}
+                        fit="cover"
+                      />
+                      <Text size="xs" c="dimmed" lineClamp={1}>{file.name}</Text>
+                    </div>
+                  ))}
+                </SimpleGrid>
+              )}
+            </Stack>
 
             <Group grow>
               <Switch

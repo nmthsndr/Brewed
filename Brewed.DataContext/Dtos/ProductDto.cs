@@ -14,6 +14,7 @@ namespace Brewed.Dtos
         public bool IsCaffeineFree { get; set; }
         public bool IsOrganic { get; set; }
         public string ImageUrl { get; set; }
+        public List<string> ImageUrls { get; set; } = new List<string>();
         public int CategoryId { get; set; }
         public string CategoryName { get; set; }
         public double AverageRating { get; set; }

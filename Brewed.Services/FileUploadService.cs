@@ -17,7 +17,23 @@ namespace Brewed.Services
 
         public FileUploadService(string webRootPath)
         {
-            _uploadPath = Path.Combine(webRootPath, "images");
+            // Always use the frontend images folder regardless of webRootPath
+            // Go up from backend project to solution root, then into frontend images
+            var projectRoot = Directory.GetCurrentDirectory();
+            var solutionRoot = Directory.GetParent(projectRoot)?.FullName;
+
+            if (solutionRoot != null)
+            {
+                _uploadPath = Path.Combine(solutionRoot, "Brewed-frontend", "images");
+            }
+            else
+            {
+                // Fallback: use relative path
+                _uploadPath = Path.Combine(projectRoot, "..", "Brewed-frontend", "images");
+            }
+
+            // Normalize the path
+            _uploadPath = Path.GetFullPath(_uploadPath);
 
             // Create upload directory if it doesn't exist
             if (!Directory.Exists(_uploadPath))
@@ -103,13 +119,20 @@ namespace Brewed.Services
 
                 // Convert URL to physical path
                 // imageUrl format: /images/products/filename.jpg
-                var relativePath = imageUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", relativePath);
+                // Extract the path after /images/ and combine with _uploadPath
+                var imageUrlParts = imageUrl.TrimStart('/').Split('/');
 
-                if (File.Exists(filePath))
+                // Skip 'images' part and get the rest (e.g., "products/filename.jpg")
+                if (imageUrlParts.Length > 1)
                 {
-                    File.Delete(filePath);
-                    return Task.FromResult(true);
+                    var relativePath = string.Join(Path.DirectorySeparatorChar.ToString(), imageUrlParts.Skip(1));
+                    var filePath = Path.Combine(_uploadPath, relativePath);
+
+                    if (File.Exists(filePath))
+                    {
+                        File.Delete(filePath);
+                        return Task.FromResult(true);
+                    }
                 }
 
                 return Task.FromResult(false);

@@ -12,6 +12,7 @@ export interface IProduct {
   isCaffeineFree: boolean;
   isOrganic: boolean;
   imageUrl: string;
+  imageUrls?: string[];
   categoryId: number;
   categoryName: string;
   averageRating: number;
