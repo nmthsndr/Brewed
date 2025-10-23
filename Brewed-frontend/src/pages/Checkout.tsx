@@ -54,12 +54,10 @@ const Checkout = () => {
 
       // Calculate shipping
       const subtotal = cartRes.data.subTotal;
-      if (subtotal >= 10000) {
+      if (subtotal >= 50) {
         setShippingCost(0);
-      } else if (subtotal >= 5000) {
-        setShippingCost(500);
       } else {
-        setShippingCost(1000);
+        setShippingCost(5);
       }
     } catch (error) {
       console.error("Failed to load checkout data:", error);
