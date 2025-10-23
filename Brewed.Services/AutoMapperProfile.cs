@@ -12,8 +12,6 @@ namespace Brewed.Services
         {
             // User Mappings
             CreateMap<User, UserDto>();
-            // User Mappings
-            CreateMap<User, UserDto>();
             CreateMap<UserRegisterDto, User>()
                 .ForMember(dest => dest.Orders, opt => opt.Ignore())
                 .ForMember(dest => dest.Reviews, opt => opt.Ignore())

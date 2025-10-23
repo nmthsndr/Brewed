@@ -15,6 +15,7 @@
         {
             var builder = WebApplication.CreateBuilder(args);
 
+
             // Database context
             builder.Services.AddDbContext<BrewedDbContext>(options =>
                 options.UseSqlServer(

@@ -14,7 +14,7 @@ namespace Brewed.DataContext.Entities
         public int? UserId { get; set; }
 
         [StringLength(100)]
-        public string? SessionId { get; set; }  // For guest users - nullable!
+        public string? SessionId { get; set; }  // For guest users
 
         public virtual User User { get; set; }
         public virtual ICollection<CartItem> CartItems { get; set; }

@@ -81,7 +81,7 @@ namespace Brewed.Services
             }
 
             var coupon = _mapper.Map<Coupon>(couponDto);
-            coupon.Code = coupon.Code.ToUpper(); // Normalize to uppercase
+            coupon.Code = coupon.Code.ToUpper();
 
             await _context.Coupons.AddAsync(coupon);
             await _context.SaveChangesAsync();
