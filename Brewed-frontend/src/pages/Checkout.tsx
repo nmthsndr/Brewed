@@ -57,7 +57,7 @@ const Checkout = () => {
       if (subtotal >= 50) {
         setShippingCost(0);
       } else {
-        setShippingCost(5);
+        setShippingCost(10);
       }
     } catch (error) {
       console.error("Failed to load checkout data:", error);

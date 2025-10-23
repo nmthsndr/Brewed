@@ -352,8 +352,8 @@ namespace Brewed.Services
 
         private decimal CalculateShippingCost(decimal subTotal)
         {
-            if (subTotal >= 50) return 0; // Free shipping over 30 euros
-            return 5;
+            if (subTotal >= 50) return 0; // Free shipping over 50 euros
+            return 10;
         }
         
 

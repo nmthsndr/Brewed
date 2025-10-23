@@ -18,7 +18,7 @@ namespace Brewed.DataContext.Entities
         public decimal TotalAmount { get; set; }
 
         [StringLength(50)]
-        public string CouponCode { get; set; }
+        public string? CouponCode { get; set; }
 
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
 
@@ -34,7 +34,7 @@ namespace Brewed.DataContext.Entities
         public string PaymentStatus { get; set; } = "Pending";
 
         [StringLength(500)]
-        public string Notes { get; set; }
+        public string? Notes { get; set; }
 
         public DateTime? ShippedAt { get; set; }
         public DateTime? DeliveredAt { get; set; }

@@ -51,10 +51,10 @@ namespace Brewed.DataContext.Dtos
         public string PaymentMethod { get; set; }
 
         [StringLength(50)]
-        public string CouponCode { get; set; }
+        public string? CouponCode { get; set; }
 
         [StringLength(500)]
-        public string Notes { get; set; }
+        public string? Notes { get; set; }
     }
 
     public class OrderStatusUpdateDto

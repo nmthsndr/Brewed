@@ -285,7 +285,7 @@
     {
         new() { Code = "WELCOME10", Description = "10% discount for new customers", DiscountType = "Percentage", DiscountValue = 10m, MinimumOrderAmount = 20m, StartDate = DateTime.UtcNow.AddDays(-30), EndDate = DateTime.UtcNow.AddDays(30), IsActive = true },
         new() { Code = "BEANS20", Description = "20% off all coffee beans", DiscountType = "Percentage", DiscountValue = 20m, MinimumOrderAmount = 30m, StartDate = DateTime.UtcNow.AddDays(-10), EndDate = DateTime.UtcNow.AddDays(60), IsActive = true },
-        new() { Code = "FREESHIP", Description = "Free shipping over 50€", DiscountType = "FixedAmount", DiscountValue = 5m, MinimumOrderAmount = 50m, StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddDays(90), IsActive = true },
+        new() { Code = "FREESHIP", Description = "Free shipping over 25€", DiscountType = "FixedAmount", DiscountValue = 10m, MinimumOrderAmount = 25m, StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddDays(90), IsActive = true },
         new() { Code = "GEAR15", Description = "15% off coffee equipment", DiscountType = "Percentage", DiscountValue = 15m, MinimumOrderAmount = 100m, StartDate = DateTime.UtcNow.AddDays(-5), EndDate = DateTime.UtcNow.AddDays(45), IsActive = true }
     };
             context.Coupons.AddRange(coupons);
@@ -303,9 +303,11 @@
             ShippingCost = 5m,
             Discount = 0m,
             TotalAmount = 49.80m,
+            CouponCode = "",
             Status = "Delivered",
             PaymentMethod = "CreditCard",
             PaymentStatus = "Paid",
+            Notes = "",
             ShippingAddressId = addresses[0].Id,
             BillingAddressId = addresses[0].Id,
             ShippedAt = DateTime.UtcNow.AddMonths(-3).AddDays(2),
@@ -325,9 +327,11 @@
             ShippingCost = 5m,
             Discount = 0m,
             TotalAmount = 643.00m,
+            CouponCode = "",
             Status = "Delivered",
             PaymentMethod = "BankTransfer",
             PaymentStatus = "Paid",
+            Notes = "",
             ShippingAddressId = addresses[1].Id,
             BillingAddressId = addresses[1].Id,
             ShippedAt = DateTime.UtcNow.AddMonths(-2).AddDays(-3),
@@ -346,9 +350,11 @@
             ShippingCost = 5m,
             Discount = 0m,
             TotalAmount = 158.70m,
+            CouponCode = "",
             Status = "Delivered",
             PaymentMethod = "CreditCard",
             PaymentStatus = "Paid",
+            Notes = "",
             ShippingAddressId = addresses[2].Id,
             BillingAddressId = addresses[2].Id,
             ShippedAt = DateTime.UtcNow.AddDays(-43),
@@ -369,9 +375,11 @@
             ShippingCost = 5m,
             Discount = 0m,
             TotalAmount = 302.80m,
+            CouponCode = "",
             Status = "Shipped",
             PaymentMethod = "DebitCard",
             PaymentStatus = "Paid",
+            Notes = "",
             ShippingAddressId = addresses[3].Id,
             BillingAddressId = addresses[3].Id,
             ShippedAt = DateTime.UtcNow.AddDays(-2),
@@ -394,6 +402,7 @@
             Status = "Processing",
             PaymentMethod = "CreditCard",
             PaymentStatus = "Pending",
+            Notes = "",
             ShippingAddressId = addresses[4].Id,
             BillingAddressId = addresses[4].Id,
             OrderItems = new List<OrderItem> {
@@ -411,9 +420,11 @@
             ShippingCost = 5m,
             Discount = 0m,
             TotalAmount = 98.70m,
+            CouponCode = "",
             Status = "Processing",
             PaymentMethod = "CreditCard",
             PaymentStatus = "Pending",
+            Notes = "",
             ShippingAddressId = addresses[0].Id,
             BillingAddressId = addresses[0].Id,
             OrderItems = new List<OrderItem> {
@@ -435,6 +446,7 @@
             Status = "Delivered",
             PaymentMethod = "CreditCard",
             PaymentStatus = "Paid",
+            Notes = "",
             ShippingAddressId = addresses[1].Id,
             BillingAddressId = addresses[1].Id,
             ShippedAt = DateTime.UtcNow.AddMonths(-1).AddDays(1),
@@ -455,6 +467,7 @@
             ShippingCost = 5m,
             Discount = 0m,
             TotalAmount = 454.00m,
+            CouponCode = "",
             Status = "Cancelled",
             PaymentMethod = "BankTransfer",
             PaymentStatus = "Refunded",
@@ -472,11 +485,11 @@
             // Create Invoices for Delivered and Shipped Orders
             var invoices = new List<Invoice>
     {
-        new() { InvoiceNumber = $"INV-{DateTime.UtcNow.AddMonths(-3):yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}", OrderId = orders[0].Id, IssueDate = orders[0].OrderDate.AddDays(1), TotalAmount = orders[0].TotalAmount },
-        new() { InvoiceNumber = $"INV-{DateTime.UtcNow.AddMonths(-2):yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}", OrderId = orders[1].Id, IssueDate = orders[1].OrderDate.AddDays(1), TotalAmount = orders[1].TotalAmount },
-        new() { InvoiceNumber = $"INV-{DateTime.UtcNow.AddDays(-45):yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}", OrderId = orders[2].Id, IssueDate = orders[2].OrderDate.AddDays(1), TotalAmount = orders[2].TotalAmount },
-        new() { InvoiceNumber = $"INV-{DateTime.UtcNow.AddDays(-5):yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}", OrderId = orders[3].Id, IssueDate = orders[3].OrderDate.AddDays(1), TotalAmount = orders[3].TotalAmount },
-        new() { InvoiceNumber = $"INV-{DateTime.UtcNow.AddMonths(-1):yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}", OrderId = orders[6].Id, IssueDate = orders[6].OrderDate.AddDays(1), TotalAmount = orders[6].TotalAmount }
+        new() { InvoiceNumber = $"INV-{DateTime.UtcNow.AddMonths(-3):yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}", OrderId = orders[0].Id, IssueDate = orders[0].OrderDate.AddDays(1), TotalAmount = orders[0].TotalAmount, PdfUrl = "" },
+        new() { InvoiceNumber = $"INV-{DateTime.UtcNow.AddMonths(-2):yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}", OrderId = orders[1].Id, IssueDate = orders[1].OrderDate.AddDays(1), TotalAmount = orders[1].TotalAmount, PdfUrl = "" },
+        new() { InvoiceNumber = $"INV-{DateTime.UtcNow.AddDays(-45):yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}", OrderId = orders[2].Id, IssueDate = orders[2].OrderDate.AddDays(1), TotalAmount = orders[2].TotalAmount, PdfUrl = "" },
+        new() { InvoiceNumber = $"INV-{DateTime.UtcNow.AddDays(-5):yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}", OrderId = orders[3].Id, IssueDate = orders[3].OrderDate.AddDays(1), TotalAmount = orders[3].TotalAmount, PdfUrl = "" },
+        new() { InvoiceNumber = $"INV-{DateTime.UtcNow.AddMonths(-1):yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}", OrderId = orders[6].Id, IssueDate = orders[6].OrderDate.AddDays(1), TotalAmount = orders[6].TotalAmount, PdfUrl = "" }
     };
             context.Invoices.AddRange(invoices);
             context.SaveChanges();
