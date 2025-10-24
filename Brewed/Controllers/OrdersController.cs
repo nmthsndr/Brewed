@@ -159,7 +159,7 @@ namespace Brewed.API.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPost("{orderId}/invoice/generate")]
+        [HttpPost("{orderId}/invoice")]
         public async Task<IActionResult> GenerateInvoice(int orderId)
         {
             try
