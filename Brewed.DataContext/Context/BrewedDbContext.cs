@@ -31,6 +31,7 @@ namespace Brewed.DataContext.Context
                 .HasMany(u => u.Orders)
                 .WithOne(o => o.User)
                 .HasForeignKey(o => o.UserId)
+                .IsRequired(true) // Always required - guest orders will have a guest user
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<User>()
@@ -43,6 +44,7 @@ namespace Brewed.DataContext.Context
                 .HasMany(u => u.Addresses)
                 .WithOne(a => a.User)
                 .HasForeignKey(a => a.UserId)
+                .IsRequired(false) // Allow null for guest addresses
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<User>()

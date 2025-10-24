@@ -47,7 +47,8 @@ namespace Brewed.DataContext.Entities
         [StringLength(50)]
         public string AddressType { get; set; } = "Shipping"; // Shipping, Billing, Both
 
-        public int UserId { get; set; }
+        // Nullable for guest addresses
+        public int? UserId { get; set; }
 
         public virtual User User { get; set; }
     }
