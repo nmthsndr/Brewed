@@ -29,6 +29,7 @@ const AdminOrders = () => {
   const [selectedOrder, setSelectedOrder] = useState<IOrder | null>(null);
   const [modalOpened, setModalOpened] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [generatingInvoice, setGeneratingInvoice] = useState(false);
 
   useEffect(() => {
     loadOrders();
@@ -67,15 +68,42 @@ const AdminOrders = () => {
       });
       loadOrders();
       setModalOpened(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to update order status:", error);
       notifications.show({
         title: 'Error',
-        message: 'Failed to update order status',
+        message: error.response?.data || 'Failed to update order status',
         color: 'red',
       });
     } finally {
       setUpdatingStatus(false);
+    }
+  };
+
+  const handleGenerateInvoice = async (orderId: number) => {
+    try {
+      setGeneratingInvoice(true);
+      await api.Orders.generateInvoice(orderId);
+      notifications.show({
+        title: 'Success',
+        message: 'Invoice generated successfully',
+        color: 'green',
+      });
+      loadOrders();
+      // Refresh the selected order to show invoice
+      if (selectedOrder) {
+        const response = await api.Orders.getOrder(orderId);
+        setSelectedOrder(response.data);
+      }
+    } catch (error: any) {
+      console.error("Failed to generate invoice:", error);
+      notifications.show({
+        title: 'Error',
+        message: error.response?.data || 'Failed to generate invoice',
+        color: 'red',
+      });
+    } finally {
+      setGeneratingInvoice(false);
     }
   };
 
@@ -135,6 +163,7 @@ const AdminOrders = () => {
                   <Table.Th>Customer</Table.Th>
                   <Table.Th>Date</Table.Th>
                   <Table.Th>Amount</Table.Th>
+                  <Table.Th>Invoice</Table.Th>
                   <Table.Th>Status</Table.Th>
                   <Table.Th>Actions</Table.Th>
                 </Table.Tr>
@@ -155,6 +184,13 @@ const AdminOrders = () => {
                     </Table.Td>
                     <Table.Td>
                       <Text size="sm" fw={600}>€{order.totalAmount.toFixed(2)}</Text>
+                    </Table.Td>
+                    <Table.Td>
+                      {order.invoice ? (
+                        <Badge color="green" size="sm">Generated</Badge>
+                      ) : (
+                        <Badge color="yellow" size="sm">Pending</Badge>
+                      )}
                     </Table.Td>
                     <Table.Td>
                       <Badge color={getStatusColor(order.status)}>
@@ -196,6 +232,30 @@ const AdminOrders = () => {
       >
         {selectedOrder && (
           <Stack gap="md">
+            <div>
+              <Text fw={600} size="sm" mb="xs">Invoice Status</Text>
+              {selectedOrder.invoice ? (
+                <Group gap="xs">
+                  <Badge color="green">Invoice Generated</Badge>
+                  <Text size="sm" c="dimmed">
+                    {selectedOrder.invoice.invoiceNumber}
+                  </Text>
+                </Group>
+              ) : (
+                <Group gap="xs">
+                  <Badge color="yellow">No Invoice</Badge>
+                  <Button
+                    size="xs"
+                    variant="light"
+                    onClick={() => handleGenerateInvoice(selectedOrder.id)}
+                    loading={generatingInvoice}
+                  >
+                    Generate Invoice
+                  </Button>
+                </Group>
+              )}
+            </div>
+
             <div>
               <Text fw={600} size="sm">Customer Information</Text>
               <Text size="sm">Name: {selectedOrder.user?.name || 'Unknown'}</Text>

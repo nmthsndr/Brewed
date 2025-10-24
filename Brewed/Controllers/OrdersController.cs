@@ -157,5 +157,28 @@ namespace Brewed.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost("{orderId}/invoice")]
+        public async Task<IActionResult> GenerateInvoice(int orderId)
+        {
+            try
+            {
+                var invoice = await _orderService.GenerateInvoiceAsync(orderId);
+                return Ok(invoice);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound("Order not found");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

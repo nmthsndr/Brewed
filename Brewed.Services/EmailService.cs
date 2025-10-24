@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Brewed.DataContext.Dtos;
+using Microsoft.Extensions.Configuration;
 using System.Net;
 using System.Net.Mail;
 
@@ -8,9 +9,10 @@ namespace Brewed.Services
     {
         Task SendEmailConfirmationAsync(string email, string name, string confirmationToken);
         Task SendPasswordResetAsync(string email, string name, string resetToken);
-        Task SendOrderConfirmationAsync(string email, string name, string orderNumber, decimal totalAmount);
+        Task SendOrderConfirmationAsync(OrderDto orderDetails);
         Task SendOrderStatusUpdateAsync(string email, string name, string orderNumber, string status);
         Task SendLowStockAlertAsync(string productName, int currentStock);
+        Task SendInvoiceEmailAsync(OrderDto orderDetails);
     }
 
     public class EmailService : IEmailService
@@ -100,26 +102,153 @@ namespace Brewed.Services
             await SendEmailAsync(email, subject, body);
         }
 
-        public async Task SendOrderConfirmationAsync(string email, string name, string orderNumber, decimal totalAmount)
+        public async Task SendOrderConfirmationAsync(OrderDto orderDetails)
         {
-            var subject = $"Order Confirmation - {orderNumber}";
+            var subject = $"Order Confirmation - {orderDetails.OrderNumber}";
+
+            // Build product items HTML
+            var itemsHtml = string.Join("", orderDetails.Items.Select(item => $@"
+                <tr>
+                    <td style='padding: 12px; border-bottom: 1px solid #eee;'>
+                        <div style='display: flex; align-items: center;'>
+                            {(string.IsNullOrEmpty(item.ProductImageUrl) ? "" : $"<img src='{item.ProductImageUrl}' alt='{item.ProductName}' style='width: 50px; height: 50px; object-fit: cover; border-radius: 4px; margin-right: 10px;' />")}
+                            <span style='color: #333;'>{item.ProductName}</span>
+                        </div>
+                    </td>
+                    <td style='padding: 12px; border-bottom: 1px solid #eee; text-align: center; color: #666;'>{item.Quantity}</td>
+                    <td style='padding: 12px; border-bottom: 1px solid #eee; text-align: right; color: #666;'>€{item.UnitPrice:N2}</td>
+                    <td style='padding: 12px; border-bottom: 1px solid #eee; text-align: right; color: #333; font-weight: 600;'>€{item.TotalPrice:N2}</td>
+                </tr>
+            "));
+
+            // Format addresses
+            var shippingAddress = orderDetails.ShippingAddress;
+            var billingAddress = orderDetails.BillingAddress ?? orderDetails.ShippingAddress;
 
             var body = $@"
-                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #D4A373 0%, #8B4513 100%); padding: 40px; border-radius: 10px;'>
-                    <div style='background: white; padding: 30px; border-radius: 8px;'>
-                        <h2 style='color: #8B4513;'>Hello {name}!</h2>
-                        <p>Thank you for your order!</p>
-                        <h3 style='color: #8B4513;'>Order Details:</h3>
-                        <p><strong>Order Number:</strong> {orderNumber}</p>
-                        <p><strong>Total Amount:</strong> €{totalAmount:N2}</p>
-                        <p>Your order is being processed. We'll notify you about the shipping status soon.</p>
-                        <p>You can view your order details in your <a href='{_configuration["AppUrl"]}/orders/{orderNumber}' style='color: #8B4513;'>account</a>.</p>
-                        <p style='color: #333; margin-top: 30px;'>Best regards,<br/><span style='color: #8B4513; font-weight: bold;'>Brewed Team</span></p>
+                <div style='font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; background: linear-gradient(135deg, #D4A373 0%, #8B4513 100%); padding: 40px; border-radius: 10px;'>
+                    <div style='background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
+
+                        <!-- Header -->
+                        <div style='text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 3px solid #8B4513;'>
+                            <h1 style='color: #8B4513; margin: 0 0 10px 0; font-size: 32px;'>ORDER CONFIRMATION</h1>
+                            <p style='color: #666; margin: 5px 0; font-size: 16px;'><strong>Order Number:</strong> {orderDetails.OrderNumber}</p>
+                            <p style='color: #666; margin: 5px 0; font-size: 14px;'>Order Date: {orderDetails.OrderDate:MMMM dd, yyyy}</p>
+                        </div>
+
+                        <!-- Customer Info -->
+                        <div style='margin-bottom: 30px;'>
+                            <h3 style='color: #8B4513; margin-bottom: 10px;'>Hello {orderDetails.User.Name}!</h3>
+                            <p style='color: #666; line-height: 1.6;'>Thank you for your order! Your order is being processed and we'll notify you about the shipping status soon.</p>
+                        </div>
+
+                        <!-- Order Summary -->
+                        <div style='background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 25px;'>
+                            <h3 style='color: #8B4513; margin-top: 0;'>Order Information</h3>
+                            <table style='width: 100%; border-collapse: collapse;'>
+                                <tr>
+                                    <td style='padding: 8px 0; color: #666;'><strong>Order Status:</strong></td>
+                                    <td style='padding: 8px 0; color: #333; text-align: right;'>
+                                        <span style='background: #FF9800; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px;'>{orderDetails.Status}</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 8px 0; color: #666;'><strong>Payment Method:</strong></td>
+                                    <td style='padding: 8px 0; color: #333; text-align: right;'>{orderDetails.PaymentMethod}</td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 8px 0; color: #666;'><strong>Payment Status:</strong></td>
+                                    <td style='padding: 8px 0; color: #333; text-align: right;'>
+                                        <span style='background: {(orderDetails.PaymentStatus == "Paid" ? "#4CAF50" : "#FF9800")}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px;'>{orderDetails.PaymentStatus}</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Product Items -->
+                        <div style='margin-bottom: 25px;'>
+                            <h3 style='color: #8B4513; margin-bottom: 15px;'>Order Items</h3>
+                            <table style='width: 100%; border-collapse: collapse; border: 1px solid #eee; border-radius: 6px; overflow: hidden;'>
+                                <thead>
+                                    <tr style='background: linear-gradient(135deg, #D4A373 0%, #8B4513 100%);'>
+                                        <th style='padding: 12px; text-align: left; color: white; font-weight: 600;'>Product</th>
+                                        <th style='padding: 12px; text-align: center; color: white; font-weight: 600;'>Quantity</th>
+                                        <th style='padding: 12px; text-align: right; color: white; font-weight: 600;'>Unit Price</th>
+                                        <th style='padding: 12px; text-align: right; color: white; font-weight: 600;'>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {itemsHtml}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Totals -->
+                        <div style='background: #f9f9f9; padding: 20px; border-radius: 6px; margin-bottom: 25px;'>
+                            <table style='width: 100%; border-collapse: collapse;'>
+                                <tr>
+                                    <td style='padding: 8px 0; color: #666; font-size: 15px;'>Subtotal:</td>
+                                    <td style='padding: 8px 0; color: #333; text-align: right; font-size: 15px;'>€{orderDetails.SubTotal:N2}</td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 8px 0; color: #666; font-size: 15px;'>Shipping Cost:</td>
+                                    <td style='padding: 8px 0; color: #333; text-align: right; font-size: 15px;'>€{orderDetails.ShippingCost:N2}</td>
+                                </tr>
+                                {(orderDetails.Discount > 0 ? $@"
+                                <tr>
+                                    <td style='padding: 8px 0; color: #4CAF50; font-size: 15px;'>Discount {(string.IsNullOrEmpty(orderDetails.CouponCode) ? "" : $"({orderDetails.CouponCode})")}:</td>
+                                    <td style='padding: 8px 0; color: #4CAF50; text-align: right; font-size: 15px;'>-€{orderDetails.Discount:N2}</td>
+                                </tr>
+                                " : "")}
+                                <tr style='border-top: 2px solid #8B4513;'>
+                                    <td style='padding: 15px 0 0 0; color: #8B4513; font-size: 18px; font-weight: bold;'>Total Amount:</td>
+                                    <td style='padding: 15px 0 0 0; color: #8B4513; text-align: right; font-size: 20px; font-weight: bold;'>€{orderDetails.TotalAmount:N2}</td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Addresses -->
+                        <div style='margin-bottom: 25px;'>
+                            <table style='width: 100%; border-collapse: collapse;'>
+                                <tr>
+                                    <td style='width: 48%; vertical-align: top; padding-right: 2%;'>
+                                        <h3 style='color: #8B4513; margin-bottom: 10px; font-size: 16px;'>Shipping Address</h3>
+                                        <div style='background: #f9f9f9; padding: 15px; border-radius: 6px; font-size: 14px;'>
+                                            <p style='margin: 5px 0; color: #333;'><strong>{shippingAddress.FirstName} {shippingAddress.LastName}</strong></p>
+                                            <p style='margin: 5px 0; color: #666;'>{shippingAddress.AddressLine1}</p>
+                                            {(string.IsNullOrEmpty(shippingAddress.AddressLine2) ? "" : $"<p style='margin: 5px 0; color: #666;'>{shippingAddress.AddressLine2}</p>")}
+                                            <p style='margin: 5px 0; color: #666;'>{shippingAddress.City}, {shippingAddress.PostalCode}</p>
+                                            <p style='margin: 5px 0; color: #666;'>{shippingAddress.Country}</p>
+                                            <p style='margin: 5px 0; color: #666;'><strong>Phone:</strong> {shippingAddress.PhoneNumber}</p>
+                                        </div>
+                                    </td>
+                                    <td style='width: 48%; vertical-align: top; padding-left: 2%;'>
+                                        <h3 style='color: #8B4513; margin-bottom: 10px; font-size: 16px;'>Billing Address</h3>
+                                        <div style='background: #f9f9f9; padding: 15px; border-radius: 6px; font-size: 14px;'>
+                                            <p style='margin: 5px 0; color: #333;'><strong>{billingAddress.FirstName} {billingAddress.LastName}</strong></p>
+                                            <p style='margin: 5px 0; color: #666;'>{billingAddress.AddressLine1}</p>
+                                            {(string.IsNullOrEmpty(billingAddress.AddressLine2) ? "" : $"<p style='margin: 5px 0; color: #666;'>{billingAddress.AddressLine2}</p>")}
+                                            <p style='margin: 5px 0; color: #666;'>{billingAddress.City}, {billingAddress.PostalCode}</p>
+                                            <p style='margin: 5px 0; color: #666;'>{billingAddress.Country}</p>
+                                            <p style='margin: 5px 0; color: #666;'><strong>Phone:</strong> {billingAddress.PhoneNumber}</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Footer -->
+                        <div style='text-align: center; padding-top: 20px; border-top: 2px solid #eee;'>
+                            <p style='color: #666; font-size: 14px; line-height: 1.6;'>
+                                If you have any questions about your order, please contact us at <a href='mailto:{_fromEmail}' style='color: #8B4513;'>{_fromEmail}</a>
+                            </p>
+                            <p style='color: #333; margin-top: 20px; font-size: 16px;'>Best regards,<br/><span style='color: #8B4513; font-weight: bold;'>Brewed Team</span></p>
+                        </div>
                     </div>
                 </div>
             ";
 
-            await SendEmailAsync(email, subject, body);
+            await SendEmailAsync(orderDetails.User.Email, subject, body);
         }
 
         public async Task SendOrderStatusUpdateAsync(string email, string name, string orderNumber, string status)
@@ -167,6 +296,157 @@ namespace Brewed.Services
             ";
 
             await SendEmailAsync(adminEmail, subject, body);
+        }
+
+        public async Task SendInvoiceEmailAsync(OrderDto orderDetails)
+        {
+            var subject = $"Invoice {orderDetails.Invoice.InvoiceNumber} - Order {orderDetails.OrderNumber}";
+
+            // Build product items HTML
+            var itemsHtml = string.Join("", orderDetails.Items.Select(item => $@"
+                <tr>
+                    <td style='padding: 12px; border-bottom: 1px solid #eee;'>
+                        <div style='display: flex; align-items: center;'>
+                            {(string.IsNullOrEmpty(item.ProductImageUrl) ? "" : $"<img src='{item.ProductImageUrl}' alt='{item.ProductName}' style='width: 50px; height: 50px; object-fit: cover; border-radius: 4px; margin-right: 10px;' />")}
+                            <span style='color: #333;'>{item.ProductName}</span>
+                        </div>
+                    </td>
+                    <td style='padding: 12px; border-bottom: 1px solid #eee; text-align: center; color: #666;'>{item.Quantity}</td>
+                    <td style='padding: 12px; border-bottom: 1px solid #eee; text-align: right; color: #666;'>€{item.UnitPrice:N2}</td>
+                    <td style='padding: 12px; border-bottom: 1px solid #eee; text-align: right; color: #333; font-weight: 600;'>€{item.TotalPrice:N2}</td>
+                </tr>
+            "));
+
+            // Format addresses
+            var shippingAddress = orderDetails.ShippingAddress;
+            var billingAddress = orderDetails.BillingAddress ?? orderDetails.ShippingAddress;
+
+            var body = $@"
+                <div style='font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; background: linear-gradient(135deg, #D4A373 0%, #8B4513 100%); padding: 40px; border-radius: 10px;'>
+                    <div style='background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
+
+                        <!-- Header -->
+                        <div style='text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 3px solid #8B4513;'>
+                            <h1 style='color: #8B4513; margin: 0 0 10px 0; font-size: 32px;'>INVOICE</h1>
+                            <p style='color: #666; margin: 5px 0; font-size: 16px;'><strong>Invoice Number:</strong> {orderDetails.Invoice.InvoiceNumber}</p>
+                            <p style='color: #666; margin: 5px 0; font-size: 14px;'>Issue Date: {orderDetails.Invoice.IssueDate:MMMM dd, yyyy}</p>
+                        </div>
+
+                        <!-- Customer Info -->
+                        <div style='margin-bottom: 30px;'>
+                            <h3 style='color: #8B4513; margin-bottom: 10px;'>Hello {orderDetails.User.Name}!</h3>
+                            <p style='color: #666; line-height: 1.6;'>Thank you for your order! Please find your invoice details below.</p>
+                        </div>
+
+                        <!-- Order Summary -->
+                        <div style='background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 25px;'>
+                            <h3 style='color: #8B4513; margin-top: 0;'>Order Information</h3>
+                            <table style='width: 100%; border-collapse: collapse;'>
+                                <tr>
+                                    <td style='padding: 8px 0; color: #666;'><strong>Order Number:</strong></td>
+                                    <td style='padding: 8px 0; color: #333; text-align: right;'>{orderDetails.OrderNumber}</td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 8px 0; color: #666;'><strong>Order Date:</strong></td>
+                                    <td style='padding: 8px 0; color: #333; text-align: right;'>{orderDetails.OrderDate:MMMM dd, yyyy}</td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 8px 0; color: #666;'><strong>Payment Method:</strong></td>
+                                    <td style='padding: 8px 0; color: #333; text-align: right;'>{orderDetails.PaymentMethod}</td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 8px 0; color: #666;'><strong>Payment Status:</strong></td>
+                                    <td style='padding: 8px 0; color: #333; text-align: right;'>
+                                        <span style='background: {(orderDetails.PaymentStatus == "Paid" ? "#4CAF50" : "#FF9800")}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px;'>{orderDetails.PaymentStatus}</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Product Items -->
+                        <div style='margin-bottom: 25px;'>
+                            <h3 style='color: #8B4513; margin-bottom: 15px;'>Order Items</h3>
+                            <table style='width: 100%; border-collapse: collapse; border: 1px solid #eee; border-radius: 6px; overflow: hidden;'>
+                                <thead>
+                                    <tr style='background: linear-gradient(135deg, #D4A373 0%, #8B4513 100%);'>
+                                        <th style='padding: 12px; text-align: left; color: white; font-weight: 600;'>Product</th>
+                                        <th style='padding: 12px; text-align: center; color: white; font-weight: 600;'>Quantity</th>
+                                        <th style='padding: 12px; text-align: right; color: white; font-weight: 600;'>Unit Price</th>
+                                        <th style='padding: 12px; text-align: right; color: white; font-weight: 600;'>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {itemsHtml}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Totals -->
+                        <div style='background: #f9f9f9; padding: 20px; border-radius: 6px; margin-bottom: 25px;'>
+                            <table style='width: 100%; border-collapse: collapse;'>
+                                <tr>
+                                    <td style='padding: 8px 0; color: #666; font-size: 15px;'>Subtotal:</td>
+                                    <td style='padding: 8px 0; color: #333; text-align: right; font-size: 15px;'>€{orderDetails.SubTotal:N2}</td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 8px 0; color: #666; font-size: 15px;'>Shipping Cost:</td>
+                                    <td style='padding: 8px 0; color: #333; text-align: right; font-size: 15px;'>€{orderDetails.ShippingCost:N2}</td>
+                                </tr>
+                                {(orderDetails.Discount > 0 ? $@"
+                                <tr>
+                                    <td style='padding: 8px 0; color: #4CAF50; font-size: 15px;'>Discount {(string.IsNullOrEmpty(orderDetails.CouponCode) ? "" : $"({orderDetails.CouponCode})")}:</td>
+                                    <td style='padding: 8px 0; color: #4CAF50; text-align: right; font-size: 15px;'>-€{orderDetails.Discount:N2}</td>
+                                </tr>
+                                " : "")}
+                                <tr style='border-top: 2px solid #8B4513;'>
+                                    <td style='padding: 15px 0 0 0; color: #8B4513; font-size: 18px; font-weight: bold;'>Total Amount:</td>
+                                    <td style='padding: 15px 0 0 0; color: #8B4513; text-align: right; font-size: 20px; font-weight: bold;'>€{orderDetails.TotalAmount:N2}</td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Addresses -->
+                        <div style='margin-bottom: 25px;'>
+                            <table style='width: 100%; border-collapse: collapse;'>
+                                <tr>
+                                    <td style='width: 48%; vertical-align: top; padding-right: 2%;'>
+                                        <h3 style='color: #8B4513; margin-bottom: 10px; font-size: 16px;'>Shipping Address</h3>
+                                        <div style='background: #f9f9f9; padding: 15px; border-radius: 6px; font-size: 14px;'>
+                                            <p style='margin: 5px 0; color: #333;'><strong>{shippingAddress.FirstName} {shippingAddress.LastName}</strong></p>
+                                            <p style='margin: 5px 0; color: #666;'>{shippingAddress.AddressLine1}</p>
+                                            {(string.IsNullOrEmpty(shippingAddress.AddressLine2) ? "" : $"<p style='margin: 5px 0; color: #666;'>{shippingAddress.AddressLine2}</p>")}
+                                            <p style='margin: 5px 0; color: #666;'>{shippingAddress.City}, {shippingAddress.PostalCode}</p>
+                                            <p style='margin: 5px 0; color: #666;'>{shippingAddress.Country}</p>
+                                            <p style='margin: 5px 0; color: #666;'><strong>Phone:</strong> {shippingAddress.PhoneNumber}</p>
+                                        </div>
+                                    </td>
+                                    <td style='width: 48%; vertical-align: top; padding-left: 2%;'>
+                                        <h3 style='color: #8B4513; margin-bottom: 10px; font-size: 16px;'>Billing Address</h3>
+                                        <div style='background: #f9f9f9; padding: 15px; border-radius: 6px; font-size: 14px;'>
+                                            <p style='margin: 5px 0; color: #333;'><strong>{billingAddress.FirstName} {billingAddress.LastName}</strong></p>
+                                            <p style='margin: 5px 0; color: #666;'>{billingAddress.AddressLine1}</p>
+                                            {(string.IsNullOrEmpty(billingAddress.AddressLine2) ? "" : $"<p style='margin: 5px 0; color: #666;'>{billingAddress.AddressLine2}</p>")}
+                                            <p style='margin: 5px 0; color: #666;'>{billingAddress.City}, {billingAddress.PostalCode}</p>
+                                            <p style='margin: 5px 0; color: #666;'>{billingAddress.Country}</p>
+                                            <p style='margin: 5px 0; color: #666;'><strong>Phone:</strong> {billingAddress.PhoneNumber}</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Footer -->
+                        <div style='text-align: center; padding-top: 20px; border-top: 2px solid #eee;'>
+                            <p style='color: #666; font-size: 14px; line-height: 1.6;'>
+                                If you have any questions about this invoice, please contact us at <a href='mailto:{_fromEmail}' style='color: #8B4513;'>{_fromEmail}</a>
+                            </p>
+                            <p style='color: #333; margin-top: 20px; font-size: 16px;'>Best regards,<br/><span style='color: #8B4513; font-weight: bold;'>Brewed Team</span></p>
+                        </div>
+                    </div>
+                </div>
+            ";
+
+            await SendEmailAsync(orderDetails.User.Email, subject, body);
         }
     }
 }

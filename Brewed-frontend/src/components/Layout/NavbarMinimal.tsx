@@ -39,7 +39,7 @@ function NavbarLink({ icon: Icon, label, color, active, onClick }: NavbarLinkPro
         variant="light"
         color={color}
         className={classes.iconButton}
-        style={{ width: rem(40), height: rem(40) }}
+        style={{ width: rem(40), height: rem(35) }}
       >
         <Icon className={classes.linkIcon} style={{ width: rem(25), height: rem(25) }} stroke={1.8} />
       </Button>
@@ -91,7 +91,7 @@ export function NavbarMinimal({ toggle }: any) {
       icon: IconPackage,
       label: "Orders",
       url: "orders",
-      roles: ['RegisteredUser']
+      roles: ['Admin','RegisteredUser']
     },
     {
       icon: IconClipboardList,

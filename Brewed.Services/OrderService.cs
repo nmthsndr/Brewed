@@ -10,11 +10,12 @@ namespace Brewed.Services
     {
         Task<List<OrderDto>> GetUserOrdersAsync(int userId);
         Task<OrderDto> GetOrderByIdAsync(int orderId, int userId, bool isAdmin = false);
-        Task<OrderDto> CreateOrderAsync(int userId, OrderCreateDto orderDto);
+        Task<OrderDto> CreateOrderAsync(int userId, OrderCreateDto orderCreateDto);
         Task<OrderDto> CancelOrderAsync(int orderId, int userId);
         Task<PaginatedResultDto<OrderDto>> GetAllOrdersAsync(string status, int page, int pageSize);
         Task<OrderDto> UpdateOrderStatusAsync(int orderId, OrderStatusUpdateDto statusDto);
         Task<InvoiceDto> GetInvoiceAsync(int orderId, int userId, bool isAdmin = false);
+        Task<InvoiceDto> GenerateInvoiceAsync(int orderId);
         Task<bool> HasUserPurchasedProductAsync(int userId, int productId);
     }
 
@@ -25,10 +26,12 @@ namespace Brewed.Services
         private readonly ICouponService _couponService;
         private readonly IEmailService _emailService;
 
-        public OrderService(BrewedDbContext context, IMapper mapper)
+        public OrderService(BrewedDbContext context, IMapper mapper, ICouponService couponService, IEmailService emailService)
         {
             _context = context;
             _mapper = mapper;
+            _couponService = couponService;
+            _emailService = emailService;
         }
 
         public async Task<List<OrderDto>> GetUserOrdersAsync(int userId)
@@ -39,6 +42,7 @@ namespace Brewed.Services
                 .Include(o => o.ShippingAddress)
                 .Include(o => o.BillingAddress)
                 .Include(o => o.Invoice)
+                .Include(o => o.User)
                 .Where(o => o.UserId == userId)
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
@@ -54,6 +58,7 @@ namespace Brewed.Services
                 .Include(o => o.ShippingAddress)
                 .Include(o => o.BillingAddress)
                 .Include(o => o.Invoice)
+                .Include(o => o.User)
                 .FirstOrDefaultAsync(o => o.Id == orderId);
 
             if (order == null)
@@ -69,7 +74,7 @@ namespace Brewed.Services
             return MapOrderToDto(order);
         }
 
-        public async Task<OrderDto> CreateOrderAsync(int userId, OrderCreateDto orderDto)
+        public async Task<OrderDto> CreateOrderAsync(int userId, OrderCreateDto orderCreateDto)
         {
             var cart = await _context.Carts
                 .Include(c => c.CartItems)
@@ -81,16 +86,16 @@ namespace Brewed.Services
                 throw new Exception("Cart is empty");
             }
 
-            var shippingAddress = await _context.Addresses.FindAsync(orderDto.ShippingAddressId);
+            var shippingAddress = await _context.Addresses.FindAsync(orderCreateDto.ShippingAddressId);
             if (shippingAddress == null || shippingAddress.UserId != userId)
             {
                 throw new KeyNotFoundException("Shipping address not found");
             }
 
             Address billingAddress = null;
-            if (orderDto.BillingAddressId.HasValue)
+            if (orderCreateDto.BillingAddressId.HasValue)
             {
-                billingAddress = await _context.Addresses.FindAsync(orderDto.BillingAddressId.Value);
+                billingAddress = await _context.Addresses.FindAsync(orderCreateDto.BillingAddressId.Value);
                 if (billingAddress == null || billingAddress.UserId != userId)
                 {
                     throw new KeyNotFoundException("Billing address not found");
@@ -111,9 +116,9 @@ namespace Brewed.Services
             var discount = 0m;
 
             // Apply coupon if provided
-            if (!string.IsNullOrEmpty(orderDto.CouponCode))
+            if (!string.IsNullOrEmpty(orderCreateDto.CouponCode))
             {
-                discount = await ApplyCouponAsync(orderDto.CouponCode, subTotal);
+                discount = await ApplyCouponAsync(orderCreateDto.CouponCode, subTotal);
             }
 
             var totalAmount = subTotal + shippingCost - discount;
@@ -126,11 +131,11 @@ namespace Brewed.Services
                 ShippingCost = shippingCost,
                 Discount = discount,
                 TotalAmount = totalAmount,
-                CouponCode = orderDto.CouponCode,
-                PaymentMethod = orderDto.PaymentMethod,
-                Notes = orderDto.Notes,
-                ShippingAddressId = orderDto.ShippingAddressId,
-                BillingAddressId = orderDto.BillingAddressId ?? orderDto.ShippingAddressId,
+                CouponCode = orderCreateDto.CouponCode,
+                PaymentMethod = orderCreateDto.PaymentMethod,
+                Notes = orderCreateDto.Notes,
+                ShippingAddressId = orderCreateDto.ShippingAddressId,
+                BillingAddressId = orderCreateDto.BillingAddressId ?? orderCreateDto.ShippingAddressId,
                 OrderItems = cart.CartItems.Select(ci => new OrderItem
                 {
                     ProductId = ci.ProductId,
@@ -152,25 +157,14 @@ namespace Brewed.Services
             // Clear cart
             _context.CartItems.RemoveRange(cart.CartItems);
 
-            // Save order first to get the generated ID
+            // Save order
             await _context.SaveChangesAsync();
 
-            // Create invoice with the saved order's ID
-            var invoice = new Invoice
-            {
-                InvoiceNumber = GenerateInvoiceNumber(),
-                OrderId = order.Id,
-                TotalAmount = totalAmount,
-                PdfUrl = string.Empty // Will be generated later
-            };
-            await _context.Invoices.AddAsync(invoice);
-            await _context.SaveChangesAsync();
+            // Send order confirmation email
+            var orderDto = await GetOrderByIdAsync(order.Id, userId);
+            await _emailService.SendOrderConfirmationAsync(orderDto);
 
-            // After saving order and invoice
-            var user = await _context.Users.FindAsync(userId);
-            await _emailService.SendOrderConfirmationAsync(user.Email, user.Name, order.OrderNumber, order.TotalAmount);
-
-            return await GetOrderByIdAsync(order.Id, userId);
+            return orderDto;
         }
 
         public async Task<OrderDto> CancelOrderAsync(int orderId, int userId)
@@ -250,11 +244,19 @@ namespace Brewed.Services
 
         public async Task<OrderDto> UpdateOrderStatusAsync(int orderId, OrderStatusUpdateDto statusDto)
         {
-            var order = await _context.Orders.FindAsync(orderId);
+            var order = await _context.Orders
+                .Include(o => o.Invoice)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
 
             if (order == null)
             {
                 throw new KeyNotFoundException("Order not found");
+            }
+
+            // Check if invoice exists before allowing Shipped or Delivered status
+            if ((statusDto.Status == "Shipped" || statusDto.Status == "Delivered") && order.Invoice == null)
+            {
+                throw new InvalidOperationException("Cannot ship or deliver order without generating an invoice first. Please generate invoice before updating status.");
             }
 
             order.Status = statusDto.Status;
@@ -367,17 +369,52 @@ namespace Brewed.Services
             return 10;
         }
 
-
-        public OrderService(BrewedDbContext context, IMapper mapper, ICouponService couponService, IEmailService emailService)
-        {
-            _context = context;
-            _mapper = mapper;
-            _couponService = couponService;
-            _emailService = emailService;
-        }
         private async Task<decimal> ApplyCouponAsync(string couponCode, decimal orderAmount)
         {
             return await _couponService.ApplyCouponAsync(couponCode, orderAmount);
+        }
+
+        public async Task<InvoiceDto> GenerateInvoiceAsync(int orderId)
+        {
+            var order = await _context.Orders
+                .Include(o => o.Invoice)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null)
+            {
+                throw new KeyNotFoundException("Order not found");
+            }
+
+            // Check if invoice already exists
+            if (order.Invoice != null)
+            {
+                throw new InvalidOperationException("Invoice already exists for this order");
+            }
+
+            // Create new invoice
+            var invoice = new Invoice
+            {
+                InvoiceNumber = GenerateInvoiceNumber(),
+                OrderId = order.Id,
+                TotalAmount = order.TotalAmount,
+                PdfUrl = string.Empty // Will be generated later
+            };
+
+            await _context.Invoices.AddAsync(invoice);
+            await _context.SaveChangesAsync();
+
+            // Send invoice email
+            var orderDto = await GetOrderByIdAsync(orderId, order.UserId, true);
+            await _emailService.SendInvoiceEmailAsync(orderDto);
+
+            return new InvoiceDto
+            {
+                Id = invoice.Id,
+                InvoiceNumber = invoice.InvoiceNumber,
+                IssueDate = invoice.IssueDate,
+                TotalAmount = invoice.TotalAmount,
+                PdfUrl = invoice.PdfUrl
+            };
         }
 
         public async Task<bool> HasUserPurchasedProductAsync(int userId, int productId)
