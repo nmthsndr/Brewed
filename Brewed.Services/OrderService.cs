@@ -10,7 +10,7 @@ namespace Brewed.Services
     {
         Task<List<OrderDto>> GetUserOrdersAsync(int userId);
         Task<OrderDto> GetOrderByIdAsync(int orderId, int userId, bool isAdmin = false);
-        Task<OrderDto> CreateOrderAsync(int userId, OrderCreateDto orderDto);
+        Task<OrderDto> CreateOrderAsync(int userId, OrderCreateDto orderCreateDto);
         Task<OrderDto> CancelOrderAsync(int orderId, int userId);
         Task<PaginatedResultDto<OrderDto>> GetAllOrdersAsync(string status, int page, int pageSize);
         Task<OrderDto> UpdateOrderStatusAsync(int orderId, OrderStatusUpdateDto statusDto);
@@ -41,6 +41,7 @@ namespace Brewed.Services
                 .Include(o => o.ShippingAddress)
                 .Include(o => o.BillingAddress)
                 .Include(o => o.Invoice)
+                .Include(o => o.User)
                 .Where(o => o.UserId == userId)
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
@@ -56,6 +57,7 @@ namespace Brewed.Services
                 .Include(o => o.ShippingAddress)
                 .Include(o => o.BillingAddress)
                 .Include(o => o.Invoice)
+                .Include(o => o.User)
                 .FirstOrDefaultAsync(o => o.Id == orderId);
 
             if (order == null)
@@ -71,7 +73,7 @@ namespace Brewed.Services
             return MapOrderToDto(order);
         }
 
-        public async Task<OrderDto> CreateOrderAsync(int userId, OrderCreateDto orderDto)
+        public async Task<OrderDto> CreateOrderAsync(int userId, OrderCreateDto orderCreateDto)
         {
             var cart = await _context.Carts
                 .Include(c => c.CartItems)
@@ -83,16 +85,16 @@ namespace Brewed.Services
                 throw new Exception("Cart is empty");
             }
 
-            var shippingAddress = await _context.Addresses.FindAsync(orderDto.ShippingAddressId);
+            var shippingAddress = await _context.Addresses.FindAsync(orderCreateDto.ShippingAddressId);
             if (shippingAddress == null || shippingAddress.UserId != userId)
             {
                 throw new KeyNotFoundException("Shipping address not found");
             }
 
             Address billingAddress = null;
-            if (orderDto.BillingAddressId.HasValue)
+            if (orderCreateDto.BillingAddressId.HasValue)
             {
-                billingAddress = await _context.Addresses.FindAsync(orderDto.BillingAddressId.Value);
+                billingAddress = await _context.Addresses.FindAsync(orderCreateDto.BillingAddressId.Value);
                 if (billingAddress == null || billingAddress.UserId != userId)
                 {
                     throw new KeyNotFoundException("Billing address not found");
@@ -113,9 +115,9 @@ namespace Brewed.Services
             var discount = 0m;
 
             // Apply coupon if provided
-            if (!string.IsNullOrEmpty(orderDto.CouponCode))
+            if (!string.IsNullOrEmpty(orderCreateDto.CouponCode))
             {
-                discount = await ApplyCouponAsync(orderDto.CouponCode, subTotal);
+                discount = await ApplyCouponAsync(orderCreateDto.CouponCode, subTotal);
             }
 
             var totalAmount = subTotal + shippingCost - discount;
@@ -128,11 +130,11 @@ namespace Brewed.Services
                 ShippingCost = shippingCost,
                 Discount = discount,
                 TotalAmount = totalAmount,
-                CouponCode = orderDto.CouponCode,
-                PaymentMethod = orderDto.PaymentMethod,
-                Notes = orderDto.Notes,
-                ShippingAddressId = orderDto.ShippingAddressId,
-                BillingAddressId = orderDto.BillingAddressId ?? orderDto.ShippingAddressId,
+                CouponCode = orderCreateDto.CouponCode,
+                PaymentMethod = orderCreateDto.PaymentMethod,
+                Notes = orderCreateDto.Notes,
+                ShippingAddressId = orderCreateDto.ShippingAddressId,
+                BillingAddressId = orderCreateDto.BillingAddressId ?? orderCreateDto.ShippingAddressId,
                 OrderItems = cart.CartItems.Select(ci => new OrderItem
                 {
                     ProductId = ci.ProductId,
