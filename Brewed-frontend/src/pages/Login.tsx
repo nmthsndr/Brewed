@@ -133,6 +133,18 @@ const Login = () => {
               Don't have an account? Register
             </Anchor>
           </Group>
+
+          <Group justify="center" mt="md">
+            <Anchor
+              component="button"
+              type="button"
+              onClick={() => navigate('/app/dashboard')}
+              size="sm"
+              c="dimmed"
+            >
+              ← Back to Dashboard
+            </Anchor>
+          </Group>
         </form>
       </div>
     </AuthContainer>

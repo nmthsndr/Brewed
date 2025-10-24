@@ -165,6 +165,8 @@ const Orders = {
     axiosInstance.get<IOrder>(`/api/orders/${id}`),
   createOrder: (orderData: OrderCreateDto) =>
     axiosInstance.post<IOrder>(`/api/orders`, orderData),
+  createGuestOrder: (guestOrderData: any) =>
+    axiosInstance.post<IOrder>(`/api/orders/guest`, guestOrderData),
   cancelOrder: (id: number) =>
     axiosInstance.post<IOrder>(`/api/orders/${id}/cancel`),
   getAllOrders: (status?: string, page?: number, pageSize?: number) =>

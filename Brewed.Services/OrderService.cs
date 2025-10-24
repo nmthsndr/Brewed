@@ -11,6 +11,7 @@ namespace Brewed.Services
         Task<List<OrderDto>> GetUserOrdersAsync(int userId);
         Task<OrderDto> GetOrderByIdAsync(int orderId, int userId, bool isAdmin = false);
         Task<OrderDto> CreateOrderAsync(int userId, OrderCreateDto orderCreateDto);
+        Task<OrderDto> CreateGuestOrderAsync(GuestOrderCreateDto guestOrderCreateDto);
         Task<OrderDto> CancelOrderAsync(int orderId, int userId);
         Task<PaginatedResultDto<OrderDto>> GetAllOrdersAsync(string status, int page, int pageSize);
         Task<OrderDto> UpdateOrderStatusAsync(int orderId, OrderStatusUpdateDto statusDto);
@@ -162,6 +163,97 @@ namespace Brewed.Services
 
             // Send order confirmation email
             var orderDto = await GetOrderByIdAsync(order.Id, userId);
+            await _emailService.SendOrderConfirmationAsync(orderDto);
+
+            return orderDto;
+        }
+
+        public async Task<OrderDto> CreateGuestOrderAsync(GuestOrderCreateDto guestOrderCreateDto)
+        {
+            // Get guest cart
+            var cart = await _context.Carts
+                .Include(c => c.CartItems)
+                .ThenInclude(ci => ci.Product)
+                .FirstOrDefaultAsync(c => c.GuestSessionId == guestOrderCreateDto.SessionId);
+
+            if (cart == null || !cart.CartItems.Any())
+            {
+                throw new Exception("Cart is empty");
+            }
+
+            // Check stock availability
+            foreach (var cartItem in cart.CartItems)
+            {
+                if (cartItem.Product.StockQuantity < cartItem.Quantity)
+                {
+                    throw new Exception($"Insufficient stock for product: {cartItem.Product.Name}");
+                }
+            }
+
+            var subTotal = cart.CartItems.Sum(ci => ci.Price * ci.Quantity);
+            var shippingCost = CalculateShippingCost(subTotal);
+            var discount = 0m;
+
+            // Apply coupon if provided
+            if (!string.IsNullOrEmpty(guestOrderCreateDto.CouponCode))
+            {
+                discount = await ApplyCouponAsync(guestOrderCreateDto.CouponCode, subTotal);
+            }
+
+            var totalAmount = subTotal + shippingCost - discount;
+
+            // Serialize guest addresses to JSON for storage
+            var shippingAddressJson = System.Text.Json.JsonSerializer.Serialize(guestOrderCreateDto.ShippingAddress);
+            var billingAddressJson = System.Text.Json.JsonSerializer.Serialize(guestOrderCreateDto.BillingAddress);
+
+            var order = new Order
+            {
+                OrderNumber = GenerateOrderNumber(),
+                UserId = null, // Guest order - no user ID
+                SubTotal = subTotal,
+                ShippingCost = shippingCost,
+                Discount = discount,
+                TotalAmount = totalAmount,
+                CouponCode = guestOrderCreateDto.CouponCode,
+                PaymentMethod = guestOrderCreateDto.PaymentMethod,
+                Notes = guestOrderCreateDto.Notes,
+                GuestEmail = guestOrderCreateDto.Email,
+                GuestShippingAddress = shippingAddressJson,
+                GuestBillingAddress = billingAddressJson,
+                ShippingAddressId = null,
+                BillingAddressId = null,
+                OrderItems = cart.CartItems.Select(ci => new OrderItem
+                {
+                    ProductId = ci.ProductId,
+                    Quantity = ci.Quantity,
+                    UnitPrice = ci.Price,
+                    TotalPrice = ci.Price * ci.Quantity
+                }).ToList()
+            };
+
+            await _context.Orders.AddAsync(order);
+
+            // Update stock
+            foreach (var cartItem in cart.CartItems)
+            {
+                cartItem.Product.StockQuantity -= cartItem.Quantity;
+                _context.Products.Update(cartItem.Product);
+            }
+
+            // Clear cart
+            _context.CartItems.RemoveRange(cart.CartItems);
+
+            // Save order
+            await _context.SaveChangesAsync();
+
+            // Reload order with items for email
+            var savedOrder = await _context.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .FirstOrDefaultAsync(o => o.Id == order.Id);
+
+            // Send order confirmation email to guest
+            var orderDto = MapGuestOrderToDto(savedOrder, guestOrderCreateDto);
             await _emailService.SendOrderConfirmationAsync(orderDto);
 
             return orderDto;
@@ -350,6 +442,67 @@ namespace Brewed.Services
                     Name = order.User.Name,
                     Email = order.User.Email
                 } : null
+            };
+        }
+
+        private OrderDto MapGuestOrderToDto(Order order, GuestOrderCreateDto guestOrderDto)
+        {
+            return new OrderDto
+            {
+                Id = order.Id,
+                OrderNumber = order.OrderNumber,
+                SubTotal = order.SubTotal,
+                ShippingCost = order.ShippingCost,
+                Discount = order.Discount,
+                TotalAmount = order.TotalAmount,
+                CouponCode = order.CouponCode,
+                OrderDate = order.OrderDate,
+                Status = order.Status,
+                PaymentMethod = order.PaymentMethod,
+                PaymentStatus = order.PaymentStatus,
+                ShippedAt = order.ShippedAt,
+                DeliveredAt = order.DeliveredAt,
+                ShippingAddress = new AddressDto
+                {
+                    FirstName = guestOrderDto.ShippingAddress.FirstName,
+                    LastName = guestOrderDto.ShippingAddress.LastName,
+                    AddressLine1 = guestOrderDto.ShippingAddress.AddressLine1,
+                    AddressLine2 = guestOrderDto.ShippingAddress.AddressLine2,
+                    City = guestOrderDto.ShippingAddress.City,
+                    PostalCode = guestOrderDto.ShippingAddress.PostalCode,
+                    Country = guestOrderDto.ShippingAddress.Country,
+                    PhoneNumber = guestOrderDto.ShippingAddress.PhoneNumber,
+                    AddressType = "Shipping"
+                },
+                BillingAddress = new AddressDto
+                {
+                    FirstName = guestOrderDto.BillingAddress.FirstName,
+                    LastName = guestOrderDto.BillingAddress.LastName,
+                    AddressLine1 = guestOrderDto.BillingAddress.AddressLine1,
+                    AddressLine2 = guestOrderDto.BillingAddress.AddressLine2,
+                    City = guestOrderDto.BillingAddress.City,
+                    PostalCode = guestOrderDto.BillingAddress.PostalCode,
+                    Country = guestOrderDto.BillingAddress.Country,
+                    PhoneNumber = guestOrderDto.BillingAddress.PhoneNumber,
+                    AddressType = "Billing"
+                },
+                Items = order.OrderItems.Select(oi => new OrderItemDto
+                {
+                    Id = oi.Id,
+                    ProductId = oi.Product.Id,
+                    ProductName = oi.Product.Name,
+                    ProductImageUrl = oi.Product.ImageUrl,
+                    Quantity = oi.Quantity,
+                    UnitPrice = oi.UnitPrice,
+                    TotalPrice = oi.TotalPrice
+                }).ToList(),
+                Invoice = null,
+                User = new OrderUserDto
+                {
+                    Id = 0,
+                    Name = $"{guestOrderDto.ShippingAddress.FirstName} {guestOrderDto.ShippingAddress.LastName}",
+                    Email = guestOrderDto.Email
+                }
             };
         }
 

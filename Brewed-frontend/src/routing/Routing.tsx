@@ -40,9 +40,9 @@ const Routing = () => {
         <Route path="products" element={<Products />} />
         <Route path="products/:id" element={<ProductDetail />} />
         <Route path="cart" element={<Cart />} />
+        <Route path="checkout" element={<Checkout />} />
 
         {/* Protected pages - require login */}
-        <Route path="checkout" element={isLoggedIn ? <Checkout /> : <Navigate to="/login" />} />
         <Route path="orders" element={isLoggedIn ? <Orders /> : <Navigate to="/login" />} />
         <Route path="profile" element={isLoggedIn ? <Profile /> : <Navigate to="/login" />} />
 
