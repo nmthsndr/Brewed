@@ -21,6 +21,8 @@ import { IProduct } from "../interfaces/IProduct";
 import { ICategory } from "../interfaces/ICategory";
 import ProductCard from "../components/ProductCard";
 import { notifications } from "@mantine/notifications";
+import useAuth from "../hooks/useAuth";
+import { getGuestSessionId } from "../utils/guestSession";
 
 const Products = () => {
   const [products, setProducts] = useState<IProduct[]>([]);
@@ -30,6 +32,7 @@ const Products = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch] = useDebouncedValue(searchQuery, 500);
+  const { isLoggedIn } = useAuth();
 
   const [filters, setFilters] = useState<ProductFilterDto>({
     page: 1,
@@ -78,7 +81,8 @@ const Products = () => {
 
   const handleAddToCart = async (productId: number) => {
     try {
-      await api.Cart.addToCart({ productId, quantity: 1 });
+      const sessionId = isLoggedIn ? undefined : getGuestSessionId();
+      await api.Cart.addToCart({ productId, quantity: 1 }, sessionId);
       notifications.show({
         title: 'Success',
         message: 'Product added to cart',

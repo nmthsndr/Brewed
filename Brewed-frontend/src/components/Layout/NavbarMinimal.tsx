@@ -12,7 +12,8 @@ import {
   IconCategory,
   IconUsers,
   IconChartBar,
-  IconClipboardList
+  IconClipboardList,
+  IconLogin
 } from "@tabler/icons-react";
 import classes from "./NavbarMinimalColored.module.css";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -54,20 +55,20 @@ export function NavbarMinimal({ toggle }: any) {
   const [active, setActive] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout, role } = useAuth();
+  const { logout, role, isLoggedIn } = useAuth();
 
   const menuItems = [
     {
       icon: IconHome,
       label: "Dashboard",
       url: "dashboard",
-      roles: ['Admin', 'RegisteredUser']
+      roles: ['Admin', 'RegisteredUser', 'Guest']
     },
     {
       icon: IconShoppingBag,
       label: "Products",
       url: "products",
-      roles: ['Admin', 'RegisteredUser']
+      roles: ['Admin', 'RegisteredUser', 'Guest']
     },
     {
       icon: IconCategory,
@@ -85,7 +86,7 @@ export function NavbarMinimal({ toggle }: any) {
       icon: IconShoppingCart,
       label: "Cart",
       url: "cart",
-      roles: ['Admin', 'RegisteredUser']
+      roles: ['Admin', 'RegisteredUser', 'Guest']
     },
     {
       icon: IconPackage,
@@ -132,12 +133,14 @@ export function NavbarMinimal({ toggle }: any) {
 
   useEffect(() => {
     const currentPath = location.pathname.split('/').pop() || '';
-    const filteredItems = menuItems.filter(item => role && item.roles.includes(role));
+    const effectiveRole = isLoggedIn ? role : 'Guest';
+    const filteredItems = menuItems.filter(item => effectiveRole && item.roles.includes(effectiveRole));
     setActive(filteredItems.findIndex(m => currentPath === m.url));
-  }, [location.pathname, role]);
+  }, [location.pathname, role, isLoggedIn]);
 
+  const effectiveRole = isLoggedIn ? role : 'Guest';
   const links = menuItems
-    .filter(item => role && item.roles.includes(role))
+    .filter(item => effectiveRole && item.roles.includes(effectiveRole))
     .map((link, index) => (
       <NavbarLink
         color="blue"
@@ -159,22 +162,36 @@ export function NavbarMinimal({ toggle }: any) {
           {links}
         </div>
         <div className={classes.footer}>
-          <NavbarLink
-            active={location.pathname.endsWith('profile')}
-            icon={IconUserCircle}
-            label="Profile"
-            onClick={() => {
-              navigate("profile");
-              if (isMobile) toggle();
-            }}
-            color="blue"
-          />
-          <NavbarLink
-            icon={IconLogout}
-            label="Logout"
-            onClick={onLogout}
-            color="red"
-          />
+          {isLoggedIn ? (
+            <>
+              <NavbarLink
+                active={location.pathname.endsWith('profile')}
+                icon={IconUserCircle}
+                label="Profile"
+                onClick={() => {
+                  navigate("profile");
+                  if (isMobile) toggle();
+                }}
+                color="blue"
+              />
+              <NavbarLink
+                icon={IconLogout}
+                label="Logout"
+                onClick={onLogout}
+                color="red"
+              />
+            </>
+          ) : (
+            <NavbarLink
+              icon={IconLogin}
+              label="Login"
+              onClick={() => {
+                navigate("/login");
+                if (isMobile) toggle();
+              }}
+              color="blue"
+            />
+          )}
         </div>
       </div>
     </nav>

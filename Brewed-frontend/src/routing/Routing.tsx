@@ -33,16 +33,19 @@ const Routing = () => {
       <Route path="/reset-password" element={!isLoggedIn ? <ResetPassword /> : <Navigate to="/app/dashboard" />} />
       <Route path="/confirm-email" element={<ConfirmEmail />} />
 
-      {/* Protected Routes */}
-      <Route path="/app" element={isLoggedIn ? <BasicLayout /> : <Navigate to="/login" />}>
+      {/* App Routes - Accessible to both guests and logged-in users */}
+      <Route path="/app" element={<BasicLayout />}>
+        {/* Public pages - accessible to guests */}
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="products" element={<Products />} />
         <Route path="products/:id" element={<ProductDetail />} />
         <Route path="cart" element={<Cart />} />
-        <Route path="checkout" element={<Checkout />} />
-        <Route path="orders" element={<Orders />} />
-        <Route path="profile" element={<Profile />} />
-        
+
+        {/* Protected pages - require login */}
+        <Route path="checkout" element={isLoggedIn ? <Checkout /> : <Navigate to="/login" />} />
+        <Route path="orders" element={isLoggedIn ? <Orders /> : <Navigate to="/login" />} />
+        <Route path="profile" element={isLoggedIn ? <Profile /> : <Navigate to="/login" />} />
+
         {/* Admin Only Routes */}
         {role === 'Admin' && (
           <>
@@ -57,9 +60,9 @@ const Routing = () => {
         )}
       </Route>
 
-      {/* Default Route */}
-      <Route path="/" element={<Navigate to={isLoggedIn ? "/app/dashboard" : "/login"} />} />
-      <Route path="*" element={<Navigate to={isLoggedIn ? "/app/dashboard" : "/login"} />} />
+      {/* Default Route - always redirect to dashboard */}
+      <Route path="/" element={<Navigate to="/app/dashboard" />} />
+      <Route path="*" element={<Navigate to="/app/dashboard" />} />
     </Routes>
   );
 };

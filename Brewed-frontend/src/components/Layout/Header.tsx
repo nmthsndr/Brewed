@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import UserMenuDropdown from "./UserMenuDropdown";
 import api from "../../api/api";
 import useAuth from "../../hooks/useAuth";
+import { getGuestSessionId } from "../../utils/guestSession";
 
 const Header = ({ opened, toggle }: any) => {
   const navigate = useNavigate();
@@ -12,13 +13,13 @@ const Header = ({ opened, toggle }: any) => {
   const [cartItemCount, setCartItemCount] = useState(0);
 
   const loadCartCount = async () => {
-    if (isLoggedIn) {
-      try {
-        const response = await api.Cart.getCart();
-        setCartItemCount(response.data.totalItems);
-      } catch (error) {
-        console.error("Failed to load cart count:", error);
-      }
+    try {
+      const sessionId = isLoggedIn ? undefined : getGuestSessionId();
+      const response = await api.Cart.getCart(sessionId);
+      setCartItemCount(response.data.totalItems);
+    } catch (error) {
+      console.error("Failed to load cart count:", error);
+      setCartItemCount(0);
     }
   };
 

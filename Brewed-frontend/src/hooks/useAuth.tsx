@@ -3,6 +3,7 @@ import { AuthContext } from "../context/AuthContext";
 import { emailKeyName, roleKeyName, tokenKeyName, userIdKeyName, roleTokenKey, emailTokenKey, userIdTokenKey } from "../constants/constants";
 import api from "../api/api";
 import { jwtDecode } from "jwt-decode";
+import { clearGuestSession } from "../utils/guestSession";
 
 const useAuth = () => {
   const { token, setToken, email, setEmail, role, setRole, userId, setUserId } = useContext(AuthContext);
@@ -42,7 +43,11 @@ const useAuth = () => {
       localStorage.setItem(userIdKeyName, id);
       
       console.log("All data saved to localStorage");
-      
+
+      // Clear guest session after successful login
+      clearGuestSession();
+      console.log("Guest session cleared after login");
+
       return true;
     } catch (error) {
       console.error("Login failed:", error);

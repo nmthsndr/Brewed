@@ -27,6 +27,7 @@ import { IReview } from "../interfaces/IReview";
 import ReviewCard from "../components/ReviewCard";
 import { notifications } from "@mantine/notifications";
 import useAuth from "../hooks/useAuth";
+import { getGuestSessionId } from "../utils/guestSession";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -146,7 +147,8 @@ const ProductDetail = () => {
     if (!product) return;
 
     try {
-      await api.Cart.addToCart({ productId: product.id, quantity });
+      const sessionId = isLoggedIn ? undefined : getGuestSessionId();
+      await api.Cart.addToCart({ productId: product.id, quantity }, sessionId);
       notifications.show({
         title: 'Success',
         message: `${quantity} ${product.name} added to cart`,
