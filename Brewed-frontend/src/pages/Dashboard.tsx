@@ -10,17 +10,20 @@ import {
   LoadingOverlay,
   Button
 } from "@mantine/core";
-import { IconShoppingBag, IconShoppingCart, IconPackage } from "@tabler/icons-react";
+import { IconShoppingBag, IconShoppingCart, IconPackage, IconLogin } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import { IProduct } from "../interfaces/IProduct";
 import ProductCard from "../components/ProductCard";
 import { notifications } from "@mantine/notifications";
+import useAuth from "../hooks/useAuth";
+import { getGuestSessionId } from "../utils/guestSession";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [featuredProducts, setFeaturedProducts] = useState<IProduct[]>([]);
   const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
 
   useEffect(() => {
     const loadData = async () => {
@@ -45,7 +48,8 @@ const Dashboard = () => {
 
   const handleAddToCart = async (productId: number) => {
     try {
-      await api.Cart.addToCart({ productId, quantity: 1 });
+      const sessionId = isLoggedIn ? undefined : getGuestSessionId();
+      await api.Cart.addToCart({ productId, quantity: 1 }, sessionId);
       notifications.show({
         title: 'Success',
         message: 'Product added to cart',
@@ -91,17 +95,31 @@ const Dashboard = () => {
           </Group>
         </Paper>
 
-        <Paper withBorder p="md" radius="md" style={{ cursor: 'pointer' }} onClick={() => navigate('/app/orders')}>
-          <Group>
-            <IconPackage size={40} color="#228be6" />
-            <div>
-              <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
-                Track
-              </Text>
-              <Text fw={700} size="xl">Orders</Text>
-            </div>
-          </Group>
-        </Paper>
+        {isLoggedIn ? (
+          <Paper withBorder p="md" radius="md" style={{ cursor: 'pointer' }} onClick={() => navigate('/app/orders')}>
+            <Group>
+              <IconPackage size={40} color="#228be6" />
+              <div>
+                <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
+                  Track
+                </Text>
+                <Text fw={700} size="xl">Orders</Text>
+              </div>
+            </Group>
+          </Paper>
+        ) : (
+          <Paper withBorder p="md" radius="md" style={{ cursor: 'pointer' }} onClick={() => navigate('/login')}>
+            <Group>
+              <IconLogin size={40} color="#228be6" />
+              <div>
+                <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
+                  Sign In
+                </Text>
+                <Text fw={700} size="xl">Login</Text>
+              </div>
+            </Group>
+          </Paper>
+        )}
       </SimpleGrid>
 
       <Group justify="space-between" mb="md">

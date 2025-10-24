@@ -19,16 +19,20 @@ import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import { ICart } from "../interfaces/ICart";
 import { notifications } from "@mantine/notifications";
+import useAuth from "../hooks/useAuth";
+import { getGuestSessionId } from "../utils/guestSession";
 
 const Cart = () => {
   const [cart, setCart] = useState<ICart | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
 
   const loadCart = async () => {
     try {
       setLoading(true);
-      const response = await api.Cart.getCart();
+      const sessionId = isLoggedIn ? undefined : getGuestSessionId();
+      const response = await api.Cart.getCart(sessionId);
       setCart(response.data);
     } catch (error) {
       console.error("Failed to load cart:", error);
@@ -80,7 +84,8 @@ const Cart = () => {
   const handleClearCart = async () => {
     if (window.confirm('Are you sure you want to clear your cart?')) {
       try {
-        await api.Cart.clearCart();
+        const sessionId = isLoggedIn ? undefined : getGuestSessionId();
+        await api.Cart.clearCart(sessionId);
         await loadCart();
         notifications.show({
           title: 'Success',
