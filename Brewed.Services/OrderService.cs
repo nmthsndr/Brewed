@@ -68,8 +68,8 @@ namespace Brewed.Services
                 throw new KeyNotFoundException("Order not found");
             }
 
-            // Allow access if admin, or if user owns the order, or if it's a guest order (userId is null)
-            if (!isAdmin && order.UserId.HasValue && order.UserId != userId)
+            // Allow access if admin, or if user owns the order
+            if (!isAdmin && order.UserId != userId)
             {
                 throw new UnauthorizedAccessException("You don't have permission to view this order");
             }
@@ -204,14 +204,56 @@ namespace Brewed.Services
 
             var totalAmount = subTotal + shippingCost - discount;
 
-            // Serialize guest addresses to JSON for storage
-            var shippingAddressJson = System.Text.Json.JsonSerializer.Serialize(guestOrderCreateDto.ShippingAddress);
-            var billingAddressJson = System.Text.Json.JsonSerializer.Serialize(guestOrderCreateDto.BillingAddress);
+            // Create a temporary guest user (no password, not verified)
+            var guestUser = new User
+            {
+                Name = $"{guestOrderCreateDto.ShippingAddress.FirstName} {guestOrderCreateDto.ShippingAddress.LastName}",
+                Email = guestOrderCreateDto.Email,
+                PasswordHash = string.Empty, // No password for guest users
+                Role = "Guest",
+                EmailConfirmed = false
+            };
+            await _context.Users.AddAsync(guestUser);
+            await _context.SaveChangesAsync(); // Save to get the UserId
 
+            // Create shipping address
+            var shippingAddress = new Address
+            {
+                FirstName = guestOrderCreateDto.ShippingAddress.FirstName,
+                LastName = guestOrderCreateDto.ShippingAddress.LastName,
+                AddressLine1 = guestOrderCreateDto.ShippingAddress.AddressLine1,
+                AddressLine2 = guestOrderCreateDto.ShippingAddress.AddressLine2,
+                City = guestOrderCreateDto.ShippingAddress.City,
+                PostalCode = guestOrderCreateDto.ShippingAddress.PostalCode,
+                Country = guestOrderCreateDto.ShippingAddress.Country,
+                PhoneNumber = guestOrderCreateDto.ShippingAddress.PhoneNumber,
+                AddressType = "Shipping",
+                UserId = null // Guest address - not linked to user profile
+            };
+            await _context.Addresses.AddAsync(shippingAddress);
+
+            // Create billing address
+            var billingAddress = new Address
+            {
+                FirstName = guestOrderCreateDto.BillingAddress.FirstName,
+                LastName = guestOrderCreateDto.BillingAddress.LastName,
+                AddressLine1 = guestOrderCreateDto.BillingAddress.AddressLine1,
+                AddressLine2 = guestOrderCreateDto.BillingAddress.AddressLine2,
+                City = guestOrderCreateDto.BillingAddress.City,
+                PostalCode = guestOrderCreateDto.BillingAddress.PostalCode,
+                Country = guestOrderCreateDto.BillingAddress.Country,
+                PhoneNumber = guestOrderCreateDto.BillingAddress.PhoneNumber,
+                AddressType = "Billing",
+                UserId = null // Guest address - not linked to user profile
+            };
+            await _context.Addresses.AddAsync(billingAddress);
+            await _context.SaveChangesAsync(); // Save to get address IDs
+
+            // Create the order with all required IDs
             var order = new Order
             {
                 OrderNumber = GenerateOrderNumber(),
-                UserId = null, // Guest order - no user ID
+                UserId = guestUser.Id,
                 SubTotal = subTotal,
                 ShippingCost = shippingCost,
                 Discount = discount,
@@ -219,11 +261,9 @@ namespace Brewed.Services
                 CouponCode = guestOrderCreateDto.CouponCode,
                 PaymentMethod = guestOrderCreateDto.PaymentMethod,
                 Notes = guestOrderCreateDto.Notes,
-                GuestEmail = guestOrderCreateDto.Email,
-                GuestShippingAddress = shippingAddressJson,
-                GuestBillingAddress = billingAddressJson,
-                ShippingAddressId = null,
-                BillingAddressId = null,
+                ShippingAddressId = shippingAddress.Id,
+                BillingAddressId = billingAddress.Id,
+                IsGuestOrder = true, // Mark as guest order
                 OrderItems = cart.CartItems.Select(ci => new OrderItem
                 {
                     ProductId = ci.ProductId,
@@ -248,7 +288,7 @@ namespace Brewed.Services
             // Save order first to get the order ID
             await _context.SaveChangesAsync();
 
-            // Create and save guest order details
+            // Create and save guest order details for easy querying
             var guestOrderDetails = new GuestOrderDetails
             {
                 OrderId = order.Id,
@@ -272,15 +312,18 @@ namespace Brewed.Services
             await _context.GuestOrderDetails.AddAsync(guestOrderDetails);
             await _context.SaveChangesAsync();
 
-            // Reload order with items for email
+            // Reload order with all relationships for email
             var savedOrder = await _context.Orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Product)
+                .Include(o => o.User)
+                .Include(o => o.ShippingAddress)
+                .Include(o => o.BillingAddress)
                 .Include(o => o.GuestOrderDetails)
                 .FirstOrDefaultAsync(o => o.Id == order.Id);
 
             // Send order confirmation email to guest
-            var orderDto = MapGuestOrderToDto(savedOrder, guestOrderCreateDto);
+            var orderDto = MapOrderToDto(savedOrder);
             await _emailService.SendOrderConfirmationAsync(orderDto);
 
             return orderDto;
@@ -299,7 +342,7 @@ namespace Brewed.Services
             }
 
             // Check if user has permission to cancel (must be their order)
-            if (!order.UserId.HasValue || order.UserId != userId)
+            if (order.UserId != userId)
             {
                 throw new UnauthorizedAccessException("You don't have permission to cancel this order");
             }
@@ -396,31 +439,13 @@ namespace Brewed.Services
             await _context.SaveChangesAsync();
 
             // Send email notification
-            if (order.UserId.HasValue)
+            var user = await _context.Users.FindAsync(order.UserId);
+            if (user != null)
             {
-                // Registered user order
-                var user = await _context.Users.FindAsync(order.UserId.Value);
-                if (user != null)
-                {
-                    await _emailService.SendOrderStatusUpdateAsync(user.Email, user.Name, order.OrderNumber, order.Status);
-                }
-            }
-            else
-            {
-                // Guest order
-                var guestDetails = await _context.GuestOrderDetails.FirstOrDefaultAsync(g => g.OrderId == orderId);
-                if (guestDetails != null)
-                {
-                    await _emailService.SendOrderStatusUpdateAsync(
-                        guestDetails.Email,
-                        $"{guestDetails.FirstName} {guestDetails.LastName}",
-                        order.OrderNumber,
-                        order.Status
-                    );
-                }
+                await _emailService.SendOrderStatusUpdateAsync(user.Email, user.Name, order.OrderNumber, order.Status);
             }
 
-            return await GetOrderByIdAsync(orderId, order.UserId ?? 0, true);
+            return await GetOrderByIdAsync(orderId, order.UserId, true);
         }
 
         public async Task<InvoiceDto> GetInvoiceAsync(int orderId, int userId, bool isAdmin = false)
@@ -434,8 +459,8 @@ namespace Brewed.Services
                 throw new KeyNotFoundException("Invoice not found");
             }
 
-            // Allow access if admin, or if user owns the order (guest orders can't access invoices)
-            if (!isAdmin && invoice.Order.UserId.HasValue && invoice.Order.UserId != userId)
+            // Allow access if admin, or if user owns the order
+            if (!isAdmin && invoice.Order.UserId != userId)
             {
                 throw new UnauthorizedAccessException("You don't have permission to view this invoice");
             }
@@ -452,59 +477,6 @@ namespace Brewed.Services
 
         private OrderDto MapOrderToDto(Order order)
         {
-            // For guest orders, use GuestOrderDetails for address info
-            AddressDto shippingAddress = null;
-            AddressDto billingAddress = null;
-            OrderUserDto user = null;
-
-            if (order.UserId.HasValue && order.User != null)
-            {
-                // Regular user order
-                shippingAddress = _mapper.Map<AddressDto>(order.ShippingAddress);
-                billingAddress = _mapper.Map<AddressDto>(order.BillingAddress);
-                user = new OrderUserDto
-                {
-                    Id = order.User.Id,
-                    Name = order.User.Name,
-                    Email = order.User.Email
-                };
-            }
-            else if (order.GuestOrderDetails != null)
-            {
-                // Guest order - map from GuestOrderDetails
-                var guestDetails = order.GuestOrderDetails;
-                shippingAddress = new AddressDto
-                {
-                    FirstName = guestDetails.FirstName,
-                    LastName = guestDetails.LastName,
-                    AddressLine1 = guestDetails.ShippingAddressLine1,
-                    AddressLine2 = guestDetails.ShippingAddressLine2,
-                    City = guestDetails.ShippingCity,
-                    PostalCode = guestDetails.ShippingPostalCode,
-                    Country = guestDetails.ShippingCountry,
-                    PhoneNumber = guestDetails.ShippingPhoneNumber,
-                    AddressType = "Shipping"
-                };
-                billingAddress = new AddressDto
-                {
-                    FirstName = guestDetails.FirstName,
-                    LastName = guestDetails.LastName,
-                    AddressLine1 = guestDetails.BillingAddressLine1,
-                    AddressLine2 = guestDetails.BillingAddressLine2,
-                    City = guestDetails.BillingCity,
-                    PostalCode = guestDetails.BillingPostalCode,
-                    Country = guestDetails.BillingCountry,
-                    PhoneNumber = guestDetails.BillingPhoneNumber,
-                    AddressType = "Billing"
-                };
-                user = new OrderUserDto
-                {
-                    Id = 0,
-                    Name = $"{guestDetails.FirstName} {guestDetails.LastName}",
-                    Email = guestDetails.Email
-                };
-            }
-
             return new OrderDto
             {
                 Id = order.Id,
@@ -520,8 +492,8 @@ namespace Brewed.Services
                 PaymentStatus = order.PaymentStatus,
                 ShippedAt = order.ShippedAt,
                 DeliveredAt = order.DeliveredAt,
-                ShippingAddress = shippingAddress,
-                BillingAddress = billingAddress,
+                ShippingAddress = _mapper.Map<AddressDto>(order.ShippingAddress),
+                BillingAddress = _mapper.Map<AddressDto>(order.BillingAddress),
                 Items = order.OrderItems.Select(oi => new OrderItemDto
                 {
                     Id = oi.Id,
@@ -540,68 +512,12 @@ namespace Brewed.Services
                     TotalAmount = order.Invoice.TotalAmount,
                     PdfUrl = order.Invoice.PdfUrl
                 } : null,
-                User = user
-            };
-        }
-
-        private OrderDto MapGuestOrderToDto(Order order, GuestOrderCreateDto guestOrderDto)
-        {
-            return new OrderDto
-            {
-                Id = order.Id,
-                OrderNumber = order.OrderNumber,
-                SubTotal = order.SubTotal,
-                ShippingCost = order.ShippingCost,
-                Discount = order.Discount,
-                TotalAmount = order.TotalAmount,
-                CouponCode = order.CouponCode,
-                OrderDate = order.OrderDate,
-                Status = order.Status,
-                PaymentMethod = order.PaymentMethod,
-                PaymentStatus = order.PaymentStatus,
-                ShippedAt = order.ShippedAt,
-                DeliveredAt = order.DeliveredAt,
-                ShippingAddress = new AddressDto
+                User = order.User != null ? new OrderUserDto
                 {
-                    FirstName = guestOrderDto.ShippingAddress.FirstName,
-                    LastName = guestOrderDto.ShippingAddress.LastName,
-                    AddressLine1 = guestOrderDto.ShippingAddress.AddressLine1,
-                    AddressLine2 = guestOrderDto.ShippingAddress.AddressLine2,
-                    City = guestOrderDto.ShippingAddress.City,
-                    PostalCode = guestOrderDto.ShippingAddress.PostalCode,
-                    Country = guestOrderDto.ShippingAddress.Country,
-                    PhoneNumber = guestOrderDto.ShippingAddress.PhoneNumber,
-                    AddressType = "Shipping"
-                },
-                BillingAddress = new AddressDto
-                {
-                    FirstName = guestOrderDto.BillingAddress.FirstName,
-                    LastName = guestOrderDto.BillingAddress.LastName,
-                    AddressLine1 = guestOrderDto.BillingAddress.AddressLine1,
-                    AddressLine2 = guestOrderDto.BillingAddress.AddressLine2,
-                    City = guestOrderDto.BillingAddress.City,
-                    PostalCode = guestOrderDto.BillingAddress.PostalCode,
-                    Country = guestOrderDto.BillingAddress.Country,
-                    PhoneNumber = guestOrderDto.BillingAddress.PhoneNumber,
-                    AddressType = "Billing"
-                },
-                Items = order.OrderItems.Select(oi => new OrderItemDto
-                {
-                    Id = oi.Id,
-                    ProductId = oi.Product.Id,
-                    ProductName = oi.Product.Name,
-                    ProductImageUrl = oi.Product.ImageUrl,
-                    Quantity = oi.Quantity,
-                    UnitPrice = oi.UnitPrice,
-                    TotalPrice = oi.TotalPrice
-                }).ToList(),
-                Invoice = null,
-                User = new OrderUserDto
-                {
-                    Id = 0,
-                    Name = $"{guestOrderDto.ShippingAddress.FirstName} {guestOrderDto.ShippingAddress.LastName}",
-                    Email = guestOrderDto.Email
-                }
+                    Id = order.User.Id,
+                    Name = order.User.Name,
+                    Email = order.User.Email
+                } : null
             };
         }
 
