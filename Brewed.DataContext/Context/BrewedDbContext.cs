@@ -18,6 +18,7 @@ namespace Brewed.DataContext.Context
         public DbSet<Invoice> Invoices { get; set; }
         public DbSet<UserToken> UserTokens { get; set; }
         public DbSet<Coupon> Coupons { get; set; }
+        public DbSet<GuestOrderDetails> GuestOrderDetails { get; set; }
 
         public BrewedDbContext(DbContextOptions<BrewedDbContext> options) : base(options)
         {
@@ -112,6 +113,12 @@ namespace Brewed.DataContext.Context
                 .HasOne(o => o.Invoice)
                 .WithOne(i => i.Order)
                 .HasForeignKey<Invoice>(i => i.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.GuestOrderDetails)
+                .WithOne(g => g.Order)
+                .HasForeignKey<GuestOrderDetails>(g => g.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Unique Indexes

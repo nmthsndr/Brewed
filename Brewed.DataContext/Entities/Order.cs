@@ -57,5 +57,6 @@ namespace Brewed.DataContext.Entities
         public virtual Address BillingAddress { get; set; }
         public virtual ICollection<OrderItem> OrderItems { get; set; }
         public virtual Invoice Invoice { get; set; }
+        public virtual GuestOrderDetails GuestOrderDetails { get; set; }
     }
 }
