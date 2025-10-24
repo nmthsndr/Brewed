@@ -71,4 +71,64 @@ namespace Brewed.DataContext.Dtos
         [StringLength(50)]
         public string Status { get; set; }
     }
+
+    public class GuestOrderCreateDto
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; }
+
+        [Required]
+        public GuestAddressDto ShippingAddress { get; set; }
+
+        [Required]
+        public GuestAddressDto BillingAddress { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        public string PaymentMethod { get; set; }
+
+        [StringLength(50)]
+        public string? CouponCode { get; set; }
+
+        [StringLength(500)]
+        public string? Notes { get; set; }
+
+        [Required]
+        public string SessionId { get; set; }
+    }
+
+    public class GuestAddressDto
+    {
+        [Required]
+        [StringLength(100)]
+        public string FirstName { get; set; }
+
+        [Required]
+        [StringLength(100)]
+        public string LastName { get; set; }
+
+        [Required]
+        [StringLength(200)]
+        public string AddressLine1 { get; set; }
+
+        [StringLength(200)]
+        public string? AddressLine2 { get; set; }
+
+        [Required]
+        [StringLength(100)]
+        public string City { get; set; }
+
+        [Required]
+        [StringLength(20)]
+        public string PostalCode { get; set; }
+
+        [Required]
+        [StringLength(100)]
+        public string Country { get; set; }
+
+        [Required]
+        [StringLength(20)]
+        public string PhoneNumber { get; set; }
+    }
 }

@@ -39,14 +39,24 @@ namespace Brewed.DataContext.Entities
         public DateTime? ShippedAt { get; set; }
         public DateTime? DeliveredAt { get; set; }
 
-        public int UserId { get; set; }
-        public int ShippingAddressId { get; set; }
+        public int? UserId { get; set; }
+        public int? ShippingAddressId { get; set; }
         public int? BillingAddressId { get; set; }
+
+        [StringLength(200)]
+        public string? GuestEmail { get; set; }
+
+        [StringLength(1000)]
+        public string? GuestShippingAddress { get; set; }
+
+        [StringLength(1000)]
+        public string? GuestBillingAddress { get; set; }
 
         public virtual User User { get; set; }
         public virtual Address ShippingAddress { get; set; }
         public virtual Address BillingAddress { get; set; }
         public virtual ICollection<OrderItem> OrderItems { get; set; }
         public virtual Invoice Invoice { get; set; }
+        public virtual GuestOrderDetails GuestOrderDetails { get; set; }
     }
 }

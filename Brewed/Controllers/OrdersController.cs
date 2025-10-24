@@ -73,6 +73,21 @@ namespace Brewed.API.Controllers
             }
         }
 
+        [AllowAnonymous]
+        [HttpPost("guest")]
+        public async Task<IActionResult> CreateGuestOrder([FromBody] GuestOrderCreateDto guestOrderDto)
+        {
+            try
+            {
+                var result = await _orderService.CreateGuestOrderAsync(guestOrderDto);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPost("{orderId}/cancel")]
         public async Task<IActionResult> CancelOrder(int orderId)
         {

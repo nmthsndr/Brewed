@@ -20,6 +20,7 @@ import api from "../api/api";
 import { ICart } from "../interfaces/ICart";
 import { notifications } from "@mantine/notifications";
 import useAuth from "../hooks/useAuth";
+import useCart from "../hooks/useCart";
 import { getGuestSessionId } from "../utils/guestSession";
 
 const Cart = () => {
@@ -27,6 +28,7 @@ const Cart = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
+  const { refreshCartCount } = useCart();
 
   const loadCart = async () => {
     try {
@@ -54,6 +56,7 @@ const Cart = () => {
     try {
       await api.Cart.updateCartItem(cartItemId, { quantity });
       await loadCart();
+      await refreshCartCount();
     } catch (error) {
       notifications.show({
         title: 'Error',
@@ -67,6 +70,7 @@ const Cart = () => {
     try {
       await api.Cart.removeFromCart(cartItemId);
       await loadCart();
+      await refreshCartCount();
       notifications.show({
         title: 'Success',
         message: 'Item removed from cart',
@@ -87,6 +91,7 @@ const Cart = () => {
         const sessionId = isLoggedIn ? undefined : getGuestSessionId();
         await api.Cart.clearCart(sessionId);
         await loadCart();
+        await refreshCartCount();
         notifications.show({
           title: 'Success',
           message: 'Cart cleared',

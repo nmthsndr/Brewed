@@ -1,33 +1,12 @@
 import { Box, Burger, Flex, Image, Badge, Text } from "@mantine/core";
 import { IconShoppingCart } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
 import UserMenuDropdown from "./UserMenuDropdown";
-import api from "../../api/api";
-import useAuth from "../../hooks/useAuth";
-import { getGuestSessionId } from "../../utils/guestSession";
+import useCart from "../../hooks/useCart";
 
 const Header = ({ opened, toggle }: any) => {
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuth();
-  const [cartItemCount, setCartItemCount] = useState(0);
-
-  const loadCartCount = async () => {
-    try {
-      const sessionId = isLoggedIn ? undefined : getGuestSessionId();
-      const response = await api.Cart.getCart(sessionId);
-      setCartItemCount(response.data.totalItems);
-    } catch (error) {
-      console.error("Failed to load cart count:", error);
-      setCartItemCount(0);
-    }
-  };
-
-  useEffect(() => {
-    loadCartCount();
-    const interval = setInterval(loadCartCount, 30000);
-    return () => clearInterval(interval);
-  }, [isLoggedIn]);
+  const { cartItemCount } = useCart();
 
   return (
     <Flex

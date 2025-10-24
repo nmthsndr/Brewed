@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { MantineProvider, createTheme } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { AuthProvider } from './context/AuthProvider';
+import CartProvider from './context/CartProvider';
 import Routing from './routing/Routing';
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
@@ -35,7 +36,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <Notifications position="top-right" />
       <BrowserRouter>
         <AuthProvider>
-          <Routing />
+          <CartProvider>
+            <Routing />
+          </CartProvider>
         </AuthProvider>
       </BrowserRouter>
     </MantineProvider>

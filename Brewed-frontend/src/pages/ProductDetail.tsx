@@ -27,12 +27,14 @@ import { IReview } from "../interfaces/IReview";
 import ReviewCard from "../components/ReviewCard";
 import { notifications } from "@mantine/notifications";
 import useAuth from "../hooks/useAuth";
+import useCart from "../hooks/useCart";
 import { getGuestSessionId } from "../utils/guestSession";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { userId, isLoggedIn } = useAuth();
+  const { refreshCartCount } = useCart();
   const [product, setProduct] = useState<IProduct | null>(null);
   const [reviews, setReviews] = useState<IReview[]>([]);
   const [loading, setLoading] = useState(true);
@@ -149,6 +151,7 @@ const ProductDetail = () => {
     try {
       const sessionId = isLoggedIn ? undefined : getGuestSessionId();
       await api.Cart.addToCart({ productId: product.id, quantity }, sessionId);
+      await refreshCartCount();
       notifications.show({
         title: 'Success',
         message: `${quantity} ${product.name} added to cart`,
