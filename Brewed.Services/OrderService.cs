@@ -15,6 +15,7 @@ namespace Brewed.Services
         Task<PaginatedResultDto<OrderDto>> GetAllOrdersAsync(string status, int page, int pageSize);
         Task<OrderDto> UpdateOrderStatusAsync(int orderId, OrderStatusUpdateDto statusDto);
         Task<InvoiceDto> GetInvoiceAsync(int orderId, int userId, bool isAdmin = false);
+        Task<InvoiceDto> GenerateInvoiceAsync(int orderId);
         Task<bool> HasUserPurchasedProductAsync(int userId, int productId);
     }
 
@@ -375,6 +376,49 @@ namespace Brewed.Services
         private async Task<decimal> ApplyCouponAsync(string couponCode, decimal orderAmount)
         {
             return await _couponService.ApplyCouponAsync(couponCode, orderAmount);
+        }
+
+        public async Task<InvoiceDto> GenerateInvoiceAsync(int orderId)
+        {
+            var order = await _context.Orders
+                .Include(o => o.Invoice)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null)
+            {
+                throw new KeyNotFoundException("Order not found");
+            }
+
+            // Check if invoice already exists
+            if (order.Invoice != null)
+            {
+                throw new InvalidOperationException("Invoice already exists for this order");
+            }
+
+            // Create new invoice
+            var invoice = new Invoice
+            {
+                InvoiceNumber = GenerateInvoiceNumber(),
+                OrderId = order.Id,
+                TotalAmount = order.TotalAmount,
+                PdfUrl = string.Empty // Will be generated later
+            };
+
+            await _context.Invoices.AddAsync(invoice);
+            await _context.SaveChangesAsync();
+
+            // Send invoice email
+            var orderDto = await GetOrderByIdAsync(orderId, order.UserId, true);
+            await _emailService.SendInvoiceEmailAsync(orderDto);
+
+            return new InvoiceDto
+            {
+                Id = invoice.Id,
+                InvoiceNumber = invoice.InvoiceNumber,
+                IssueDate = invoice.IssueDate,
+                TotalAmount = invoice.TotalAmount,
+                PdfUrl = invoice.PdfUrl
+            };
         }
 
         public async Task<bool> HasUserPurchasedProductAsync(int userId, int productId)
