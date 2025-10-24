@@ -209,10 +209,9 @@ namespace Brewed.Services
             {
                 Name = $"{guestOrderCreateDto.ShippingAddress.FirstName} {guestOrderCreateDto.ShippingAddress.LastName}",
                 Email = guestOrderCreateDto.Email,
-                Password = string.Empty, // No password for guest users
+                PasswordHash = string.Empty, // No password for guest users
                 Role = "Guest",
-                IsVerified = false,
-                CreatedAt = DateTime.UtcNow
+                EmailConfirmed = false
             };
             await _context.Users.AddAsync(guestUser);
             await _context.SaveChangesAsync(); // Save to get the UserId
