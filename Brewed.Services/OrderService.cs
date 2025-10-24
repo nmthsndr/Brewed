@@ -15,6 +15,7 @@ namespace Brewed.Services
         Task<PaginatedResultDto<OrderDto>> GetAllOrdersAsync(string status, int page, int pageSize);
         Task<OrderDto> UpdateOrderStatusAsync(int orderId, OrderStatusUpdateDto statusDto);
         Task<InvoiceDto> GetInvoiceAsync(int orderId, int userId, bool isAdmin = false);
+        Task<InvoiceDto> GenerateInvoiceAsync(int orderId);
         Task<bool> HasUserPurchasedProductAsync(int userId, int productId);
     }
 
@@ -155,18 +156,9 @@ namespace Brewed.Services
             // Save order first to get the generated ID
             await _context.SaveChangesAsync();
 
-            // Create invoice with the saved order's ID
-            var invoice = new Invoice
-            {
-                InvoiceNumber = GenerateInvoiceNumber(),
-                OrderId = order.Id,
-                TotalAmount = totalAmount,
-                PdfUrl = string.Empty // Will be generated later
-            };
-            await _context.Invoices.AddAsync(invoice);
-            await _context.SaveChangesAsync();
+            // Note: Invoice will be generated manually by admin
 
-            // After saving order and invoice
+            // After saving order
             var user = await _context.Users.FindAsync(userId);
             await _emailService.SendOrderConfirmationAsync(user.Email, user.Name, order.OrderNumber, order.TotalAmount);
 
@@ -257,6 +249,16 @@ namespace Brewed.Services
                 throw new KeyNotFoundException("Order not found");
             }
 
+            // Validate that invoice exists before shipping
+            if (statusDto.Status == "Shipped" || statusDto.Status == "Delivered")
+            {
+                var invoice = await _context.Invoices.FirstOrDefaultAsync(i => i.OrderId == orderId);
+                if (invoice == null)
+                {
+                    throw new InvalidOperationException("Invoice must be generated before the order can be shipped");
+                }
+            }
+
             order.Status = statusDto.Status;
 
             if (statusDto.Status == "Shipped")
@@ -294,6 +296,45 @@ namespace Brewed.Services
             {
                 throw new UnauthorizedAccessException("You don't have permission to view this invoice");
             }
+
+            return new InvoiceDto
+            {
+                Id = invoice.Id,
+                InvoiceNumber = invoice.InvoiceNumber,
+                IssueDate = invoice.IssueDate,
+                TotalAmount = invoice.TotalAmount,
+                PdfUrl = invoice.PdfUrl
+            };
+        }
+
+        public async Task<InvoiceDto> GenerateInvoiceAsync(int orderId)
+        {
+            // Check if order exists
+            var order = await _context.Orders.FindAsync(orderId);
+            if (order == null)
+            {
+                throw new KeyNotFoundException("Order not found");
+            }
+
+            // Check if invoice already exists for this order
+            var existingInvoice = await _context.Invoices.FirstOrDefaultAsync(i => i.OrderId == orderId);
+            if (existingInvoice != null)
+            {
+                throw new InvalidOperationException("Invoice already exists for this order");
+            }
+
+            // Create new invoice
+            var invoice = new Invoice
+            {
+                InvoiceNumber = GenerateInvoiceNumber(),
+                OrderId = orderId,
+                TotalAmount = order.TotalAmount,
+                IssueDate = DateTime.UtcNow,
+                PdfUrl = string.Empty // Will be generated later if needed
+            };
+
+            await _context.Invoices.AddAsync(invoice);
+            await _context.SaveChangesAsync();
 
             return new InvoiceDto
             {

@@ -174,7 +174,9 @@ const Orders = {
   updateOrderStatus: (id: number, status: string) =>
     axiosInstance.put<IOrder>(`/api/orders/${id}/status`, { status }),
   getInvoice: (orderId: number) =>
-    axiosInstance.get(`/api/orders/${orderId}/invoice`)
+    axiosInstance.get(`/api/orders/${orderId}/invoice`),
+  generateInvoice: (orderId: number) =>
+    axiosInstance.post(`/api/orders/${orderId}/invoice`)
 };
 
 const Addresses = {
