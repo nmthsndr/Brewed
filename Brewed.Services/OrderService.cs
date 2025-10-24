@@ -244,11 +244,19 @@ namespace Brewed.Services
 
         public async Task<OrderDto> UpdateOrderStatusAsync(int orderId, OrderStatusUpdateDto statusDto)
         {
-            var order = await _context.Orders.FindAsync(orderId);
+            var order = await _context.Orders
+                .Include(o => o.Invoice)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
 
             if (order == null)
             {
                 throw new KeyNotFoundException("Order not found");
+            }
+
+            // Check if invoice exists before allowing Shipped or Delivered status
+            if ((statusDto.Status == "Shipped" || statusDto.Status == "Delivered") && order.Invoice == null)
+            {
+                throw new InvalidOperationException("Cannot ship or deliver order without generating an invoice first. Please generate invoice before updating status.");
             }
 
             order.Status = statusDto.Status;
