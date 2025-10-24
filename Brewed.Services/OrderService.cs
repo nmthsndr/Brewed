@@ -157,24 +157,12 @@ namespace Brewed.Services
             // Clear cart
             _context.CartItems.RemoveRange(cart.CartItems);
 
-            // Save order first to get the generated ID
+            // Save order
             await _context.SaveChangesAsync();
 
-            // Create invoice with the saved order's ID
-            var invoice = new Invoice
-            {
-                InvoiceNumber = GenerateInvoiceNumber(),
-                OrderId = order.Id,
-                TotalAmount = totalAmount,
-                PdfUrl = string.Empty // Will be generated later
-            };
-            await _context.Invoices.AddAsync(invoice);
-            await _context.SaveChangesAsync();
-
-            // After saving order and invoice, send confirmation and invoice emails
+            // Send order confirmation email
             var orderDto = await GetOrderByIdAsync(order.Id, userId);
             await _emailService.SendOrderConfirmationAsync(orderDto);
-            await _emailService.SendInvoiceEmailAsync(orderDto);
 
             return orderDto;
         }
