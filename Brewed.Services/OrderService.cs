@@ -168,7 +168,7 @@ namespace Brewed.Services
 
             // After saving order and invoice, send confirmation and invoice emails
             var orderDto = await GetOrderByIdAsync(order.Id, userId);
-            await _emailService.SendOrderConfirmationAsync(orderDto.User.Email, orderDto.User.Name, orderDto.OrderNumber, orderDto.TotalAmount);
+            await _emailService.SendOrderConfirmationAsync(orderDto);
             await _emailService.SendInvoiceEmailAsync(orderDto);
 
             return orderDto;
