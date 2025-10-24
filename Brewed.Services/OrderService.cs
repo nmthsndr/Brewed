@@ -166,11 +166,12 @@ namespace Brewed.Services
             await _context.Invoices.AddAsync(invoice);
             await _context.SaveChangesAsync();
 
-            // After saving order and invoice
-            var user = await _context.Users.FindAsync(userId);
-            await _emailService.SendOrderConfirmationAsync(user.Email, user.Name, order.OrderNumber, order.TotalAmount);
+            // After saving order and invoice, send confirmation and invoice emails
+            var orderDto = await GetOrderByIdAsync(order.Id, userId);
+            await _emailService.SendOrderConfirmationAsync(orderDto.User.Email, orderDto.User.Name, orderDto.OrderNumber, orderDto.TotalAmount);
+            await _emailService.SendInvoiceEmailAsync(orderDto);
 
-            return await GetOrderByIdAsync(order.Id, userId);
+            return orderDto;
         }
 
         public async Task<OrderDto> CancelOrderAsync(int orderId, int userId)
