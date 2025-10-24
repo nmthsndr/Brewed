@@ -25,10 +25,12 @@ namespace Brewed.Services
         private readonly ICouponService _couponService;
         private readonly IEmailService _emailService;
 
-        public OrderService(BrewedDbContext context, IMapper mapper)
+        public OrderService(BrewedDbContext context, IMapper mapper, ICouponService couponService, IEmailService emailService)
         {
             _context = context;
             _mapper = mapper;
+            _couponService = couponService;
+            _emailService = emailService;
         }
 
         public async Task<List<OrderDto>> GetUserOrdersAsync(int userId)
@@ -368,14 +370,6 @@ namespace Brewed.Services
             return 10;
         }
 
-
-        public OrderService(BrewedDbContext context, IMapper mapper, ICouponService couponService, IEmailService emailService)
-        {
-            _context = context;
-            _mapper = mapper;
-            _couponService = couponService;
-            _emailService = emailService;
-        }
         private async Task<decimal> ApplyCouponAsync(string couponCode, decimal orderAmount)
         {
             return await _couponService.ApplyCouponAsync(couponCode, orderAmount);
