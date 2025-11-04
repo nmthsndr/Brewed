@@ -121,7 +121,7 @@ namespace Brewed.Services
             // Apply coupon if provided
             if (!string.IsNullOrEmpty(orderCreateDto.CouponCode))
             {
-                discount = await ApplyCouponAsync(orderCreateDto.CouponCode, subTotal);
+                discount = await ApplyCouponAsync(orderCreateDto.CouponCode, subTotal, userId);
             }
 
             var totalAmount = subTotal + shippingCost - discount;
@@ -155,6 +155,26 @@ namespace Brewed.Services
             {
                 cartItem.Product.StockQuantity -= cartItem.Quantity;
                 _context.Products.Update(cartItem.Product);
+
+                // Send low stock alert if stock is below threshold (e.g., 10)
+                if (cartItem.Product.StockQuantity <= 10 && cartItem.Product.StockQuantity > 0)
+                {
+                    try
+                    {
+                        // Get all admin users from database
+                        var adminEmails = await _context.Users
+                            .Where(u => u.Role == "Admin")
+                            .Select(u => u.Email)
+                            .ToListAsync();
+
+                        await _emailService.SendLowStockAlertAsync(cartItem.Product.Name, cartItem.Product.StockQuantity, adminEmails);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log error but don't fail the order
+                        Console.WriteLine($"Failed to send low stock alert for {cartItem.Product.Name}: {ex.Message}");
+                    }
+                }
             }
 
             // Clear cart
@@ -162,6 +182,20 @@ namespace Brewed.Services
 
             // Save order
             await _context.SaveChangesAsync();
+
+            // Mark coupon as used if provided
+            if (!string.IsNullOrEmpty(orderCreateDto.CouponCode))
+            {
+                try
+                {
+                    await _couponService.MarkCouponAsUsedAsync(userId, orderCreateDto.CouponCode, order.Id);
+                }
+                catch (Exception ex)
+                {
+                    // Log error but don't fail the order
+                    Console.WriteLine($"Failed to mark coupon as used: {ex.Message}");
+                }
+            }
 
             // Send order confirmation email
             var orderDto = await GetOrderByIdAsync(order.Id, userId);
@@ -280,6 +314,26 @@ namespace Brewed.Services
             {
                 cartItem.Product.StockQuantity -= cartItem.Quantity;
                 _context.Products.Update(cartItem.Product);
+
+                // Send low stock alert if stock is below threshold (e.g., 10)
+                if (cartItem.Product.StockQuantity <= 10 && cartItem.Product.StockQuantity > 0)
+                {
+                    try
+                    {
+                        // Get all admin users from database
+                        var adminEmails = await _context.Users
+                            .Where(u => u.Role == "Admin")
+                            .Select(u => u.Email)
+                            .ToListAsync();
+
+                        await _emailService.SendLowStockAlertAsync(cartItem.Product.Name, cartItem.Product.StockQuantity, adminEmails);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log error but don't fail the order
+                        Console.WriteLine($"Failed to send low stock alert for {cartItem.Product.Name}: {ex.Message}");
+                    }
+                }
             }
 
             // Clear cart
@@ -537,9 +591,23 @@ namespace Brewed.Services
             return 10;
         }
 
-        private async Task<decimal> ApplyCouponAsync(string couponCode, decimal orderAmount)
+        private async Task<decimal> ApplyCouponAsync(string couponCode, decimal orderAmount, int? userId = null)
         {
-            return await _couponService.ApplyCouponAsync(couponCode, orderAmount);
+            // If userId is provided, validate that the user has access to this coupon
+            if (userId.HasValue)
+            {
+                var validation = await _couponService.ValidateCouponForUserAsync(userId.Value, couponCode, orderAmount);
+                if (!validation.IsValid)
+                {
+                    throw new Exception(validation.Message);
+                }
+                return validation.DiscountAmount;
+            }
+            else
+            {
+                // Guest orders - use regular validation (no user restriction)
+                return await _couponService.ApplyCouponAsync(couponCode, orderAmount);
+            }
         }
 
         public async Task<InvoiceDto> GenerateInvoiceAsync(int orderId)

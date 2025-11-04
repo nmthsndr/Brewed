@@ -96,22 +96,45 @@ const Coupons = () => {
     open();
   };
 
-  const handleEdit = (coupon: ICoupon) => {
+  const handleEdit = async (coupon: ICoupon) => {
     setModalMode('edit');
     setSelectedCoupon(coupon);
-    form.setValues({
-      code: coupon.code,
-      description: coupon.description,
-      discountType: coupon.discountType,
-      discountValue: coupon.discountValue,
-      minimumOrderAmount: coupon.minimumOrderAmount || 0,
-      maxUsageCount: coupon.maxUsageCount,
-      startDate: new Date(coupon.startDate),
-      endDate: new Date(coupon.endDate),
-      isActive: coupon.isActive,
-      generateRandomCode: false,
-      userIds: []
-    });
+
+    // Load assigned users for this coupon
+    try {
+      const response = await api.Coupons.getCouponUsers(coupon.id);
+      const assignedUserIds = response.data.map((uc: IUserCoupon) => uc.userId);
+
+      form.setValues({
+        code: coupon.code,
+        description: coupon.description,
+        discountType: coupon.discountType,
+        discountValue: coupon.discountValue,
+        minimumOrderAmount: coupon.minimumOrderAmount || 0,
+        maxUsageCount: coupon.maxUsageCount,
+        startDate: new Date(coupon.startDate),
+        endDate: new Date(coupon.endDate),
+        isActive: coupon.isActive,
+        generateRandomCode: false,
+        userIds: assignedUserIds
+      });
+    } catch (error) {
+      console.error("Failed to load assigned users:", error);
+      form.setValues({
+        code: coupon.code,
+        description: coupon.description,
+        discountType: coupon.discountType,
+        discountValue: coupon.discountValue,
+        minimumOrderAmount: coupon.minimumOrderAmount || 0,
+        maxUsageCount: coupon.maxUsageCount,
+        startDate: new Date(coupon.startDate),
+        endDate: new Date(coupon.endDate),
+        isActive: coupon.isActive,
+        generateRandomCode: false,
+        userIds: []
+      });
+    }
+
     open();
   };
 
@@ -233,7 +256,6 @@ const Coupons = () => {
               <Table.Th>Description</Table.Th>
               <Table.Th>Discount</Table.Th>
               <Table.Th>Min Order</Table.Th>
-              <Table.Th>Usage</Table.Th>
               <Table.Th>Valid Until</Table.Th>
               <Table.Th>Status</Table.Th>
               <Table.Th>Actions</Table.Th>
@@ -255,12 +277,6 @@ const Coupons = () => {
                   {coupon.minimumOrderAmount
                     ? `€${coupon.minimumOrderAmount}`
                     : '-'}
-                </Table.Td>
-                <Table.Td>
-                  <Text size="sm">
-                    {coupon.usageCount}
-                    {coupon.maxUsageCount ? `/${coupon.maxUsageCount}` : ''}
-                  </Text>
                 </Table.Td>
                 <Table.Td>
                   {new Date(coupon.endDate).toLocaleDateString()}

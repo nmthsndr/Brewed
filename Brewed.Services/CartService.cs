@@ -77,7 +77,9 @@ namespace Brewed.Services
                     Id = ci.Id,
                     ProductId = ci.Product.Id,
                     ProductName = ci.Product.Name,
-                    ProductImageUrl = ci.Product.ImageUrl,
+                    ProductImageUrl = ci.Product.ImageUrl != null && ci.Product.ImageUrl.Contains(";")
+                        ? ci.Product.ImageUrl.Substring(0, ci.Product.ImageUrl.IndexOf(";")).Trim()
+                        : ci.Product.ImageUrl,
                     Price = ci.Price,
                     Quantity = ci.Quantity,
                     TotalPrice = ci.Price * ci.Quantity,

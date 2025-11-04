@@ -11,8 +11,9 @@ namespace Brewed.Services
         Task SendPasswordResetAsync(string email, string name, string resetToken);
         Task SendOrderConfirmationAsync(OrderDto orderDetails);
         Task SendOrderStatusUpdateAsync(string email, string name, string orderNumber, string status);
-        Task SendLowStockAlertAsync(string productName, int currentStock);
+        Task SendLowStockAlertAsync(string productName, int currentStock, List<string> adminEmails);
         Task SendInvoiceEmailAsync(OrderDto orderDetails);
+        Task SendCouponAssignmentAsync(string email, string name, CouponDto coupon);
     }
 
     public class EmailService : IEmailService
@@ -281,9 +282,13 @@ namespace Brewed.Services
             await SendEmailAsync(email, subject, body);
         }
 
-        public async Task SendLowStockAlertAsync(string productName, int currentStock)
+        public async Task SendLowStockAlertAsync(string productName, int currentStock, List<string> adminEmails)
         {
-            var adminEmail = _configuration["Email:AdminEmail"];
+            if (adminEmails == null || !adminEmails.Any())
+            {
+                return; // No admin emails to send to
+            }
+
             var subject = $"Low Stock Alert - {productName}";
 
             var body = $@"
@@ -295,7 +300,19 @@ namespace Brewed.Services
                 </div>
             ";
 
-            await SendEmailAsync(adminEmail, subject, body);
+            // Send email to all admin users
+            foreach (var adminEmail in adminEmails)
+            {
+                try
+                {
+                    await SendEmailAsync(adminEmail, subject, body);
+                }
+                catch (Exception ex)
+                {
+                    // Log error but continue sending to other admins
+                    Console.WriteLine($"Failed to send low stock alert to {adminEmail}: {ex.Message}");
+                }
+            }
         }
 
         public async Task SendInvoiceEmailAsync(OrderDto orderDetails)
@@ -447,6 +464,103 @@ namespace Brewed.Services
             ";
 
             await SendEmailAsync(orderDetails.User.Email, subject, body);
+        }
+
+        public async Task SendCouponAssignmentAsync(string email, string name, CouponDto coupon)
+        {
+            var subject = $"You've Received a Special Coupon - {coupon.Code}!";
+
+            var discountText = coupon.DiscountType == "Percentage"
+                ? $"{coupon.DiscountValue}%"
+                : $"€{coupon.DiscountValue:N2}";
+
+            var body = $@"
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, #FFF8E7 0%, #FFEFD5 100%);'>
+                    <div style='background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
+                        <!-- Header -->
+                        <div style='text-align: center; margin-bottom: 30px;'>
+                            <div style='background: linear-gradient(135deg, #D4A373 0%, #8B4513 100%); padding: 20px; border-radius: 8px; margin-bottom: 20px;'>
+                                <h1 style='color: white; margin: 0; font-size: 28px;'>Special Coupon for You!</h1>
+                            </div>
+                        </div>
+
+                        <!-- Greeting -->
+                        <p style='color: #333; font-size: 16px; line-height: 1.6;'>Hello <strong>{name}</strong>,</p>
+
+                        <p style='color: #333; font-size: 16px; line-height: 1.6;'>
+                            Great news! You've been assigned a special coupon code to use on your next purchase at Brewed Coffee Shop.
+                        </p>
+
+                        <!-- Coupon Card -->
+                        <div style='background: linear-gradient(135deg, #8B4513 0%, #D4A373 100%); border-radius: 12px; padding: 30px; margin: 25px 0; text-align: center; box-shadow: 0 4px 12px rgba(139, 69, 19, 0.3);'>
+                            <p style='color: rgba(255,255,255,0.9); margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 2px;'>Your Coupon Code</p>
+                            <div style='background: white; border-radius: 8px; padding: 15px 25px; margin: 15px 0; display: inline-block;'>
+                                <h2 style='color: #8B4513; margin: 0; font-size: 32px; font-weight: bold; letter-spacing: 3px;'>{coupon.Code}</h2>
+                            </div>
+                            <p style='color: white; margin: 15px 0 0 0; font-size: 24px; font-weight: bold;'>{discountText} OFF</p>
+                        </div>
+
+                        <!-- Coupon Details -->
+                        <div style='background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 25px 0;'>
+                            <h3 style='color: #8B4513; margin: 0 0 15px 0; font-size: 18px;'>Coupon Details:</h3>
+                            <table style='width: 100%; border-collapse: collapse;'>
+                                {(string.IsNullOrEmpty(coupon.Description) ? "" : $@"
+                                <tr>
+                                    <td style='padding: 8px 0; color: #666;'><strong>Description:</strong></td>
+                                    <td style='padding: 8px 0; color: #333; text-align: right;'>{coupon.Description}</td>
+                                </tr>
+                                ")}
+                                <tr>
+                                    <td style='padding: 8px 0; color: #666;'><strong>Discount:</strong></td>
+                                    <td style='padding: 8px 0; color: #333; text-align: right;'>{discountText}</td>
+                                </tr>
+                                {(coupon.MinimumOrderAmount.HasValue && coupon.MinimumOrderAmount.Value > 0 ? $@"
+                                <tr>
+                                    <td style='padding: 8px 0; color: #666;'><strong>Minimum Order:</strong></td>
+                                    <td style='padding: 8px 0; color: #333; text-align: right;'>€{coupon.MinimumOrderAmount.Value:N2}</td>
+                                </tr>
+                                " : "")}
+                                <tr>
+                                    <td style='padding: 8px 0; color: #666;'><strong>Valid From:</strong></td>
+                                    <td style='padding: 8px 0; color: #333; text-align: right;'>{coupon.StartDate:MMMM dd, yyyy}</td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 8px 0; color: #666;'><strong>Valid Until:</strong></td>
+                                    <td style='padding: 8px 0; color: #333; text-align: right;'>{coupon.EndDate:MMMM dd, yyyy}</td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- How to Use -->
+                        <div style='background: #fff8e7; border-left: 4px solid #8B4513; padding: 15px; margin: 25px 0; border-radius: 4px;'>
+                            <h4 style='color: #8B4513; margin: 0 0 10px 0; font-size: 16px;'>How to Use:</h4>
+                            <ol style='color: #333; margin: 0; padding-left: 20px; line-height: 1.8;'>
+                                <li>Add your favorite products to the cart</li>
+                                <li>Enter coupon code <strong>{coupon.Code}</strong> at checkout</li>
+                                <li>Enjoy your discount!</li>
+                            </ol>
+                        </div>
+
+                        <!-- Note -->
+                        <div style='background: #FFF3E0; padding: 15px; border-radius: 6px; margin: 20px 0;'>
+                            <p style='color: #E65100; margin: 0; font-size: 14px; text-align: center;'>
+                                This coupon is exclusively assigned to you and can only be used once.
+                            </p>
+                        </div>
+
+                        <!-- Footer -->
+                        <div style='text-align: center; padding-top: 20px; border-top: 2px solid #eee;'>
+                            <p style='color: #666; font-size: 14px; line-height: 1.6;'>
+                                Happy shopping!<br/>
+                                If you have any questions, feel free to contact us at <a href='mailto:{_fromEmail}' style='color: #8B4513;'>{_fromEmail}</a>
+                            </p>
+                            <p style='color: #333; margin-top: 20px; font-size: 16px;'>Best regards,<br/><span style='color: #8B4513; font-weight: bold;'>Brewed Team</span></p>
+                        </div>
+                    </div>
+                </div>
+            ";
+
+            await SendEmailAsync(email, subject, body);
         }
     }
 }

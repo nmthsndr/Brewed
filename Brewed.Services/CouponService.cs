@@ -20,6 +20,7 @@ namespace Brewed.Services
         // New methods for user-coupon management
         Task<string> GenerateRandomCouponCodeAsync();
         Task AssignCouponToUsersAsync(int couponId, List<int> userIds);
+        Task UpdateUserAssignmentsAsync(int couponId, List<int> userIds);
         Task<bool> CanUserUseCouponAsync(int userId, string couponCode);
         Task<CouponValidationResultDto> ValidateCouponForUserAsync(int userId, string code, decimal orderAmount);
         Task MarkCouponAsUsedAsync(int userId, string couponCode, int? orderId = null);
@@ -31,11 +32,13 @@ namespace Brewed.Services
     {
         private readonly BrewedDbContext _context;
         private readonly IMapper _mapper;
+        private readonly IEmailService _emailService;
 
-        public CouponService(BrewedDbContext context, IMapper mapper)
+        public CouponService(BrewedDbContext context, IMapper mapper, IEmailService emailService)
         {
             _context = context;
             _mapper = mapper;
+            _emailService = emailService;
         }
 
         public async Task<List<CouponDto>> GetAllCouponsAsync()
@@ -293,6 +296,104 @@ namespace Brewed.Services
             {
                 await _context.UserCoupons.AddRangeAsync(userCoupons);
                 await _context.SaveChangesAsync();
+
+                // Send email notifications to newly assigned users
+                var couponDto = _mapper.Map<CouponDto>(coupon);
+                var users = await _context.Users
+                    .Where(u => newUserIds.Contains(u.Id))
+                    .ToListAsync();
+
+                foreach (var user in users)
+                {
+                    try
+                    {
+                        await _emailService.SendCouponAssignmentAsync(user.Email, user.Name, couponDto);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log error but don't fail the assignment
+                        Console.WriteLine($"Failed to send coupon email to {user.Email}: {ex.Message}");
+                    }
+                }
+            }
+        }
+
+        public async Task UpdateUserAssignmentsAsync(int couponId, List<int> userIds)
+        {
+            var coupon = await _context.Coupons.FindAsync(couponId);
+            if (coupon == null)
+            {
+                throw new KeyNotFoundException("Coupon not found");
+            }
+
+            // Get all current assignments
+            var existingAssignments = await _context.UserCoupons
+                .Where(uc => uc.CouponId == couponId)
+                .ToListAsync();
+
+            var existingUserIds = existingAssignments.Select(uc => uc.UserId).ToList();
+
+            // Find users to add (in new list but not in existing)
+            var userIdsToAdd = userIds.Except(existingUserIds).ToList();
+
+            // Find users to remove (in existing but not in new list, AND haven't used the coupon)
+            var assignmentsToRemove = existingAssignments
+                .Where(uc => !userIds.Contains(uc.UserId) && !uc.IsUsed)
+                .ToList();
+
+            // Add new users
+            if (userIdsToAdd.Any())
+            {
+                var userCoupons = new List<UserCoupon>();
+                foreach (var userId in userIdsToAdd)
+                {
+                    // Verify user exists
+                    var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
+                    if (!userExists)
+                    {
+                        throw new KeyNotFoundException($"User with ID {userId} not found");
+                    }
+
+                    userCoupons.Add(new UserCoupon
+                    {
+                        UserId = userId,
+                        CouponId = couponId,
+                        IsUsed = false,
+                        AssignedDate = DateTime.UtcNow
+                    });
+                }
+
+                await _context.UserCoupons.AddRangeAsync(userCoupons);
+            }
+
+            // Remove users who haven't used the coupon
+            if (assignmentsToRemove.Any())
+            {
+                _context.UserCoupons.RemoveRange(assignmentsToRemove);
+            }
+
+            await _context.SaveChangesAsync();
+
+            // Send email notifications to newly added users
+            if (userIdsToAdd.Any())
+            {
+                var couponDto = _mapper.Map<CouponDto>(coupon);
+                var users = await _context.Users
+                    .Where(u => userIdsToAdd.Contains(u.Id))
+                    .ToListAsync();
+
+                foreach (var user in users)
+                {
+                    try
+                    {
+                        await _emailService.SendCouponAssignmentAsync(user.Email, user.Name, couponDto);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log error but don't fail the assignment
+                        Console.WriteLine($"Failed to send coupon email to {user.Email}: {ex.Message}");
+                    }
+                }
             }
         }
 

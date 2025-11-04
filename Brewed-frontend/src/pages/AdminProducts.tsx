@@ -201,10 +201,11 @@ const AdminProducts = () => {
     try {
       setLoading(true);
 
+      let newUrls: string[] = [];
+
       if (selectedFiles.length === 1) {
         const response = await api.Files.uploadImage(selectedFiles[0], 'products');
-        setUploadedImageUrl(response.data.url);
-        form.setFieldValue('imageUrl', response.data.url);
+        newUrls = [response.data.url];
         notifications.show({
           title: 'Success',
           message: 'Image uploaded successfully',
@@ -212,16 +213,21 @@ const AdminProducts = () => {
         });
       } else {
         const response = await api.Files.uploadMultipleImages(selectedFiles, 'products');
-        // Join all uploaded images with semicolon separator
-        const joinedUrls = response.data.urls.join(';');
-        setUploadedImageUrl(joinedUrls);
-        form.setFieldValue('imageUrl', joinedUrls);
+        newUrls = response.data.urls;
         notifications.show({
           title: 'Success',
           message: `${response.data.urls.length} images uploaded successfully`,
           color: 'green',
         });
       }
+
+      // Merge with existing images
+      const existingUrls = uploadedImageUrl ? uploadedImageUrl.split(';').filter(url => url.trim()) : [];
+      const allUrls = [...existingUrls, ...newUrls];
+      const joinedUrls = allUrls.join(';');
+
+      setUploadedImageUrl(joinedUrls);
+      form.setFieldValue('imageUrl', joinedUrls);
 
       setSelectedFiles([]);
     } catch (error: any) {
@@ -464,8 +470,22 @@ const AdminProducts = () => {
                   <Text size="xs" c="dimmed">Uploaded Images ({uploadedImageUrl.split(';').length}):</Text>
                   <SimpleGrid cols={3}>
                     {uploadedImageUrl.split(';').map((url, index) => (
-                      <div key={index}>
+                      <div key={index} style={{ position: 'relative' }}>
                         <Image src={url.trim()} alt={`Product ${index + 1}`} height={100} fit="contain" />
+                        <ActionIcon
+                          size="xs"
+                          color="red"
+                          variant="filled"
+                          style={{ position: 'absolute', top: 5, right: 5 }}
+                          onClick={() => {
+                            const urls = uploadedImageUrl.split(';').filter((_, i) => i !== index);
+                            const newImageUrl = urls.join(';');
+                            setUploadedImageUrl(newImageUrl);
+                            form.setFieldValue('imageUrl', newImageUrl);
+                          }}
+                        >
+                          <IconX size={12} />
+                        </ActionIcon>
                         <Text size="xs" c="dimmed" lineClamp={1}>{url.trim().split('/').pop()}</Text>
                       </div>
                     ))}

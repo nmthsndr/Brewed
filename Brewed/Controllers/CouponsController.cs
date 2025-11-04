@@ -73,11 +73,18 @@ namespace Brewed.API.Controllers
             try
             {
                 var result = await _couponService.UpdateCouponAsync(couponId, couponDto);
+
+                // Update user assignments if UserIds are provided
+                if (couponDto.UserIds != null && couponDto.UserIds.Any())
+                {
+                    await _couponService.UpdateUserAssignmentsAsync(couponId, couponDto.UserIds);
+                }
+
                 return Ok(result);
             }
-            catch (KeyNotFoundException)
+            catch (KeyNotFoundException ex)
             {
-                return NotFound("Coupon not found");
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {

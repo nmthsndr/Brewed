@@ -60,7 +60,10 @@ namespace Brewed.Services
             CreateMap<CartItem, CartItemDto>()
                 .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.Product.Id))
                 .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name))
-                .ForMember(dest => dest.ProductImageUrl, opt => opt.MapFrom(src => src.Product.ImageUrl))
+                .ForMember(dest => dest.ProductImageUrl, opt => opt.MapFrom(src =>
+                    src.Product.ImageUrl != null && src.Product.ImageUrl.Contains(";")
+                        ? src.Product.ImageUrl.Substring(0, src.Product.ImageUrl.IndexOf(";")).Trim()
+                        : src.Product.ImageUrl))
                 .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.Price * src.Quantity))
                 .ForMember(dest => dest.StockQuantity, opt => opt.MapFrom(src => src.Product.StockQuantity));
 
@@ -71,7 +74,10 @@ namespace Brewed.Services
             CreateMap<OrderItem, OrderItemDto>()
                 .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.Product.Id))
                 .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name))
-                .ForMember(dest => dest.ProductImageUrl, opt => opt.MapFrom(src => src.Product.ImageUrl));
+                .ForMember(dest => dest.ProductImageUrl, opt => opt.MapFrom(src =>
+                    src.Product.ImageUrl != null && src.Product.ImageUrl.Contains(";")
+                        ? src.Product.ImageUrl.Substring(0, src.Product.ImageUrl.IndexOf(";")).Trim()
+                        : src.Product.ImageUrl));
 
             // Address Mappings
             CreateMap<Address, AddressDto>();
