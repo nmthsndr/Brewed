@@ -225,7 +225,20 @@ const Coupons = {
   deleteCoupon: (id: number) =>
     axiosInstance.delete(`/api/coupons/${id}`),
   validateCoupon: (data: CouponValidateDto) =>
-    axiosInstance.post(`/api/coupons/validate`, data)
+    axiosInstance.post(`/api/coupons/validate`, data),
+  // New endpoints for user-coupon management
+  generateRandomCode: () =>
+    axiosInstance.get<{ code: string }>(`/api/coupons/generate-code`),
+  assignCouponToUsers: (couponId: number, userIds: number[]) =>
+    axiosInstance.post(`/api/coupons/assign`, { couponId, userIds }),
+  getUserCoupons: (userId: number) =>
+    axiosInstance.get(`/api/coupons/user/${userId}`),
+  getCouponUsers: (couponId: number) =>
+    axiosInstance.get(`/api/coupons/${couponId}/users`),
+  validateCouponForUser: (data: CouponValidateDto) =>
+    axiosInstance.post(`/api/coupons/validate-for-user`, data),
+  canUserUseCoupon: (couponCode: string) =>
+    axiosInstance.get<{ canUse: boolean }>(`/api/coupons/can-use/${couponCode}`)
 };
 
 const Users = {

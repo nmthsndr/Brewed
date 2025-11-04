@@ -33,5 +33,14 @@ namespace Brewed.DataContext.Entities
         public DateTime EndDate { get; set; }
 
         public bool IsActive { get; set; } = true;
+
+        /// Maximum number of times this coupon can be used in total (optional)
+        public int? MaxUsageCount { get; set; }
+
+        /// Current usage count
+        public int UsageCount { get; set; } = 0;
+
+        /// Felhasználók akikhez hozzá van rendelve ez a kupon
+        public virtual ICollection<UserCoupon> UserCoupons { get; set; } = new List<UserCoupon>();
     }
 }

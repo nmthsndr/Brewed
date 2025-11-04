@@ -13,13 +13,14 @@ namespace Brewed.DataContext.Dtos
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public bool IsActive { get; set; }
+        public int? MaxUsageCount { get; set; }
+        public int UsageCount { get; set; }
     }
 
     public class CouponCreateDto
     {
-        [Required]
         [StringLength(50)]
-        public string Code { get; set; }
+        public string Code { get; set; }  // Optional - can be auto-generated
 
         [StringLength(200)]
         public string Description { get; set; }
@@ -42,6 +43,13 @@ namespace Brewed.DataContext.Dtos
         public DateTime EndDate { get; set; }
 
         public bool IsActive { get; set; } = true;
+
+        [Range(1, 1000000)]
+        public int? MaxUsageCount { get; set; }
+
+        public List<int> UserIds { get; set; } = new List<int>();  // User IDs to assign the coupon to
+
+        public bool GenerateRandomCode { get; set; } = false;  // Flag to generate random code
     }
 
     public class CouponValidateDto
@@ -60,5 +68,28 @@ namespace Brewed.DataContext.Dtos
         public string Message { get; set; }
         public decimal DiscountAmount { get; set; }
         public CouponDto Coupon { get; set; }
+    }
+
+    public class UserCouponDto
+    {
+        public int Id { get; set; }
+        public int UserId { get; set; }
+        public string UserName { get; set; }
+        public string UserEmail { get; set; }
+        public int CouponId { get; set; }
+        public CouponDto Coupon { get; set; }
+        public bool IsUsed { get; set; }
+        public DateTime AssignedDate { get; set; }
+        public DateTime? UsedDate { get; set; }
+        public int? OrderId { get; set; }
+    }
+
+    public class AssignCouponDto
+    {
+        [Required]
+        public int CouponId { get; set; }
+
+        [Required]
+        public List<int> UserIds { get; set; } = new List<int>();
     }
 }

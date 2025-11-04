@@ -13,14 +13,17 @@ import {
   Badge,
   Select,
   NumberInput,
-  Switch
+  Switch,
+  MultiSelect,
+  Checkbox
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { DateInput } from "@mantine/dates";
-import { IconEdit, IconTrash, IconPlus } from "@tabler/icons-react";
+import { IconEdit, IconTrash, IconPlus, IconRefresh, IconUsers } from "@tabler/icons-react";
 import api from "../api/api";
-import { ICoupon } from "../interfaces/ICoupon";
+import { ICoupon, IUserCoupon } from "../interfaces/ICoupon";
+import { IUser } from "../interfaces/IUser";
 import { notifications } from "@mantine/notifications";
 
 const Coupons = () => {
@@ -29,6 +32,9 @@ const Coupons = () => {
   const [selectedCoupon, setSelectedCoupon] = useState<ICoupon | null>(null);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [opened, { open, close }] = useDisclosure(false);
+  const [usersModalOpened, { open: openUsersModal, close: closeUsersModal }] = useDisclosure(false);
+  const [users, setUsers] = useState<IUser[]>([]);
+  const [selectedCouponUsers, setSelectedCouponUsers] = useState<IUserCoupon[]>([]);
 
   const form = useForm({
     initialValues: {
@@ -37,12 +43,18 @@ const Coupons = () => {
       discountType: 'Percentage',
       discountValue: 0,
       minimumOrderAmount: 0,
+      maxUsageCount: undefined as number | undefined,
       startDate: new Date(),
       endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-      isActive: true
+      isActive: true,
+      generateRandomCode: false,
+      userIds: [] as number[]
     },
     validate: {
-      code: (value) => !value ? 'Coupon code is required' : null,
+      code: (value, values) => {
+        if (values.generateRandomCode) return null;
+        return !value ? 'Coupon code is required or enable random generation' : null;
+      },
       discountValue: (value) => value <= 0 ? 'Discount value must be positive' : null
     }
   });
@@ -64,8 +76,18 @@ const Coupons = () => {
     }
   };
 
+  const loadUsers = async () => {
+    try {
+      const response = await api.Users.getAllUsers();
+      setUsers(response.data);
+    } catch (error) {
+      console.error("Failed to load users:", error);
+    }
+  };
+
   useEffect(() => {
     loadCoupons();
+    loadUsers();
   }, []);
 
   const handleCreate = () => {
@@ -83,9 +105,12 @@ const Coupons = () => {
       discountType: coupon.discountType,
       discountValue: coupon.discountValue,
       minimumOrderAmount: coupon.minimumOrderAmount || 0,
+      maxUsageCount: coupon.maxUsageCount,
       startDate: new Date(coupon.startDate),
       endDate: new Date(coupon.endDate),
-      isActive: coupon.isActive
+      isActive: coupon.isActive,
+      generateRandomCode: false,
+      userIds: []
     });
     open();
   };
@@ -110,6 +135,42 @@ const Coupons = () => {
       } finally {
         setLoading(false);
       }
+    }
+  };
+
+  const handleGenerateCode = async () => {
+    try {
+      const response = await api.Coupons.generateRandomCode();
+      form.setFieldValue('code', response.data.code);
+      notifications.show({
+        title: 'Success',
+        message: 'Random code generated',
+        color: 'green',
+      });
+    } catch (error) {
+      notifications.show({
+        title: 'Error',
+        message: 'Failed to generate random code',
+        color: 'red',
+      });
+    }
+  };
+
+  const handleViewUsers = async (coupon: ICoupon) => {
+    try {
+      setLoading(true);
+      setSelectedCoupon(coupon);
+      const response = await api.Coupons.getCouponUsers(coupon.id);
+      setSelectedCouponUsers(response.data);
+      openUsersModal();
+    } catch (error) {
+      notifications.show({
+        title: 'Error',
+        message: 'Failed to load coupon users',
+        color: 'red',
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -172,6 +233,7 @@ const Coupons = () => {
               <Table.Th>Description</Table.Th>
               <Table.Th>Discount</Table.Th>
               <Table.Th>Min Order</Table.Th>
+              <Table.Th>Usage</Table.Th>
               <Table.Th>Valid Until</Table.Th>
               <Table.Th>Status</Table.Th>
               <Table.Th>Actions</Table.Th>
@@ -185,14 +247,20 @@ const Coupons = () => {
                 </Table.Td>
                 <Table.Td>{coupon.description}</Table.Td>
                 <Table.Td>
-                  {coupon.discountType === 'Percentage' 
-                    ? `${coupon.discountValue}%` 
+                  {coupon.discountType === 'Percentage'
+                    ? `${coupon.discountValue}%`
                     : `€${coupon.discountValue}`}
                 </Table.Td>
                 <Table.Td>
-                  {coupon.minimumOrderAmount 
-                    ? `€${coupon.minimumOrderAmount}` 
+                  {coupon.minimumOrderAmount
+                    ? `€${coupon.minimumOrderAmount}`
                     : '-'}
+                </Table.Td>
+                <Table.Td>
+                  <Text size="sm">
+                    {coupon.usageCount}
+                    {coupon.maxUsageCount ? `/${coupon.maxUsageCount}` : ''}
+                  </Text>
                 </Table.Td>
                 <Table.Td>
                   {new Date(coupon.endDate).toLocaleDateString()}
@@ -204,6 +272,14 @@ const Coupons = () => {
                 </Table.Td>
                 <Table.Td>
                   <Group gap="xs">
+                    <ActionIcon
+                      variant="subtle"
+                      color="grape"
+                      onClick={() => handleViewUsers(coupon)}
+                      title="View assigned users"
+                    >
+                      <IconUsers size={16} />
+                    </ActionIcon>
                     <ActionIcon
                       variant="subtle"
                       color="blue"
@@ -234,12 +310,30 @@ const Coupons = () => {
       >
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <Stack>
-            <TextInput
-              label="Coupon Code"
-              placeholder="e.g. SUMMER2025"
-              required
-              {...form.getInputProps('code')}
+            <Checkbox
+              label="Generate Random Code"
+              {...form.getInputProps('generateRandomCode', { type: 'checkbox' })}
             />
+
+            <Group grow>
+              <TextInput
+                label="Coupon Code"
+                placeholder="e.g. SUMMER2025"
+                required={!form.values.generateRandomCode}
+                disabled={form.values.generateRandomCode}
+                {...form.getInputProps('code')}
+              />
+              {!form.values.generateRandomCode && (
+                <Button
+                  variant="light"
+                  onClick={handleGenerateCode}
+                  mt="xl"
+                  leftSection={<IconRefresh size={16} />}
+                >
+                  Generate
+                </Button>
+              )}
+            </Group>
 
             <TextInput
               label="Description"
@@ -258,7 +352,7 @@ const Coupons = () => {
             />
 
             <NumberInput
-              label="Discount Value (€)"
+              label="Discount Value"
               required
               min={0}
               {...form.getInputProps('discountValue')}
@@ -268,6 +362,13 @@ const Coupons = () => {
               label="Minimum Order Amount (€)"
               min={0}
               {...form.getInputProps('minimumOrderAmount')}
+            />
+
+            <NumberInput
+              label="Maximum Usage Count (optional)"
+              description="Leave empty for unlimited usage"
+              min={1}
+              {...form.getInputProps('maxUsageCount')}
             />
 
             <DateInput
@@ -282,6 +383,18 @@ const Coupons = () => {
               {...form.getInputProps('endDate')}
             />
 
+            <MultiSelect
+              label="Assign to Users"
+              placeholder="Select users who can use this coupon"
+              searchable
+              data={users.map(user => ({
+                value: user.id.toString(),
+                label: `${user.name} (${user.email})`
+              }))}
+              value={form.values.userIds.map(id => id.toString())}
+              onChange={(values) => form.setFieldValue('userIds', values.map(v => parseInt(v)))}
+            />
+
             <Switch
               label="Active"
               {...form.getInputProps('isActive', { type: 'checkbox' })}
@@ -293,6 +406,50 @@ const Coupons = () => {
             </Group>
           </Stack>
         </form>
+      </Modal>
+
+      <Modal
+        opened={usersModalOpened}
+        onClose={closeUsersModal}
+        title={`Users for ${selectedCoupon?.code}`}
+        size="lg"
+      >
+        {selectedCouponUsers.length === 0 ? (
+          <Text ta="center" c="dimmed">No users assigned to this coupon</Text>
+        ) : (
+          <Table>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th>Name</Table.Th>
+                <Table.Th>Email</Table.Th>
+                <Table.Th>Status</Table.Th>
+                <Table.Th>Assigned</Table.Th>
+                <Table.Th>Used</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {selectedCouponUsers.map((userCoupon) => (
+                <Table.Tr key={userCoupon.id}>
+                  <Table.Td>{userCoupon.userName}</Table.Td>
+                  <Table.Td>{userCoupon.userEmail}</Table.Td>
+                  <Table.Td>
+                    <Badge color={userCoupon.isUsed ? 'gray' : 'green'}>
+                      {userCoupon.isUsed ? 'Used' : 'Available'}
+                    </Badge>
+                  </Table.Td>
+                  <Table.Td>
+                    {new Date(userCoupon.assignedDate).toLocaleDateString()}
+                  </Table.Td>
+                  <Table.Td>
+                    {userCoupon.usedDate
+                      ? new Date(userCoupon.usedDate).toLocaleDateString()
+                      : '-'}
+                  </Table.Td>
+                </Table.Tr>
+              ))}
+            </Table.Tbody>
+          </Table>
+        )}
       </Modal>
     </div>
   );

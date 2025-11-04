@@ -81,6 +81,12 @@ namespace Brewed.Services
             CreateMap<Coupon, CouponDto>();
             CreateMap<CouponCreateDto, Coupon>();
 
+            // UserCoupon Mappings
+            CreateMap<UserCoupon, UserCouponDto>()
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.Name))
+                .ForMember(dest => dest.UserEmail, opt => opt.MapFrom(src => src.User.Email))
+                .ForMember(dest => dest.Coupon, opt => opt.MapFrom(src => src.Coupon));
+
             // Review Mappings
             CreateMap<Review, ReviewDto>()
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.Name));

@@ -18,6 +18,7 @@ namespace Brewed.DataContext.Context
         public DbSet<Invoice> Invoices { get; set; }
         public DbSet<UserToken> UserTokens { get; set; }
         public DbSet<Coupon> Coupons { get; set; }
+        public DbSet<UserCoupon> UserCoupons { get; set; }
         public DbSet<GuestOrderDetails> GuestOrderDetails { get; set; }
 
         public BrewedDbContext(DbContextOptions<BrewedDbContext> options) : base(options)
@@ -191,6 +192,31 @@ namespace Brewed.DataContext.Context
 
             modelBuilder.Entity<Coupon>()
                 .HasIndex(c => c.Code)
+                .IsUnique();
+
+            // UserCoupon Relationships
+            modelBuilder.Entity<UserCoupon>()
+                .HasOne(uc => uc.User)
+                .WithMany(u => u.UserCoupons)
+                .HasForeignKey(uc => uc.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserCoupon>()
+                .HasOne(uc => uc.Coupon)
+                .WithMany(c => c.UserCoupons)
+                .HasForeignKey(uc => uc.CouponId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserCoupon>()
+                .HasOne(uc => uc.Order)
+                .WithMany()
+                .HasForeignKey(uc => uc.OrderId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Unique constraint: egy felhasználó egy kupont csak egyszer kaphat meg
+            modelBuilder.Entity<UserCoupon>()
+                .HasIndex(uc => new { uc.UserId, uc.CouponId })
                 .IsUnique();
 
             base.OnModelCreating(modelBuilder);

@@ -16,6 +16,15 @@ namespace Brewed.Services
         Task<bool> DeleteCouponAsync(int couponId);
         Task<CouponValidationResultDto> ValidateCouponAsync(string code, decimal orderAmount);
         Task<decimal> ApplyCouponAsync(string code, decimal orderAmount);
+
+        // New methods for user-coupon management
+        Task<string> GenerateRandomCouponCodeAsync();
+        Task AssignCouponToUsersAsync(int couponId, List<int> userIds);
+        Task<bool> CanUserUseCouponAsync(int userId, string couponCode);
+        Task<CouponValidationResultDto> ValidateCouponForUserAsync(int userId, string code, decimal orderAmount);
+        Task MarkCouponAsUsedAsync(int userId, string couponCode, int? orderId = null);
+        Task<List<UserCouponDto>> GetUserCouponsAsync(int userId);
+        Task<List<UserCouponDto>> GetCouponUsersAsync(int couponId);
     }
 
     public class CouponService : ICouponService
@@ -62,10 +71,18 @@ namespace Brewed.Services
 
         public async Task<CouponDto> CreateCouponAsync(CouponCreateDto couponDto)
         {
-            // Check if code already exists
-            if (await _context.Coupons.AnyAsync(c => c.Code.ToLower() == couponDto.Code.ToLower()))
+            // Generate random code if requested or if code is not provided
+            if (couponDto.GenerateRandomCode || string.IsNullOrWhiteSpace(couponDto.Code))
             {
-                throw new Exception("Coupon code already exists");
+                couponDto.Code = await GenerateRandomCouponCodeAsync();
+            }
+            else
+            {
+                // Check if code already exists
+                if (await _context.Coupons.AnyAsync(c => c.Code.ToLower() == couponDto.Code.ToLower()))
+                {
+                    throw new Exception("Coupon code already exists");
+                }
             }
 
             // Validate dates
@@ -85,6 +102,12 @@ namespace Brewed.Services
 
             await _context.Coupons.AddAsync(coupon);
             await _context.SaveChangesAsync();
+
+            // Assign coupon to users if UserIds are provided
+            if (couponDto.UserIds != null && couponDto.UserIds.Any())
+            {
+                await AssignCouponToUsersAsync(coupon.Id, couponDto.UserIds);
+            }
 
             return _mapper.Map<CouponDto>(coupon);
         }
@@ -214,6 +237,224 @@ namespace Brewed.Services
             }
 
             return validation.DiscountAmount;
+        }
+
+        // ===== New User-Coupon Management Methods =====
+
+        public async Task<string> GenerateRandomCouponCodeAsync()
+        {
+            string code;
+            bool exists;
+
+            do
+            {
+                code = CouponCodeGenerator.GenerateFormatted(4, 2); // Generates format like XXXX-XXXX
+                exists = await _context.Coupons.AnyAsync(c => c.Code == code);
+            } while (exists);
+
+            return code;
+        }
+
+        public async Task AssignCouponToUsersAsync(int couponId, List<int> userIds)
+        {
+            var coupon = await _context.Coupons.FindAsync(couponId);
+            if (coupon == null)
+            {
+                throw new KeyNotFoundException("Coupon not found");
+            }
+
+            var existingAssignments = await _context.UserCoupons
+                .Where(uc => uc.CouponId == couponId)
+                .Select(uc => uc.UserId)
+                .ToListAsync();
+
+            var newUserIds = userIds.Except(existingAssignments).ToList();
+
+            var userCoupons = new List<UserCoupon>();
+            foreach (var userId in newUserIds)
+            {
+                // Verify user exists
+                var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
+                if (!userExists)
+                {
+                    throw new KeyNotFoundException($"User with ID {userId} not found");
+                }
+
+                userCoupons.Add(new UserCoupon
+                {
+                    UserId = userId,
+                    CouponId = couponId,
+                    IsUsed = false,
+                    AssignedDate = DateTime.UtcNow
+                });
+            }
+
+            if (userCoupons.Any())
+            {
+                await _context.UserCoupons.AddRangeAsync(userCoupons);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task<bool> CanUserUseCouponAsync(int userId, string couponCode)
+        {
+            var coupon = await _context.Coupons
+                .FirstOrDefaultAsync(c => c.Code.ToLower() == couponCode.ToLower());
+
+            if (coupon == null)
+            {
+                return false;
+            }
+
+            var userCoupon = await _context.UserCoupons
+                .FirstOrDefaultAsync(uc => uc.UserId == userId && uc.CouponId == coupon.Id);
+
+            // User must have the coupon assigned and not used yet
+            return userCoupon != null && !userCoupon.IsUsed;
+        }
+
+        public async Task<CouponValidationResultDto> ValidateCouponForUserAsync(int userId, string code, decimal orderAmount)
+        {
+            var result = new CouponValidationResultDto
+            {
+                IsValid = false,
+                Message = "Invalid coupon",
+                DiscountAmount = 0
+            };
+
+            var coupon = await _context.Coupons
+                .FirstOrDefaultAsync(c => c.Code.ToLower() == code.ToLower());
+
+            if (coupon == null)
+            {
+                result.Message = "Coupon code not found";
+                return result;
+            }
+
+            // Check if user has this coupon assigned
+            var userCoupon = await _context.UserCoupons
+                .FirstOrDefaultAsync(uc => uc.UserId == userId && uc.CouponId == coupon.Id);
+
+            if (userCoupon == null)
+            {
+                result.Message = "This coupon is not assigned to you";
+                return result;
+            }
+
+            if (userCoupon.IsUsed)
+            {
+                result.Message = "You have already used this coupon";
+                return result;
+            }
+
+            if (!coupon.IsActive)
+            {
+                result.Message = "This coupon is no longer active";
+                return result;
+            }
+
+            var now = DateTime.UtcNow;
+            if (now < coupon.StartDate)
+            {
+                result.Message = $"This coupon is valid from {coupon.StartDate:yyyy.MM.dd}";
+                return result;
+            }
+
+            if (now > coupon.EndDate)
+            {
+                result.Message = "This coupon has expired";
+                return result;
+            }
+
+            if (coupon.MinimumOrderAmount.HasValue && orderAmount < coupon.MinimumOrderAmount.Value)
+            {
+                result.Message = $"Minimum order amount is €{coupon.MinimumOrderAmount.Value:N2}";
+                return result;
+            }
+
+            // Check max usage count
+            if (coupon.MaxUsageCount.HasValue && coupon.UsageCount >= coupon.MaxUsageCount.Value)
+            {
+                result.Message = "This coupon has reached its maximum usage limit";
+                return result;
+            }
+
+            // Calculate discount
+            decimal discount = 0;
+            if (coupon.DiscountType == "Percentage")
+            {
+                discount = orderAmount * (coupon.DiscountValue / 100);
+            }
+            else // FixedAmount
+            {
+                discount = coupon.DiscountValue;
+            }
+
+            // Discount cannot exceed order amount
+            discount = Math.Min(discount, orderAmount);
+
+            result.IsValid = true;
+            result.Message = "Coupon applied successfully";
+            result.DiscountAmount = discount;
+            result.Coupon = _mapper.Map<CouponDto>(coupon);
+
+            return result;
+        }
+
+        public async Task MarkCouponAsUsedAsync(int userId, string couponCode, int? orderId = null)
+        {
+            var coupon = await _context.Coupons
+                .FirstOrDefaultAsync(c => c.Code.ToLower() == couponCode.ToLower());
+
+            if (coupon == null)
+            {
+                throw new KeyNotFoundException("Coupon not found");
+            }
+
+            var userCoupon = await _context.UserCoupons
+                .FirstOrDefaultAsync(uc => uc.UserId == userId && uc.CouponId == coupon.Id);
+
+            if (userCoupon == null)
+            {
+                throw new KeyNotFoundException("User coupon assignment not found");
+            }
+
+            if (userCoupon.IsUsed)
+            {
+                throw new Exception("Coupon has already been used by this user");
+            }
+
+            userCoupon.IsUsed = true;
+            userCoupon.UsedDate = DateTime.UtcNow;
+            userCoupon.OrderId = orderId;
+
+            coupon.UsageCount++;
+
+            _context.UserCoupons.Update(userCoupon);
+            _context.Coupons.Update(coupon);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<UserCouponDto>> GetUserCouponsAsync(int userId)
+        {
+            var userCoupons = await _context.UserCoupons
+                .Include(uc => uc.Coupon)
+                .Include(uc => uc.Order)
+                .Where(uc => uc.UserId == userId)
+                .ToListAsync();
+
+            return _mapper.Map<List<UserCouponDto>>(userCoupons);
+        }
+
+        public async Task<List<UserCouponDto>> GetCouponUsersAsync(int couponId)
+        {
+            var userCoupons = await _context.UserCoupons
+                .Include(uc => uc.User)
+                .Include(uc => uc.Coupon)
+                .Where(uc => uc.CouponId == couponId)
+                .ToListAsync();
+
+            return _mapper.Map<List<UserCouponDto>>(userCoupons);
         }
     }
 }
