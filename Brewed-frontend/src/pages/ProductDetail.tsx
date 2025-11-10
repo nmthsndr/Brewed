@@ -247,7 +247,10 @@ const ProductDetail = () => {
                     style={{
                       cursor: 'pointer',
                       border: selectedImage === img.imageUrl ? '2px solid #228be6' : '2px solid transparent',
-                      transition: 'border 0.2s'
+                      transition: 'border 0.2s',
+                      minWidth: '80px',
+                      minHeight: '80px',
+                      objectFit: 'cover'
                     }}
                     onClick={() => setSelectedImage(img.imageUrl)}
                   />
@@ -269,7 +272,10 @@ const ProductDetail = () => {
                     style={{
                       cursor: 'pointer',
                       border: selectedImage === url ? '2px solid #228be6' : '2px solid transparent',
-                      transition: 'border 0.2s'
+                      transition: 'border 0.2s',
+                      minWidth: '80px',
+                      minHeight: '80px',
+                      objectFit: 'cover'
                     }}
                     onClick={() => setSelectedImage(url)}
                   />

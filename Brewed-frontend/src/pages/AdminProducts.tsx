@@ -25,6 +25,12 @@ import { IconEdit, IconTrash, IconPlus, IconUpload, IconX } from "@tabler/icons-
 import api from "../api/api";
 import { notifications } from "@mantine/notifications";
 
+interface ProductImageDto {
+  id: number;
+  imageUrl: string;
+  displayOrder: number;
+}
+
 interface Product {
   id: number;
   name: string;
@@ -36,6 +42,8 @@ interface Product {
   isCaffeineFree: boolean;
   isOrganic: boolean;
   imageUrl: string;
+  imageUrls?: string[];
+  productImages?: ProductImageDto[];
   categoryId: number;
   categoryName: string;
 }
@@ -149,7 +157,18 @@ const AdminProducts = () => {
     setModalMode('edit');
     setSelectedProduct(product);
     setSelectedFiles([]);
-    setUploadedImageUrl(product.imageUrl);
+
+    // Use productImages if available, otherwise fall back to imageUrl or imageUrls
+    let allImageUrls = '';
+    if (product.productImages && product.productImages.length > 0) {
+      allImageUrls = product.productImages.map(img => img.imageUrl).join(';');
+    } else if (product.imageUrls && product.imageUrls.length > 0) {
+      allImageUrls = product.imageUrls.join(';');
+    } else {
+      allImageUrls = product.imageUrl;
+    }
+
+    setUploadedImageUrl(allImageUrls);
     form.setValues({
       name: product.name,
       description: product.description,
@@ -159,7 +178,7 @@ const AdminProducts = () => {
       origin: product.origin,
       isCaffeineFree: product.isCaffeineFree,
       isOrganic: product.isOrganic,
-      imageUrl: product.imageUrl,
+      imageUrl: allImageUrls,
       categoryId: product.categoryId
     });
     open();
