@@ -21,18 +21,18 @@ const MyCoupons = () => {
   const [coupons, setCoupons] = useState<IUserCoupon[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { userId } = useAuth();
 
   useEffect(() => {
     loadCoupons();
   }, []);
 
   const loadCoupons = async () => {
-    if (!user?.id) return;
+    if (!userId) return;
 
     try {
       setLoading(true);
-      const response = await api.Coupons.getUserCoupons(user.id);
+      const response = await api.Coupons.getUserCoupons(parseInt(userId));
       setCoupons(response.data);
     } catch (error) {
       console.error("Failed to load coupons:", error);
