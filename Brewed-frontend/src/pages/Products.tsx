@@ -22,6 +22,7 @@ import { ICategory } from "../interfaces/ICategory";
 import ProductCard from "../components/ProductCard";
 import { notifications } from "@mantine/notifications";
 import useAuth from "../hooks/useAuth";
+import useCart from "../hooks/useCart";
 import { getGuestSessionId } from "../utils/guestSession";
 
 const Products = () => {
@@ -33,6 +34,7 @@ const Products = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch] = useDebouncedValue(searchQuery, 500);
   const { isLoggedIn } = useAuth();
+  const { refreshCartCount } = useCart();
 
   const [filters, setFilters] = useState<ProductFilterDto>({
     page: 1,
@@ -84,6 +86,7 @@ const Products = () => {
       const product = products.find(p => p.id === productId);
       const sessionId = isLoggedIn ? undefined : getGuestSessionId();
       await api.Cart.addToCart({ productId, quantity: 1 }, sessionId);
+      await refreshCartCount();
       notifications.show({
         title: 'Success',
         message: product ? `1 ${product.name} added to cart` : 'Product added to cart',

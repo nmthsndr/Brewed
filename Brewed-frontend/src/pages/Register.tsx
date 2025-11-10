@@ -53,7 +53,7 @@ const Register = () => {
     } catch (error: any) {
       notifications.show({
         title: 'Registration Failed',
-        message: error.response?.data?.message || 'Could not create account. Please try again.',
+        message: error.response?.data || 'Could not create account. Please try again.',
         color: 'red',
       });
     } finally {

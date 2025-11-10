@@ -206,20 +206,13 @@ namespace Brewed.Services
 
         public async Task<OrderDto> CreateGuestOrderAsync(GuestOrderCreateDto guestOrderCreateDto)
         {
-            // Check if email already exists in the database
+            // Check if email is registered as a user (not guest)
             var existingUser = await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == guestOrderCreateDto.Email);
 
-            if (existingUser != null)
+            if (existingUser != null && existingUser.Role != "Guest")
             {
-                if (existingUser.Role == "Guest")
-                {
-                    throw new Exception("This email is already associated with a guest order. Please use a different email or log in if you have an account.");
-                }
-                else
-                {
-                    throw new Exception("This email is already registered. Please log in to place your order.");
-                }
+                throw new Exception("This email is already registered. Please log in to place your order.");
             }
 
             // Get guest cart
@@ -254,17 +247,27 @@ namespace Brewed.Services
 
             var totalAmount = subTotal + shippingCost - discount;
 
-            // Create a temporary guest user (no password, not verified)
-            var guestUser = new User
+            // Reuse existing Guest user or create a new one
+            User guestUser;
+            if (existingUser != null && existingUser.Role == "Guest")
             {
-                Name = $"{guestOrderCreateDto.ShippingAddress.FirstName} {guestOrderCreateDto.ShippingAddress.LastName}",
-                Email = guestOrderCreateDto.Email,
-                PasswordHash = string.Empty, // No password for guest users
-                Role = "Guest",
-                EmailConfirmed = false
-            };
-            await _context.Users.AddAsync(guestUser);
-            await _context.SaveChangesAsync(); // Save to get the UserId
+                // Reuse existing guest user
+                guestUser = existingUser;
+            }
+            else
+            {
+                // Create a new temporary guest user (no password, not verified)
+                guestUser = new User
+                {
+                    Name = $"{guestOrderCreateDto.ShippingAddress.FirstName} {guestOrderCreateDto.ShippingAddress.LastName}",
+                    Email = guestOrderCreateDto.Email,
+                    PasswordHash = string.Empty, // No password for guest users
+                    Role = "Guest",
+                    EmailConfirmed = false
+                };
+                await _context.Users.AddAsync(guestUser);
+                await _context.SaveChangesAsync(); // Save to get the UserId
+            }
 
             // Create shipping address
             var shippingAddress = new Address

@@ -225,32 +225,52 @@ const ProductDetail = () => {
       <Grid>
         <Grid.Col span={{ base: 12, md: 6 }}>
           <Stack gap="sm">
-            <Image
-              src={selectedImage || product.imageUrl}
-              alt={product.name}
-              radius="md"
-              height={400}
-              fit="cover"
-            />
+            <div style={{
+              width: '100%',
+              height: '400px',
+              overflow: 'hidden',
+              borderRadius: '12px',
+              backgroundColor: '#f8f9fa',
+              border: '1px solid #e0e0e0'
+            }}>
+              <img
+                src={selectedImage || product.imageUrl}
+                alt={product.name}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover'
+                }}
+              />
+            </div>
             {/* Thumbnail images */}
             {(product.productImages && product.productImages.length > 1) && (
               <Group gap="xs">
                 {product.productImages.map((img) => (
-                  <Image
+                  <div
                     key={img.id}
-                    src={img.imageUrl}
-                    alt={`${product.name} - ${img.displayOrder}`}
-                    radius="sm"
-                    height={80}
-                    width={80}
-                    fit="cover"
                     style={{
+                      width: '80px',
+                      height: '80px',
+                      overflow: 'hidden',
+                      borderRadius: '8px',
                       cursor: 'pointer',
-                      border: selectedImage === img.imageUrl ? '2px solid #228be6' : '2px solid transparent',
-                      transition: 'border 0.2s'
+                      border: selectedImage === img.imageUrl ? '2px solid #228be6' : '2px solid #e0e0e0',
+                      transition: 'border 0.2s',
+                      flexShrink: 0
                     }}
                     onClick={() => setSelectedImage(img.imageUrl)}
-                  />
+                  >
+                    <img
+                      src={img.imageUrl}
+                      alt={`${product.name} - ${img.displayOrder}`}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover'
+                      }}
+                    />
+                  </div>
                 ))}
               </Group>
             )}
@@ -258,21 +278,30 @@ const ProductDetail = () => {
             {(!product.productImages || product.productImages.length === 0) && product.imageUrls && product.imageUrls.length > 1 && (
               <Group gap="xs">
                 {product.imageUrls.map((url, index) => (
-                  <Image
+                  <div
                     key={index}
-                    src={url}
-                    alt={`${product.name} - ${index + 1}`}
-                    radius="sm"
-                    height={80}
-                    width={80}
-                    fit="cover"
                     style={{
+                      width: '80px',
+                      height: '80px',
+                      overflow: 'hidden',
+                      borderRadius: '8px',
                       cursor: 'pointer',
-                      border: selectedImage === url ? '2px solid #228be6' : '2px solid transparent',
-                      transition: 'border 0.2s'
+                      border: selectedImage === url ? '2px solid #228be6' : '2px solid #e0e0e0',
+                      transition: 'border 0.2s',
+                      flexShrink: 0
                     }}
                     onClick={() => setSelectedImage(url)}
-                  />
+                  >
+                    <img
+                      src={url}
+                      alt={`${product.name} - ${index + 1}`}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover'
+                      }}
+                    />
+                  </div>
                 ))}
               </Group>
             )}

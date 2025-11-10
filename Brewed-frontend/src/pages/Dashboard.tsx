@@ -17,6 +17,7 @@ import { IProduct } from "../interfaces/IProduct";
 import ProductCard from "../components/ProductCard";
 import { notifications } from "@mantine/notifications";
 import useAuth from "../hooks/useAuth";
+import useCart from "../hooks/useCart";
 import { getGuestSessionId } from "../utils/guestSession";
 
 const Dashboard = () => {
@@ -24,6 +25,7 @@ const Dashboard = () => {
   const [featuredProducts, setFeaturedProducts] = useState<IProduct[]>([]);
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
+  const { refreshCartCount } = useCart();
 
   useEffect(() => {
     const loadData = async () => {
@@ -51,6 +53,7 @@ const Dashboard = () => {
       const product = featuredProducts.find(p => p.id === productId);
       const sessionId = isLoggedIn ? undefined : getGuestSessionId();
       await api.Cart.addToCart({ productId, quantity: 1 }, sessionId);
+      await refreshCartCount();
       notifications.show({
         title: 'Success',
         message: product ? `1 ${product.name} added to cart` : 'Product added to cart',
