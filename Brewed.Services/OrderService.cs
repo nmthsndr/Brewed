@@ -261,7 +261,6 @@ namespace Brewed.Services
                 PostalCode = guestOrderCreateDto.ShippingAddress.PostalCode,
                 Country = guestOrderCreateDto.ShippingAddress.Country,
                 PhoneNumber = guestOrderCreateDto.ShippingAddress.PhoneNumber,
-                AddressType = "Shipping",
                 UserId = null // Guest address - not linked to user profile
             };
             await _context.Addresses.AddAsync(shippingAddress);
@@ -277,7 +276,6 @@ namespace Brewed.Services
                 PostalCode = guestOrderCreateDto.BillingAddress.PostalCode,
                 Country = guestOrderCreateDto.BillingAddress.Country,
                 PhoneNumber = guestOrderCreateDto.BillingAddress.PhoneNumber,
-                AddressType = "Billing",
                 UserId = null // Guest address - not linked to user profile
             };
             await _context.Addresses.AddAsync(billingAddress);

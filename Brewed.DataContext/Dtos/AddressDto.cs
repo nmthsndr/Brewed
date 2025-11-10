@@ -19,7 +19,6 @@ namespace Brewed.DataContext.Dtos
         public string Country { get; set; }
         public string PhoneNumber { get; set; }
         public bool IsDefault { get; set; }
-        public string AddressType { get; set; }
     }
 
     public class AddressCreateDto
@@ -56,8 +55,5 @@ namespace Brewed.DataContext.Dtos
         public string PhoneNumber { get; set; }
 
         public bool IsDefault { get; set; }
-
-        [StringLength(50)]
-        public string AddressType { get; set; } = "Shipping";
     }
 }

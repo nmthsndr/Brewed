@@ -9,5 +9,4 @@ export interface IAddress {
   country: string;
   phoneNumber: string;
   isDefault: boolean;
-  addressType: string;
 }

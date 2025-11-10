@@ -272,11 +272,11 @@
             // Create Addresses for Users
             var addresses = new List<Address>
     {
-        new() { FirstName = "Sarah", LastName = "Miller", AddressLine1 = "Kurfürstendamm 123", City = "Berlin", PostalCode = "10719", Country = "Germany", PhoneNumber = "+49 30 12345678", IsDefault = true, AddressType = "Shipping", UserId = users[0].Id },
-        new() { FirstName = "James", LastName = "Brown", AddressLine1 = "Leopoldstraße 45", City = "Munich", PostalCode = "80802", Country = "Germany", PhoneNumber = "+49 89 98765432", IsDefault = true, AddressType = "Shipping", UserId = users[1].Id },
-        new() { FirstName = "Emma", LastName = "Wilson", AddressLine1 = "Zeil 78", City = "Frankfurt", PostalCode = "60313", Country = "Germany", PhoneNumber = "+49 69 55544433", IsDefault = true, AddressType = "Shipping", UserId = users[2].Id },
-        new() { FirstName = "Michael", LastName = "Davis", AddressLine1 = "Mönckebergstraße 12", City = "Hamburg", PostalCode = "20095", Country = "Germany", PhoneNumber = "+49 40 22334455", IsDefault = true, AddressType = "Shipping", UserId = users[3].Id },
-        new() { FirstName = "Lisa", LastName = "Anderson", AddressLine1 = "Königsallee 89", City = "Düsseldorf", PostalCode = "40212", Country = "Germany", PhoneNumber = "+49 211 66778899", IsDefault = true, AddressType = "Shipping", UserId = users[4].Id },
+        new() { FirstName = "Sarah", LastName = "Miller", AddressLine1 = "Kurfürstendamm 123", City = "Berlin", PostalCode = "10719", Country = "Germany", PhoneNumber = "+49 30 12345678", IsDefault = true, UserId = users[0].Id },
+        new() { FirstName = "James", LastName = "Brown", AddressLine1 = "Leopoldstraße 45", City = "Munich", PostalCode = "80802", Country = "Germany", PhoneNumber = "+49 89 98765432", IsDefault = true, UserId = users[1].Id },
+        new() { FirstName = "Emma", LastName = "Wilson", AddressLine1 = "Zeil 78", City = "Frankfurt", PostalCode = "60313", Country = "Germany", PhoneNumber = "+49 69 55544433", IsDefault = true, UserId = users[2].Id },
+        new() { FirstName = "Michael", LastName = "Davis", AddressLine1 = "Mönckebergstraße 12", City = "Hamburg", PostalCode = "20095", Country = "Germany", PhoneNumber = "+49 40 22334455", IsDefault = true, UserId = users[3].Id },
+        new() { FirstName = "Lisa", LastName = "Anderson", AddressLine1 = "Königsallee 89", City = "Düsseldorf", PostalCode = "40212", Country = "Germany", PhoneNumber = "+49 211 66778899", IsDefault = true, UserId = users[4].Id },
     };
             context.Addresses.AddRange(addresses);
             context.SaveChanges();

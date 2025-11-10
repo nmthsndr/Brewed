@@ -71,7 +71,6 @@ export interface AddressCreateDto {
   country: string;
   phoneNumber: string;
   isDefault: boolean;
-  addressType: string;
 }
 
 export interface OrderCreateDto {

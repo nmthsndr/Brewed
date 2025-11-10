@@ -44,9 +44,6 @@ namespace Brewed.DataContext.Entities
 
         public bool IsDefault { get; set; } = false;
 
-        [StringLength(50)]
-        public string AddressType { get; set; } = "Shipping"; // Shipping, Billing, Both
-
         // Nullable for guest addresses
         public int? UserId { get; set; }
 

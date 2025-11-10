@@ -172,6 +172,13 @@ const Checkout = () => {
       if (isLoggedIn) {
         const addressesRes = await api.Addresses.getAddresses();
         setAddresses(addressesRes.data);
+
+        // Auto-select default address if exists
+        const defaultAddress = addressesRes.data.find((addr: IAddress) => addr.isDefault);
+        if (defaultAddress) {
+          loggedInForm.setFieldValue('shippingAddressId', defaultAddress.id);
+          loggedInForm.setFieldValue('billingAddressId', defaultAddress.id);
+        }
       }
     } catch (error) {
       console.error("Failed to load checkout data:", error);
@@ -237,7 +244,6 @@ const Checkout = () => {
       if (showNewShippingForm) {
         const newShippingRes = await api.Addresses.createAddress({
           ...values.newShippingAddress,
-          addressType: 'Shipping',
           isDefault: false
         });
         shippingAddressId = newShippingRes.data.id;
@@ -247,7 +253,6 @@ const Checkout = () => {
       if (!sameAsShipping && showNewBillingForm) {
         const newBillingRes = await api.Addresses.createAddress({
           ...values.newBillingAddress,
-          addressType: 'Billing',
           isDefault: false
         });
         billingAddressId = newBillingRes.data.id;
