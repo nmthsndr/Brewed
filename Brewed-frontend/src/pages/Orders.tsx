@@ -11,7 +11,7 @@ import {
   Stack,
   Accordion
 } from "@mantine/core";
-import { IconPackage } from "@tabler/icons-react";
+import { IconPackage, IconDownload, IconAlertCircle } from "@tabler/icons-react";
 import api from "../api/api";
 import { IOrder } from "../interfaces/IOrder";
 import { notifications } from "@mantine/notifications";
@@ -111,6 +111,26 @@ const Orders = () => {
                       </Table.Tbody>
                     </Table>
 
+                    {order.status === 'Cancelled' && order.notes && (
+                      <Card
+                        withBorder
+                        p="md"
+                        mt="md"
+                        style={{
+                          backgroundColor: '#fff3cd',
+                          borderLeft: '4px solid #ffc107'
+                        }}
+                      >
+                        <Group gap="xs" align="flex-start">
+                          <IconAlertCircle size={20} color="#856404" />
+                          <div style={{ flex: 1 }}>
+                            <Text fw={600} size="sm" c="#856404">Cancellation Reason:</Text>
+                            <Text size="sm" c="#856404" mt="xs">{order.notes}</Text>
+                          </div>
+                        </Group>
+                      </Card>
+                    )}
+
                     <Text fw={600} mt="md">Shipping Address:</Text>
                     <Text size="sm">
                       {order.shippingAddress.firstName} {order.shippingAddress.lastName}<br />
@@ -128,6 +148,19 @@ const Orders = () => {
                         )}
                         <Text fw={700}>Total: €{order.totalAmount.toFixed(2)}</Text>
                       </div>
+                      {order.invoice && (
+                        <Button
+                          leftSection={<IconDownload size={16} />}
+                          variant="light"
+                          color="blue"
+                          component="a"
+                          href={order.invoice.pdfUrl}
+                          target="_blank"
+                          download
+                        >
+                          Download Invoice
+                        </Button>
+                      )}
                     </Group>
                   </Stack>
                 </Accordion.Panel>

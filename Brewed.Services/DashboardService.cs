@@ -25,15 +25,29 @@ namespace Brewed.Services
             var now = DateTime.UtcNow;
             var monthStart = new DateTime(now.Year, now.Month, 1);
 
-            // Total Revenue
+            // Total Revenue (exclude cancelled/refunded orders)
             var totalRevenue = await _context.Orders
-                .Where(o => o.Status == "Delivered")
+                .Where(o => o.Status == "Delivered" || (o.Status != "Cancelled" && o.PaymentStatus != "Refunded"))
                 .SumAsync(o => o.TotalAmount);
 
-            // Monthly Revenue
-            var monthlyRevenue = await _context.Orders
-                .Where(o => o.Status == "Delivered" && o.OrderDate >= monthStart)
+            // Subtract refunded amounts
+            var totalRefunded = await _context.Orders
+                .Where(o => o.Status == "Cancelled" && o.PaymentStatus == "Refunded")
                 .SumAsync(o => o.TotalAmount);
+
+            totalRevenue -= totalRefunded;
+
+            // Monthly Revenue (exclude cancelled/refunded orders)
+            var monthlyRevenue = await _context.Orders
+                .Where(o => (o.Status == "Delivered" || (o.Status != "Cancelled" && o.PaymentStatus != "Refunded")) && o.OrderDate >= monthStart)
+                .SumAsync(o => o.TotalAmount);
+
+            // Subtract monthly refunded amounts
+            var monthlyRefunded = await _context.Orders
+                .Where(o => o.Status == "Cancelled" && o.PaymentStatus == "Refunded" && o.OrderDate >= monthStart)
+                .SumAsync(o => o.TotalAmount);
+
+            monthlyRevenue -= monthlyRefunded;
 
             // Total Orders
             var totalOrders = await _context.Orders.CountAsync();
@@ -93,17 +107,18 @@ namespace Brewed.Services
                 })
                 .ToListAsync();
 
-            // Monthly Revenue Chart (Last 6 months)
+            // Monthly Revenue Chart (Last 6 months, exclude cancelled/refunded)
             var sixMonthsAgo = now.AddMonths(-6);
             var monthlyRevenueData = await _context.Orders
-                .Where(o => o.Status == "Delivered" && o.OrderDate >= sixMonthsAgo)
+                .Where(o => o.OrderDate >= sixMonthsAgo)
                 .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month })
                 .Select(g => new
                 {
                     Year = g.Key.Year,
                     Month = g.Key.Month,
-                    Revenue = g.Sum(o => o.TotalAmount),
-                    OrderCount = g.Count()
+                    Revenue = g.Where(o => o.Status == "Delivered").Sum(o => o.TotalAmount) -
+                              g.Where(o => o.Status == "Cancelled" && o.PaymentStatus == "Refunded").Sum(o => o.TotalAmount),
+                    OrderCount = g.Count(o => o.Status != "Cancelled")
                 })
                 .ToListAsync();
             var monthlyRevenueChart = monthlyRevenueData
@@ -181,9 +196,12 @@ namespace Brewed.Services
                     UserId = u.Id,
                     Name = u.Name,
                     Email = u.Email,
-                    TotalOrders = u.Orders.Count,
+                    TotalOrders = u.Orders.Count(o => o.Status != "Cancelled"),
                     TotalSpent = u.Orders
                         .Where(o => o.Status == "Delivered")
+                        .Sum(o => o.TotalAmount) -
+                        u.Orders
+                        .Where(o => o.Status == "Cancelled" && o.PaymentStatus == "Refunded")
                         .Sum(o => o.TotalAmount),
                     LastOrderDate = u.Orders
                         .OrderByDescending(o => o.OrderDate)
