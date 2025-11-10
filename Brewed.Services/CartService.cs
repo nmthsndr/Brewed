@@ -100,7 +100,7 @@ namespace Brewed.Services
 
             if (product.StockQuantity < quantity)
             {
-                throw new Exception("Insufficient stock");
+                throw new Exception($"Nincs elég termék raktáron. Elérhető mennyiség: {product.StockQuantity} db");
             }
 
             var cart = await GetOrCreateCartAsync(userId, sessionId);
@@ -113,7 +113,7 @@ namespace Brewed.Services
 
                 if (product.StockQuantity < existingItem.Quantity)
                 {
-                    throw new Exception("Insufficient stock");
+                    throw new Exception($"Nincs elég termék raktáron. Elérhető mennyiség: {product.StockQuantity} db, kosárban már: {existingItem.Quantity - quantity} db");
                 }
 
                 _context.CartItems.Update(existingItem);
@@ -150,7 +150,7 @@ namespace Brewed.Services
 
             if (cartItem.Product.StockQuantity < quantity)
             {
-                throw new Exception("Insufficient stock");
+                throw new Exception($"Nincs elég termék raktáron. Elérhető mennyiség: {cartItem.Product.StockQuantity} db");
             }
 
             cartItem.Quantity = quantity;
