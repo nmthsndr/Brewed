@@ -225,13 +225,24 @@ const ProductDetail = () => {
       <Grid>
         <Grid.Col span={{ base: 12, md: 6 }}>
           <Stack gap="sm">
-            <Image
-              src={selectedImage || product.imageUrl}
-              alt={product.name}
-              radius="md"
-              height={400}
-              fit="cover"
-            />
+            <div style={{
+              width: '100%',
+              height: '400px',
+              overflow: 'hidden',
+              borderRadius: '12px',
+              backgroundColor: '#f8f9fa',
+              border: '1px solid #e0e0e0'
+            }}>
+              <img
+                src={selectedImage || product.imageUrl}
+                alt={product.name}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover'
+                }}
+              />
+            </div>
             {/* Thumbnail images */}
             {(product.productImages && product.productImages.length > 1) && (
               <Group gap="xs">
