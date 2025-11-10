@@ -32,7 +32,7 @@ const AdminOrders = () => {
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [generatingInvoice, setGeneratingInvoice] = useState(false);
   const [cancelModalOpened, setCancelModalOpened] = useState(false);
-  const [cancellationNote, setCancellationNote] = useState("");
+  const [orderNotes, setOrderNotes] = useState("");
 
   useEffect(() => {
     loadOrders();
@@ -92,7 +92,7 @@ const AdminOrders = () => {
   const handleCancelWithNote = async () => {
     if (!selectedOrder) return;
 
-    if (!cancellationNote.trim()) {
+    if (!orderNotes.trim()) {
       notifications.show({
         title: 'Error',
         message: 'Please provide a cancellation reason',
@@ -103,7 +103,7 @@ const AdminOrders = () => {
 
     try {
       setUpdatingStatus(true);
-      await api.Orders.updateOrderStatus(selectedOrder.id, "Cancelled", cancellationNote);
+      await api.Orders.updateOrderStatus(selectedOrder.id, "Cancelled", orderNotes);
       notifications.show({
         title: 'Success',
         message: 'Order cancelled successfully',
@@ -112,7 +112,7 @@ const AdminOrders = () => {
       loadOrders();
       setCancelModalOpened(false);
       setModalOpened(false);
-      setCancellationNote("");
+      setOrderNotes("");
     } catch (error: any) {
       console.error("Failed to cancel order:", error);
       notifications.show({
@@ -379,7 +379,7 @@ const AdminOrders = () => {
         opened={cancelModalOpened}
         onClose={() => {
           setCancelModalOpened(false);
-          setCancellationNote("");
+          setOrderNotes("");
         }}
         title="Cancel Order - Provide Reason"
         size="md"
@@ -392,8 +392,8 @@ const AdminOrders = () => {
           <Textarea
             label="Cancellation Reason"
             placeholder="Enter the reason for cancellation..."
-            value={cancellationNote}
-            onChange={(e) => setCancellationNote(e.target.value)}
+            value={orderNotes}
+            onChange={(e) => setOrderNotes(e.target.value)}
             minRows={4}
             maxRows={8}
             required
@@ -404,7 +404,7 @@ const AdminOrders = () => {
               variant="default"
               onClick={() => {
                 setCancelModalOpened(false);
-                setCancellationNote("");
+                setOrderNotes("");
               }}
               disabled={updatingStatus}
             >

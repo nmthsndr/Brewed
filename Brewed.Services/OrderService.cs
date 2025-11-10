@@ -510,7 +510,7 @@ namespace Brewed.Services
             else if (statusDto.Status == "Cancelled")
             {
                 // Save cancellation note
-                order.CancellationNote = statusDto.CancellationNote;
+                order.Notes = statusDto.Notes;
                 order.PaymentStatus = "Refunded";
 
                 // Restore stock
@@ -528,7 +528,7 @@ namespace Brewed.Services
             var user = await _context.Users.FindAsync(order.UserId);
             if (user != null)
             {
-                await _emailService.SendOrderStatusUpdateAsync(user.Email, user.Name, order.OrderNumber, order.Status, order.CancellationNote);
+                await _emailService.SendOrderStatusUpdateAsync(user.Email, user.Name, order.OrderNumber, order.Status, order.Notes);
             }
 
             return await GetOrderByIdAsync(orderId, order.UserId, true);
@@ -576,7 +576,7 @@ namespace Brewed.Services
                 Status = order.Status,
                 PaymentMethod = order.PaymentMethod,
                 PaymentStatus = order.PaymentStatus,
-                CancellationNote = order.CancellationNote,
+                Notes = order.Notes,
                 ShippedAt = order.ShippedAt,
                 DeliveredAt = order.DeliveredAt,
                 ShippingAddress = _mapper.Map<AddressDto>(order.ShippingAddress),

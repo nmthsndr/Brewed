@@ -10,7 +10,7 @@ namespace Brewed.Services
         Task SendEmailConfirmationAsync(string email, string name, string confirmationToken);
         Task SendPasswordResetAsync(string email, string name, string resetToken);
         Task SendOrderConfirmationAsync(OrderDto orderDetails);
-        Task SendOrderStatusUpdateAsync(string email, string name, string orderNumber, string status, string cancellationNote = null);
+        Task SendOrderStatusUpdateAsync(string email, string name, string orderNumber, string status, string notes = null);
         Task SendLowStockAlertAsync(string productName, int currentStock, List<string> adminEmails);
         Task SendInvoiceEmailAsync(OrderDto orderDetails);
         Task SendCouponAssignmentAsync(string email, string name, CouponDto coupon);
@@ -252,7 +252,7 @@ namespace Brewed.Services
             await SendEmailAsync(orderDetails.User.Email, subject, body);
         }
 
-        public async Task SendOrderStatusUpdateAsync(string email, string name, string orderNumber, string status, string cancellationNote = null)
+        public async Task SendOrderStatusUpdateAsync(string email, string name, string orderNumber, string status, string notes = null)
         {
             var subject = $"Order Status Update - {orderNumber}";
 
@@ -267,12 +267,12 @@ namespace Brewed.Services
             var statusText = statusMessages.GetValueOrDefault(status, "has been updated");
 
             var cancellationNoteHtml = "";
-            if (status == "Cancelled" && !string.IsNullOrEmpty(cancellationNote))
+            if (status == "Cancelled" && !string.IsNullOrEmpty(notes))
             {
                 cancellationNoteHtml = $@"
                     <div style='background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px;'>
                         <h4 style='color: #856404; margin: 0 0 10px 0; font-size: 16px;'>Cancellation Reason:</h4>
-                        <p style='color: #856404; margin: 0; line-height: 1.6;'>{cancellationNote}</p>
+                        <p style='color: #856404; margin: 0; line-height: 1.6;'>{notes}</p>
                     </div>
                 ";
             }
