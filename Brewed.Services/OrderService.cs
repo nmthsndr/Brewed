@@ -206,6 +206,15 @@ namespace Brewed.Services
 
         public async Task<OrderDto> CreateGuestOrderAsync(GuestOrderCreateDto guestOrderCreateDto)
         {
+            // Check if email is registered as a user (not guest)
+            var existingUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == guestOrderCreateDto.Email);
+
+            if (existingUser != null && existingUser.Role != "Guest")
+            {
+                throw new Exception("This email is already registered. Please log in to place your order.");
+            }
+
             // Get guest cart
             var cart = await _context.Carts
                 .Include(c => c.CartItems)
