@@ -490,7 +490,27 @@ const AdminProducts = () => {
                   <SimpleGrid cols={3}>
                     {uploadedImageUrl.split(';').map((url, index) => (
                       <div key={index} style={{ position: 'relative' }}>
-                        <Image src={url.trim()} alt={`Product ${index + 1}`} height={100} fit="contain" />
+                        <div style={{
+                          width: '100%',
+                          height: '120px',
+                          overflow: 'hidden',
+                          borderRadius: '8px',
+                          border: '1px solid #e0e0e0',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: '#f8f9fa'
+                        }}>
+                          <img
+                            src={url.trim()}
+                            alt={`Product ${index + 1}`}
+                            style={{
+                              maxWidth: '100%',
+                              maxHeight: '100%',
+                              objectFit: 'contain'
+                            }}
+                          />
+                        </div>
                         <ActionIcon
                           size="xs"
                           color="red"
@@ -515,12 +535,24 @@ const AdminProducts = () => {
                 <SimpleGrid cols={3}>
                   {Array.from(selectedFiles).map((file, index) => (
                     <div key={index}>
-                      <Image
-                        src={URL.createObjectURL(file)}
-                        alt={`Preview ${index + 1}`}
-                        height={100}
-                        fit="cover"
-                      />
+                      <div style={{
+                        width: '100%',
+                        height: '120px',
+                        overflow: 'hidden',
+                        borderRadius: '8px',
+                        border: '1px solid #e0e0e0',
+                        marginBottom: '4px'
+                      }}>
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={`Preview ${index + 1}`}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                          }}
+                        />
+                      </div>
                       <Text size="xs" c="dimmed" lineClamp={1}>{file.name}</Text>
                     </div>
                   ))}
