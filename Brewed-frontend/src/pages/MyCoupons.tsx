@@ -15,7 +15,7 @@ import { IconTicket, IconCopy, IconCheck } from "@tabler/icons-react";
 import api from "../api/api";
 import { IUserCoupon } from "../interfaces/ICoupon";
 import { notifications } from "@mantine/notifications";
-import { useAuth } from "../context/AuthContext";
+import useAuth from "../hooks/useAuth";
 
 const MyCoupons = () => {
   const [coupons, setCoupons] = useState<IUserCoupon[]>([]);
