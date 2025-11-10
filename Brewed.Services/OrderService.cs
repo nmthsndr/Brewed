@@ -247,17 +247,27 @@ namespace Brewed.Services
 
             var totalAmount = subTotal + shippingCost - discount;
 
-            // Create a temporary guest user (no password, not verified)
-            var guestUser = new User
+            // Reuse existing Guest user or create a new one
+            User guestUser;
+            if (existingUser != null && existingUser.Role == "Guest")
             {
-                Name = $"{guestOrderCreateDto.ShippingAddress.FirstName} {guestOrderCreateDto.ShippingAddress.LastName}",
-                Email = guestOrderCreateDto.Email,
-                PasswordHash = string.Empty, // No password for guest users
-                Role = "Guest",
-                EmailConfirmed = false
-            };
-            await _context.Users.AddAsync(guestUser);
-            await _context.SaveChangesAsync(); // Save to get the UserId
+                // Reuse existing guest user
+                guestUser = existingUser;
+            }
+            else
+            {
+                // Create a new temporary guest user (no password, not verified)
+                guestUser = new User
+                {
+                    Name = $"{guestOrderCreateDto.ShippingAddress.FirstName} {guestOrderCreateDto.ShippingAddress.LastName}",
+                    Email = guestOrderCreateDto.Email,
+                    PasswordHash = string.Empty, // No password for guest users
+                    Role = "Guest",
+                    EmailConfirmed = false
+                };
+                await _context.Users.AddAsync(guestUser);
+                await _context.SaveChangesAsync(); // Save to get the UserId
+            }
 
             // Create shipping address
             var shippingAddress = new Address
