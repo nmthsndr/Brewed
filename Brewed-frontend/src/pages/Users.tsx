@@ -184,13 +184,13 @@ const Users = () => {
                 </Table.Td>
                 <Table.Td>{user.email}</Table.Td>
                 <Table.Td>
-                  <Badge color={user.role === 'Admin' ? 'red' : 'blue'}>
+                  <Badge color={user.role === 'Admin' ? 'red' : (user.role === 'Guest' ? 'orange' : 'blue')}>
                     {user.role}
                   </Badge>
                 </Table.Td>
                 <Table.Td>
-                  <Badge color={user.emailConfirmed ? 'green' : 'gray'}>
-                    {user.emailConfirmed ? 'Confirmed' : 'Pending'}
+                  <Badge color={user.emailConfirmed ? 'green' : (user.role === 'Guest' ? 'orange' : 'gray')}>
+                    {user.emailConfirmed ? 'Confirmed' : (user.role === 'Guest' ? 'Guest' : 'Pending')}
                   </Badge>
                 </Table.Td>
                 <Table.Td>

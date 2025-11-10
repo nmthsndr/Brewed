@@ -36,8 +36,7 @@ const AddressManagement = () => {
       postalCode: '',
       country: '',
       phoneNumber: '',
-      isDefault: false,
-      addressType: 'Shipping'
+      isDefault: false
     },
     validate: {
       firstName: (value) => !value ? 'First name is required' : null,
@@ -178,7 +177,6 @@ const AddressManagement = () => {
               <Table.Th>Address</Table.Th>
               <Table.Th>City</Table.Th>
               <Table.Th>Phone</Table.Th>
-              <Table.Th>Type</Table.Th>
               <Table.Th>Actions</Table.Th>
             </Table.Tr>
           </Table.Thead>
@@ -194,7 +192,6 @@ const AddressManagement = () => {
                 <Table.Td>{address.addressLine1}</Table.Td>
                 <Table.Td>{address.city}, {address.postalCode}</Table.Td>
                 <Table.Td>{address.phoneNumber}</Table.Td>
-                <Table.Td>{address.addressType}</Table.Td>
                 <Table.Td>
                   <Group gap="xs">
                     {!address.isDefault && (
@@ -292,17 +289,6 @@ const AddressManagement = () => {
               placeholder="+1 (555) 123-4567"
               required
               {...form.getInputProps('phoneNumber')}
-            />
-
-            <Select
-              label="Address Type"
-              placeholder="Select address type"
-              required
-              data={[
-                { value: 'Shipping', label: 'Shipping Address' },
-                { value: 'Billing', label: 'Billing Address' }
-              ]}
-              {...form.getInputProps('addressType')}
             />
 
             <Checkbox

@@ -81,11 +81,12 @@ const Products = () => {
 
   const handleAddToCart = async (productId: number) => {
     try {
+      const product = products.find(p => p.id === productId);
       const sessionId = isLoggedIn ? undefined : getGuestSessionId();
       await api.Cart.addToCart({ productId, quantity: 1 }, sessionId);
       notifications.show({
         title: 'Success',
-        message: 'Product added to cart',
+        message: product ? `1 ${product.name} added to cart` : 'Product added to cart',
         color: 'green',
       });
     } catch (error) {

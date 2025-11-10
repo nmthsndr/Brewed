@@ -47,7 +47,7 @@ namespace Brewed.Services
         {
             if (await _context.Users.AnyAsync(u => u.Email == userDto.Email))
             {
-                throw new Exception("Email already exists");
+                throw new Exception("This email is already registered. Please use a different email or log in.");
             }
 
             var user = _mapper.Map<User>(userDto);
@@ -137,7 +137,7 @@ namespace Brewed.Services
 
             if (await _context.Users.AnyAsync(u => u.Email == userDto.Email && u.Id != userId))
             {
-                throw new Exception("Email already exists");
+                throw new Exception("This email is already in use. Please use a different email.");
             }
 
             user.Name = userDto.Name;
@@ -284,7 +284,7 @@ namespace Brewed.Services
         {
             if (await _context.Users.AnyAsync(u => u.Email == userDto.Email))
             {
-                throw new Exception("Email already exists");
+                throw new Exception("This email is already registered. Please use a different email.");
             }
 
             var user = _mapper.Map<User>(userDto);
@@ -308,7 +308,7 @@ namespace Brewed.Services
 
             if (await _context.Users.AnyAsync(u => u.Email == userDto.Email && u.Id != userId))
             {
-                throw new Exception("Email already exists");
+                throw new Exception("This email is already in use. Please use a different email.");
             }
 
             user.Name = userDto.Name;

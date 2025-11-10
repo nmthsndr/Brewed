@@ -80,8 +80,7 @@ namespace Brewed.Services
                 PostalCode = addressDto.PostalCode,
                 Country = addressDto.Country,
                 PhoneNumber = addressDto.PhoneNumber,
-                IsDefault = addressDto.IsDefault,
-                AddressType = addressDto.AddressType
+                IsDefault = addressDto.IsDefault
             };
 
             await _context.Addresses.AddAsync(address);
@@ -126,7 +125,6 @@ namespace Brewed.Services
             address.Country = addressDto.Country;
             address.PhoneNumber = addressDto.PhoneNumber;
             address.IsDefault = addressDto.IsDefault;
-            address.AddressType = addressDto.AddressType;
 
             _context.Addresses.Update(address);
             await _context.SaveChangesAsync();
