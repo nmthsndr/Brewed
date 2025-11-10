@@ -12,6 +12,7 @@ export interface IOrder {
   status: string;
   paymentMethod: string;
   paymentStatus: string;
+  cancellationNote?: string;
   shippedAt?: string;
   deliveredAt?: string;
   shippingAddress: IAddress;

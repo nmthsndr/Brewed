@@ -36,6 +36,9 @@ namespace Brewed.DataContext.Entities
         [StringLength(500)]
         public string? Notes { get; set; }
 
+        [StringLength(1000)]
+        public string? CancellationNote { get; set; }
+
         public DateTime? ShippedAt { get; set; }
         public DateTime? DeliveredAt { get; set; }
 
