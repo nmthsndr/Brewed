@@ -157,10 +157,10 @@ const ProductDetail = () => {
         message: `${quantity} ${product.name} added to cart`,
         color: 'green',
       });
-    } catch (error) {
+    } catch (error: any) {
       notifications.show({
         title: 'Error',
-        message: 'Failed to add product to cart',
+        message: error.response?.data || 'Failed to add product to cart',
         color: 'red',
       });
     }

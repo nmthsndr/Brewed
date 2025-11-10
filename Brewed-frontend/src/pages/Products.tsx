@@ -89,10 +89,10 @@ const Products = () => {
         message: product ? `1 ${product.name} added to cart` : 'Product added to cart',
         color: 'green',
       });
-    } catch (error) {
+    } catch (error: any) {
       notifications.show({
         title: 'Error',
-        message: 'Failed to add product to cart',
+        message: error.response?.data || 'Failed to add product to cart',
         color: 'red',
       });
     }

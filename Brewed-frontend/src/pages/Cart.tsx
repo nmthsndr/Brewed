@@ -57,10 +57,10 @@ const Cart = () => {
       await api.Cart.updateCartItem(cartItemId, { quantity });
       await loadCart();
       await refreshCartCount();
-    } catch (error) {
+    } catch (error: any) {
       notifications.show({
         title: 'Error',
-        message: 'Failed to update quantity',
+        message: error.response?.data || 'Failed to update quantity',
         color: 'red',
       });
     }
