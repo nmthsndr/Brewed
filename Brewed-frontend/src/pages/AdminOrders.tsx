@@ -13,7 +13,8 @@ import {
   Select,
   TextInput,
   Pagination,
-  Modal
+  Modal,
+  Textarea
 } from "@mantine/core";
 import { IconPackage, IconSearch } from "@tabler/icons-react";
 import api from "../api/api";
@@ -30,6 +31,8 @@ const AdminOrders = () => {
   const [modalOpened, setModalOpened] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [generatingInvoice, setGeneratingInvoice] = useState(false);
+  const [cancelModalOpened, setCancelModalOpened] = useState(false);
+  const [orderNotes, setOrderNotes] = useState("");
 
   useEffect(() => {
     loadOrders();
@@ -58,6 +61,12 @@ const AdminOrders = () => {
   };
 
   const handleStatusUpdate = async (orderId: number, newStatus: string) => {
+    // If cancelling, open the cancellation note modal
+    if (newStatus === "Cancelled") {
+      setCancelModalOpened(true);
+      return;
+    }
+
     try {
       setUpdatingStatus(true);
       await api.Orders.updateOrderStatus(orderId, newStatus);
@@ -73,6 +82,42 @@ const AdminOrders = () => {
       notifications.show({
         title: 'Error',
         message: error.response?.data || 'Failed to update order status',
+        color: 'red',
+      });
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  const handleCancelWithNote = async () => {
+    if (!selectedOrder) return;
+
+    if (!orderNotes.trim()) {
+      notifications.show({
+        title: 'Error',
+        message: 'Please provide a cancellation reason',
+        color: 'red',
+      });
+      return;
+    }
+
+    try {
+      setUpdatingStatus(true);
+      await api.Orders.updateOrderStatus(selectedOrder.id, "Cancelled", orderNotes);
+      notifications.show({
+        title: 'Success',
+        message: 'Order cancelled successfully',
+        color: 'green',
+      });
+      loadOrders();
+      setCancelModalOpened(false);
+      setModalOpened(false);
+      setOrderNotes("");
+    } catch (error: any) {
+      console.error("Failed to cancel order:", error);
+      notifications.show({
+        title: 'Error',
+        message: error.response?.data || 'Failed to cancel order',
         color: 'red',
       });
     } finally {
@@ -328,6 +373,52 @@ const AdminOrders = () => {
             </div>
           </Stack>
         )}
+      </Modal>
+
+      <Modal
+        opened={cancelModalOpened}
+        onClose={() => {
+          setCancelModalOpened(false);
+          setOrderNotes("");
+        }}
+        title="Cancel Order - Provide Reason"
+        size="md"
+      >
+        <Stack gap="md">
+          <Text size="sm" c="dimmed">
+            Please provide a reason for cancelling this order. This will be sent to the customer via email.
+          </Text>
+
+          <Textarea
+            label="Cancellation Reason"
+            placeholder="Enter the reason for cancellation..."
+            value={orderNotes}
+            onChange={(e) => setOrderNotes(e.target.value)}
+            minRows={4}
+            maxRows={8}
+            required
+          />
+
+          <Group justify="flex-end" gap="sm">
+            <Button
+              variant="default"
+              onClick={() => {
+                setCancelModalOpened(false);
+                setOrderNotes("");
+              }}
+              disabled={updatingStatus}
+            >
+              Cancel
+            </Button>
+            <Button
+              color="red"
+              onClick={handleCancelWithNote}
+              loading={updatingStatus}
+            >
+              Confirm Cancellation
+            </Button>
+          </Group>
+        </Stack>
       </Modal>
     </div>
   );

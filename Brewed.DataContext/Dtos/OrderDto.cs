@@ -20,6 +20,7 @@ namespace Brewed.DataContext.Dtos
         public string Status { get; set; }
         public string PaymentMethod { get; set; }
         public string PaymentStatus { get; set; }
+        public string Notes { get; set; }
         public DateTime? ShippedAt { get; set; }
         public DateTime? DeliveredAt { get; set; }
         public AddressDto ShippingAddress { get; set; }
@@ -70,6 +71,9 @@ namespace Brewed.DataContext.Dtos
         [Required]
         [StringLength(50)]
         public string Status { get; set; }
+
+        [StringLength(1000)]
+        public string? Notes { get; set; }
     }
 
     public class GuestOrderCreateDto

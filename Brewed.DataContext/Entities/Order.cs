@@ -33,7 +33,7 @@ namespace Brewed.DataContext.Entities
         [StringLength(50)]
         public string PaymentStatus { get; set; } = "Pending";
 
-        [StringLength(500)]
+        [StringLength(1000)]
         public string? Notes { get; set; }
 
         public DateTime? ShippedAt { get; set; }

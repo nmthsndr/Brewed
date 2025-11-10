@@ -10,7 +10,7 @@ namespace Brewed.Services
         Task SendEmailConfirmationAsync(string email, string name, string confirmationToken);
         Task SendPasswordResetAsync(string email, string name, string resetToken);
         Task SendOrderConfirmationAsync(OrderDto orderDetails);
-        Task SendOrderStatusUpdateAsync(string email, string name, string orderNumber, string status);
+        Task SendOrderStatusUpdateAsync(string email, string name, string orderNumber, string status, string notes = null);
         Task SendLowStockAlertAsync(string productName, int currentStock, List<string> adminEmails);
         Task SendInvoiceEmailAsync(OrderDto orderDetails);
         Task SendCouponAssignmentAsync(string email, string name, CouponDto coupon);
@@ -252,7 +252,7 @@ namespace Brewed.Services
             await SendEmailAsync(orderDetails.User.Email, subject, body);
         }
 
-        public async Task SendOrderStatusUpdateAsync(string email, string name, string orderNumber, string status)
+        public async Task SendOrderStatusUpdateAsync(string email, string name, string orderNumber, string status, string notes = null)
         {
             var subject = $"Order Status Update - {orderNumber}";
 
@@ -266,13 +266,26 @@ namespace Brewed.Services
 
             var statusText = statusMessages.GetValueOrDefault(status, "has been updated");
 
+            var cancellationNoteHtml = "";
+            if (status == "Cancelled" && !string.IsNullOrEmpty(notes))
+            {
+                cancellationNoteHtml = $@"
+                    <div style='background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px;'>
+                        <h4 style='color: #856404; margin: 0 0 10px 0; font-size: 16px;'>Cancellation Reason:</h4>
+                        <p style='color: #856404; margin: 0; line-height: 1.6;'>{notes}</p>
+                    </div>
+                ";
+            }
+
             var body = $@"
                 <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #D4A373 0%, #8B4513 100%); padding: 40px; border-radius: 10px;'>
                     <div style='background: white; padding: 30px; border-radius: 8px;'>
                         <h2 style='color: #8B4513;'>Hello {name}!</h2>
                         <p>Your order <strong>{orderNumber}</strong> {statusText}.</p>
+                        {cancellationNoteHtml}
                         {(status == "Shipped" ? "<p>Your package will arrive soon!</p>" : "")}
                         {(status == "Delivered" ? "<p>We hope you're satisfied with your products! Please share your feedback with us!</p>" : "")}
+                        {(status == "Cancelled" ? "<p>If you have any questions about this cancellation, please don't hesitate to contact us.</p>" : "")}
                         <p>You can view your order details in your account.</p>
                         <p style='color: #333; margin-top: 30px;'>Best regards,<br/><span style='color: #8B4513; font-weight: bold;'>Brewed Team</span></p>
                     </div>

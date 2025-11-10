@@ -12,6 +12,7 @@ import Cart from "../pages/Cart";
 import Checkout from "../pages/Checkout";
 import Orders from "../pages/Orders";
 import Profile from "../pages/Profile";
+import MyCoupons from "../pages/MyCoupons";
 import Categories from "../pages/Categories";
 import Coupons from "../pages/Coupons";
 import AdminDashboard from "../pages/AdminDashboard";
@@ -44,6 +45,7 @@ const Routing = () => {
 
         {/* Protected pages - require login */}
         <Route path="orders" element={isLoggedIn ? <Orders /> : <Navigate to="/login" />} />
+        <Route path="my-coupons" element={isLoggedIn ? <MyCoupons /> : <Navigate to="/login" />} />
         <Route path="profile" element={isLoggedIn ? <Profile /> : <Navigate to="/login" />} />
 
         {/* Admin Only Routes */}

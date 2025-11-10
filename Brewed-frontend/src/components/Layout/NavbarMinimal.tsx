@@ -9,6 +9,7 @@ import {
   IconPackage,
   IconStar,
   IconTicket,
+  IconGift,
   IconCategory,
   IconUsers,
   IconChartBar,
@@ -92,6 +93,12 @@ export function NavbarMinimal({ toggle }: any) {
       icon: IconPackage,
       label: "Orders",
       url: "orders",
+      roles: ['Admin','RegisteredUser']
+    },
+    {
+      icon: IconGift,
+      label: "My Coupons",
+      url: "my-coupons",
       roles: ['Admin','RegisteredUser']
     },
     {

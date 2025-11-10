@@ -172,8 +172,8 @@ const Orders = {
     axiosInstance.get<PaginatedResult<IOrder>>(`/api/orders/all`, {
       params: { status, page, pageSize }
     }),
-  updateOrderStatus: (id: number, status: string) =>
-    axiosInstance.put<IOrder>(`/api/orders/${id}/status`, { status }),
+  updateOrderStatus: (id: number, status: string, notes?: string) =>
+    axiosInstance.put<IOrder>(`/api/orders/${id}/status`, { status, notes }),
   getInvoice: (orderId: number) =>
     axiosInstance.get(`/api/orders/${orderId}/invoice`),
   generateInvoice: (orderId: number) =>

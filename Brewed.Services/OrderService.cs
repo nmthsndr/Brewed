@@ -481,6 +481,8 @@ namespace Brewed.Services
         {
             var order = await _context.Orders
                 .Include(o => o.Invoice)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
                 .FirstOrDefaultAsync(o => o.Id == orderId);
 
             if (order == null)
@@ -505,6 +507,19 @@ namespace Brewed.Services
                 order.DeliveredAt = DateTime.UtcNow;
                 order.PaymentStatus = "Paid";
             }
+            else if (statusDto.Status == "Cancelled")
+            {
+                // Save cancellation note
+                order.Notes = statusDto.Notes;
+                order.PaymentStatus = "Refunded";
+
+                // Restore stock
+                foreach (var orderItem in order.OrderItems)
+                {
+                    orderItem.Product.StockQuantity += orderItem.Quantity;
+                    _context.Products.Update(orderItem.Product);
+                }
+            }
 
             _context.Orders.Update(order);
             await _context.SaveChangesAsync();
@@ -513,7 +528,7 @@ namespace Brewed.Services
             var user = await _context.Users.FindAsync(order.UserId);
             if (user != null)
             {
-                await _emailService.SendOrderStatusUpdateAsync(user.Email, user.Name, order.OrderNumber, order.Status);
+                await _emailService.SendOrderStatusUpdateAsync(user.Email, user.Name, order.OrderNumber, order.Status, order.Notes);
             }
 
             return await GetOrderByIdAsync(orderId, order.UserId, true);
@@ -561,6 +576,7 @@ namespace Brewed.Services
                 Status = order.Status,
                 PaymentMethod = order.PaymentMethod,
                 PaymentStatus = order.PaymentStatus,
+                Notes = order.Notes,
                 ShippedAt = order.ShippedAt,
                 DeliveredAt = order.DeliveredAt,
                 ShippingAddress = _mapper.Map<AddressDto>(order.ShippingAddress),
