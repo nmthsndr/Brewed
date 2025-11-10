@@ -100,7 +100,7 @@ namespace Brewed.Services
 
             if (product.StockQuantity < quantity)
             {
-                throw new Exception("Insufficient stock");
+                throw new Exception($"Not enough stock available. Available quantity: {product.StockQuantity}");
             }
 
             var cart = await GetOrCreateCartAsync(userId, sessionId);
@@ -113,7 +113,7 @@ namespace Brewed.Services
 
                 if (product.StockQuantity < existingItem.Quantity)
                 {
-                    throw new Exception("Insufficient stock");
+                    throw new Exception($"Not enough stock available. Available quantity: {product.StockQuantity}, already in cart: {existingItem.Quantity - quantity}");
                 }
 
                 _context.CartItems.Update(existingItem);
@@ -150,7 +150,7 @@ namespace Brewed.Services
 
             if (cartItem.Product.StockQuantity < quantity)
             {
-                throw new Exception("Insufficient stock");
+                throw new Exception($"Not enough stock available. Available quantity: {cartItem.Product.StockQuantity}");
             }
 
             cartItem.Quantity = quantity;
