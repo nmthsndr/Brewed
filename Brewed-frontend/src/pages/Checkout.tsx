@@ -160,6 +160,14 @@ const Checkout = () => {
       const cartRes = await api.Cart.getCart(sessionId);
       setCart(cartRes.data);
 
+      // Reset coupon state on page load to avoid inconsistencies
+      setCouponDiscount(0);
+      if (isLoggedIn) {
+        loggedInForm.setFieldValue('couponCode', '');
+      } else {
+        guestForm.setFieldValue('couponCode', '');
+      }
+
       // Calculate shipping
       const subtotal = cartRes.data.subTotal;
       if (subtotal >= 50) {
@@ -233,6 +241,20 @@ const Checkout = () => {
     }
   };
 
+  const handleRemoveCoupon = () => {
+    if (isLoggedIn) {
+      loggedInForm.setFieldValue('couponCode', '');
+    } else {
+      guestForm.setFieldValue('couponCode', '');
+    }
+    setCouponDiscount(0);
+    notifications.show({
+      title: 'Coupon Removed',
+      message: 'Coupon has been removed from your order',
+      color: 'blue',
+    });
+  };
+
   const handleLoggedInSubmit = async (values: any) => {
     try {
       setLoading(true);
@@ -262,7 +284,7 @@ const Checkout = () => {
         shippingAddressId,
         billingAddressId,
         paymentMethod: values.paymentMethod,
-        couponCode: values.couponCode || undefined,
+        couponCode: (couponDiscount > 0 && values.couponCode) ? values.couponCode : undefined,
         notes: values.notes || undefined
       };
 
@@ -297,7 +319,7 @@ const Checkout = () => {
         shippingAddress: values.shippingAddress,
         billingAddress: values.useSameAddress ? values.shippingAddress : values.billingAddress,
         paymentMethod: values.paymentMethod,
-        couponCode: values.couponCode || undefined,
+        couponCode: (couponDiscount > 0 && values.couponCode) ? values.couponCode : undefined,
         notes: values.notes || undefined,
         sessionId
       };
@@ -464,7 +486,17 @@ const Checkout = () => {
                     {...guestForm.getInputProps('couponCode')}
                   />
                   <Button onClick={handleValidateCoupon}>Apply</Button>
+                  {couponDiscount > 0 && (
+                    <Button onClick={handleRemoveCoupon} color="red" variant="light">
+                      Remove
+                    </Button>
+                  )}
                 </Group>
+                {couponDiscount > 0 && (
+                  <Text size="sm" c="green" mt="xs">
+                    Coupon applied! Discount: €{couponDiscount.toFixed(2)}
+                  </Text>
+                )}
               </Paper>
             </Stack>
 
@@ -621,7 +653,17 @@ const Checkout = () => {
                   {...loggedInForm.getInputProps('couponCode')}
                 />
                 <Button onClick={handleValidateCoupon}>Apply</Button>
+                {couponDiscount > 0 && (
+                  <Button onClick={handleRemoveCoupon} color="red" variant="light">
+                    Remove
+                  </Button>
+                )}
               </Group>
+              {couponDiscount > 0 && (
+                <Text size="sm" c="green" mt="xs">
+                  Coupon applied! Discount: €{couponDiscount.toFixed(2)}
+                </Text>
+              )}
             </Paper>
           </Stack>
 

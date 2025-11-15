@@ -148,7 +148,7 @@ const Orders = () => {
                         )}
                         <Text fw={700}>Total: €{order.totalAmount.toFixed(2)}</Text>
                       </div>
-                      {order.invoice && (
+                      {order.invoice && order.invoice.pdfUrl && (
                         <Button
                           leftSection={<IconDownload size={16} />}
                           variant="light"
