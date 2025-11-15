@@ -432,20 +432,38 @@ namespace Brewed.Services
                 return result;
             }
 
+            // Check if this coupon has any user assignments
+            var hasAssignments = await _context.UserCoupons.AnyAsync(uc => uc.CouponId == coupon.Id);
+
             // Check if user has this coupon assigned
             var userCoupon = await _context.UserCoupons
                 .FirstOrDefaultAsync(uc => uc.UserId == userId && uc.CouponId == coupon.Id);
 
-            if (userCoupon == null)
+            // If coupon has assignments, user must have it assigned
+            if (hasAssignments && userCoupon == null)
             {
                 result.Message = "This coupon is not assigned to you";
                 return result;
             }
 
-            if (userCoupon.IsUsed)
+            // If user has the coupon assigned, check if already used
+            if (userCoupon != null && userCoupon.IsUsed)
             {
                 result.Message = "You have already used this coupon";
                 return result;
+            }
+
+            // If coupon is public (no assignments), check if user has used it before via orders
+            if (!hasAssignments)
+            {
+                var hasUsedBefore = await _context.Orders
+                    .AnyAsync(o => o.UserId == userId && o.CouponCode.ToLower() == code.ToLower());
+
+                if (hasUsedBefore)
+                {
+                    result.Message = "You have already used this coupon";
+                    return result;
+                }
             }
 
             if (!coupon.IsActive)
@@ -473,7 +491,7 @@ namespace Brewed.Services
                 return result;
             }
 
-            // Check max usage count
+            // Check max usage count (global limit for the coupon)
             if (coupon.MaxUsageCount.HasValue && coupon.UsageCount >= coupon.MaxUsageCount.Value)
             {
                 result.Message = "This coupon has reached its maximum usage limit";

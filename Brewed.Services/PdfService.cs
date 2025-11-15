@@ -54,10 +54,10 @@ namespace Brewed.Services
                             {
                                 row.RelativeItem().Column(col =>
                                 {
-                                    col.Item().Text($"Invoice #: {invoice.InvoiceNumber}").SemiBold();
-                                    col.Item().Text($"Order #: {order.OrderNumber}");
+                                    col.Item().Text($"Invoice #: {invoice.InvoiceNumber ?? "N/A"}").SemiBold();
+                                    col.Item().Text($"Order #: {order.OrderNumber ?? "N/A"}");
                                     col.Item().Text($"Date: {invoice.IssueDate:yyyy-MM-dd}");
-                                    col.Item().Text($"Status: {order.Status}");
+                                    col.Item().Text($"Status: {order.Status ?? "Unknown"}");
                                 });
 
                                 row.RelativeItem().AlignRight().Column(col =>
@@ -81,26 +81,30 @@ namespace Brewed.Services
                                     if (order.IsGuestOrder && order.GuestOrderDetails != null)
                                     {
                                         var guest = order.GuestOrderDetails;
-                                        col.Item().Text($"{guest.FirstName} {guest.LastName}");
-                                        col.Item().Text(guest.Email);
-                                        col.Item().Text(guest.BillingAddressLine1);
+                                        col.Item().Text($"{guest.FirstName ?? ""} {guest.LastName ?? ""}");
+                                        col.Item().Text(guest.Email ?? "");
+                                        col.Item().Text(guest.BillingAddressLine1 ?? "");
                                         if (!string.IsNullOrEmpty(guest.BillingAddressLine2))
                                             col.Item().Text(guest.BillingAddressLine2);
-                                        col.Item().Text($"{guest.BillingCity}, {guest.BillingPostalCode}");
-                                        col.Item().Text(guest.BillingCountry);
-                                        col.Item().Text(guest.BillingPhoneNumber);
+                                        col.Item().Text($"{guest.BillingCity ?? ""}, {guest.BillingPostalCode ?? ""}");
+                                        col.Item().Text(guest.BillingCountry ?? "");
+                                        col.Item().Text(guest.BillingPhoneNumber ?? "");
                                     }
                                     else if (order.BillingAddress != null)
                                     {
                                         var addr = order.BillingAddress;
-                                        col.Item().Text($"{addr.FirstName} {addr.LastName}");
+                                        col.Item().Text($"{addr.FirstName ?? ""} {addr.LastName ?? ""}");
                                         col.Item().Text(order.User?.Email ?? "");
-                                        col.Item().Text(addr.AddressLine1);
+                                        col.Item().Text(addr.AddressLine1 ?? "");
                                         if (!string.IsNullOrEmpty(addr.AddressLine2))
                                             col.Item().Text(addr.AddressLine2);
-                                        col.Item().Text($"{addr.City}, {addr.PostalCode}");
-                                        col.Item().Text(addr.Country);
-                                        col.Item().Text(addr.PhoneNumber);
+                                        col.Item().Text($"{addr.City ?? ""}, {addr.PostalCode ?? ""}");
+                                        col.Item().Text(addr.Country ?? "");
+                                        col.Item().Text(addr.PhoneNumber ?? "");
+                                    }
+                                    else
+                                    {
+                                        col.Item().Text("No billing address");
                                     }
                                 });
 
@@ -112,24 +116,28 @@ namespace Brewed.Services
                                     if (order.IsGuestOrder && order.GuestOrderDetails != null)
                                     {
                                         var guest = order.GuestOrderDetails;
-                                        col.Item().Text($"{guest.FirstName} {guest.LastName}");
-                                        col.Item().Text(guest.ShippingAddressLine1);
+                                        col.Item().Text($"{guest.FirstName ?? ""} {guest.LastName ?? ""}");
+                                        col.Item().Text(guest.ShippingAddressLine1 ?? "");
                                         if (!string.IsNullOrEmpty(guest.ShippingAddressLine2))
                                             col.Item().Text(guest.ShippingAddressLine2);
-                                        col.Item().Text($"{guest.ShippingCity}, {guest.ShippingPostalCode}");
-                                        col.Item().Text(guest.ShippingCountry);
-                                        col.Item().Text(guest.ShippingPhoneNumber);
+                                        col.Item().Text($"{guest.ShippingCity ?? ""}, {guest.ShippingPostalCode ?? ""}");
+                                        col.Item().Text(guest.ShippingCountry ?? "");
+                                        col.Item().Text(guest.ShippingPhoneNumber ?? "");
                                     }
                                     else if (order.ShippingAddress != null)
                                     {
                                         var addr = order.ShippingAddress;
-                                        col.Item().Text($"{addr.FirstName} {addr.LastName}");
-                                        col.Item().Text(addr.AddressLine1);
+                                        col.Item().Text($"{addr.FirstName ?? ""} {addr.LastName ?? ""}");
+                                        col.Item().Text(addr.AddressLine1 ?? "");
                                         if (!string.IsNullOrEmpty(addr.AddressLine2))
                                             col.Item().Text(addr.AddressLine2);
-                                        col.Item().Text($"{addr.City}, {addr.PostalCode}");
-                                        col.Item().Text(addr.Country);
-                                        col.Item().Text(addr.PhoneNumber);
+                                        col.Item().Text($"{addr.City ?? ""}, {addr.PostalCode ?? ""}");
+                                        col.Item().Text(addr.Country ?? "");
+                                        col.Item().Text(addr.PhoneNumber ?? "");
+                                    }
+                                    else
+                                    {
+                                        col.Item().Text("No shipping address");
                                     }
                                 });
                             });
@@ -220,7 +228,7 @@ namespace Brewed.Services
                                 col.Item().PaddingTop(10).Row(row =>
                                 {
                                     row.AutoItem().Width(120).Text("Payment Method:");
-                                    row.AutoItem().Text(order.PaymentMethod).AlignRight();
+                                    row.AutoItem().Text(order.PaymentMethod ?? "Not specified").AlignRight();
                                 });
                             });
 

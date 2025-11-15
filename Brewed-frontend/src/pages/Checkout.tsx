@@ -291,9 +291,31 @@ const Checkout = () => {
       navigate('/app/orders');
     } catch (error: any) {
       console.error('Order creation error:', error);
-      const errorMessage = typeof error.response?.data === 'string'
-        ? error.response.data
-        : error.response?.data?.message || error.response?.data?.title || error.message || 'Failed to place order';
+
+      let errorMessage = 'Failed to place order';
+
+      if (error.response?.data) {
+        const data = error.response.data;
+
+        if (typeof data === 'string') {
+          errorMessage = data;
+        } else if (data.errors) {
+          // Handle .NET validation errors
+          const validationErrors = Object.entries(data.errors)
+            .map(([field, messages]: [string, any]) => {
+              const errorList = Array.isArray(messages) ? messages : [messages];
+              return `${field}: ${errorList.join(', ')}`;
+            })
+            .join('\n');
+          errorMessage = validationErrors || data.title || 'Validation failed';
+        } else if (data.message) {
+          errorMessage = data.message;
+        } else if (data.title) {
+          errorMessage = data.title;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
 
       notifications.show({
         title: 'Error',
@@ -332,9 +354,31 @@ const Checkout = () => {
       navigate('/app/dashboard');
     } catch (error: any) {
       console.error('Guest order creation error:', error);
-      const errorMessage = typeof error.response?.data === 'string'
-        ? error.response.data
-        : error.response?.data?.message || error.response?.data?.title || error.message || 'Failed to place order';
+
+      let errorMessage = 'Failed to place order';
+
+      if (error.response?.data) {
+        const data = error.response.data;
+
+        if (typeof data === 'string') {
+          errorMessage = data;
+        } else if (data.errors) {
+          // Handle .NET validation errors
+          const validationErrors = Object.entries(data.errors)
+            .map(([field, messages]: [string, any]) => {
+              const errorList = Array.isArray(messages) ? messages : [messages];
+              return `${field}: ${errorList.join(', ')}`;
+            })
+            .join('\n');
+          errorMessage = validationErrors || data.title || 'Validation failed';
+        } else if (data.message) {
+          errorMessage = data.message;
+        } else if (data.title) {
+          errorMessage = data.title;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
 
       notifications.show({
         title: 'Error',
