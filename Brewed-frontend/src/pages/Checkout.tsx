@@ -160,14 +160,6 @@ const Checkout = () => {
       const cartRes = await api.Cart.getCart(sessionId);
       setCart(cartRes.data);
 
-      // Reset coupon state on page load to avoid inconsistencies
-      setCouponDiscount(0);
-      if (isLoggedIn) {
-        loggedInForm.setFieldValue('couponCode', '');
-      } else {
-        guestForm.setFieldValue('couponCode', '');
-      }
-
       // Calculate shipping
       const subtotal = cartRes.data.subTotal;
       if (subtotal >= 50) {
@@ -298,9 +290,14 @@ const Checkout = () => {
       });
       navigate('/app/orders');
     } catch (error: any) {
+      console.error('Order creation error:', error);
+      const errorMessage = typeof error.response?.data === 'string'
+        ? error.response.data
+        : error.response?.data?.message || error.response?.data?.title || error.message || 'Failed to place order';
+
       notifications.show({
         title: 'Error',
-        message: error.response?.data || 'Failed to place order',
+        message: errorMessage,
         color: 'red',
       });
     } finally {
@@ -334,9 +331,14 @@ const Checkout = () => {
       });
       navigate('/app/dashboard');
     } catch (error: any) {
+      console.error('Guest order creation error:', error);
+      const errorMessage = typeof error.response?.data === 'string'
+        ? error.response.data
+        : error.response?.data?.message || error.response?.data?.title || error.message || 'Failed to place order';
+
       notifications.show({
         title: 'Error',
-        message: error.response?.data || 'Failed to place order',
+        message: errorMessage,
         color: 'red',
       });
     } finally {

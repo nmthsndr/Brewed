@@ -148,15 +148,15 @@ const Orders = () => {
                         )}
                         <Text fw={700}>Total: €{order.totalAmount.toFixed(2)}</Text>
                       </div>
-                      {order.invoice && order.invoice.pdfUrl && (
+                      {order.invoice && (
                         <Button
                           leftSection={<IconDownload size={16} />}
                           variant="light"
                           color="blue"
                           component="a"
-                          href={order.invoice.pdfUrl}
+                          href={`/api/orders/${order.id}/invoice/pdf`}
                           target="_blank"
-                          download
+                          download={`invoice-${order.invoice.invoiceNumber}.pdf`}
                         >
                           Download Invoice
                         </Button>

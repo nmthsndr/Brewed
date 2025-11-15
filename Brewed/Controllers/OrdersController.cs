@@ -12,10 +12,12 @@ namespace Brewed.API.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly IOrderService _orderService;
+        private readonly IPdfService _pdfService;
 
-        public OrdersController(IOrderService orderService)
+        public OrdersController(IOrderService orderService, IPdfService pdfService)
         {
             _orderService = orderService;
+            _pdfService = pdfService;
         }
 
         [HttpGet]
@@ -189,6 +191,40 @@ namespace Brewed.API.Controllers
             catch (InvalidOperationException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("{orderId}/invoice/pdf")]
+        public async Task<IActionResult> DownloadInvoicePdf(int orderId)
+        {
+            try
+            {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var isAdmin = User.IsInRole("Admin");
+
+                // Get invoice to verify it exists
+                var invoice = await _orderService.GetInvoiceAsync(orderId, userId, isAdmin);
+
+                // Get full order details
+                var order = await _orderService.GetOrderByIdAsync(orderId, userId, isAdmin);
+
+                // Generate PDF
+                var pdfBytes = _pdfService.GenerateInvoicePdf(order, invoice);
+
+                // Return PDF file
+                return File(pdfBytes, "application/pdf", $"invoice-{invoice.InvoiceNumber}.pdf");
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound("Invoice not found");
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
             }
             catch (Exception ex)
             {

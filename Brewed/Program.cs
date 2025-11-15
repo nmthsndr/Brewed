@@ -39,6 +39,7 @@
             builder.Services.AddScoped<ICouponService, CouponService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IDashboardService, DashboardService>();
+            builder.Services.AddScoped<IPdfService, PdfService>();
 
             builder.Services.AddScoped<IFileUploadService>(provider =>
             {
