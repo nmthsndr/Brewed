@@ -453,8 +453,8 @@ namespace Brewed.Services
                 return result;
             }
 
-            // If coupon is public (no assignments), check if user has used it before via orders
-            if (!hasAssignments)
+            // If coupon is public (no assignments) AND has a usage limit, check if user has used it before via orders
+            if (!hasAssignments && coupon.MaxUsageCount.HasValue)
             {
                 var hasUsedBefore = await _context.Orders
                     .AnyAsync(o => o.UserId == userId && o.CouponCode.ToLower() == code.ToLower());

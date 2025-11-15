@@ -203,7 +203,8 @@ const Coupons = () => {
 
       const couponData = {
         ...values,
-        minimumOrderAmount: values.minimumOrderAmount || undefined
+        minimumOrderAmount: values.minimumOrderAmount || undefined,
+        maxUsageCount: values.maxUsageCount || undefined
       };
 
       if (modalMode === 'create') {
