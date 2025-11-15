@@ -276,7 +276,7 @@ const Checkout = () => {
         shippingAddressId,
         billingAddressId,
         paymentMethod: values.paymentMethod,
-        couponCode: (couponDiscount > 0 && values.couponCode) ? values.couponCode : undefined,
+        couponCode: (couponDiscount > 0 && values.couponCode?.trim()) ? values.couponCode.trim() : undefined,
         notes: values.notes || undefined
       };
 
@@ -316,7 +316,7 @@ const Checkout = () => {
         shippingAddress: values.shippingAddress,
         billingAddress: values.useSameAddress ? values.shippingAddress : values.billingAddress,
         paymentMethod: values.paymentMethod,
-        couponCode: (couponDiscount > 0 && values.couponCode) ? values.couponCode : undefined,
+        couponCode: (couponDiscount > 0 && values.couponCode?.trim()) ? values.couponCode.trim() : undefined,
         notes: values.notes || undefined,
         sessionId
       };
@@ -486,6 +486,12 @@ const Checkout = () => {
                     placeholder="Enter coupon code"
                     style={{ flex: 1 }}
                     {...guestForm.getInputProps('couponCode')}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleValidateCoupon();
+                      }
+                    }}
                   />
                   <Button onClick={handleValidateCoupon}>Apply</Button>
                   {couponDiscount > 0 && (
@@ -653,6 +659,12 @@ const Checkout = () => {
                   placeholder="Enter coupon code"
                   style={{ flex: 1 }}
                   {...loggedInForm.getInputProps('couponCode')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleValidateCoupon();
+                    }
+                  }}
                 />
                 <Button onClick={handleValidateCoupon}>Apply</Button>
                 {couponDiscount > 0 && (

@@ -20,6 +20,13 @@ namespace Brewed.Services
 
         public byte[] GenerateInvoicePdf(OrderDto order, InvoiceDto invoice)
         {
+            if (order == null)
+                throw new ArgumentNullException(nameof(order));
+            if (invoice == null)
+                throw new ArgumentNullException(nameof(invoice));
+            if (order.Items == null || !order.Items.Any())
+                throw new InvalidOperationException("Order must contain at least one item");
+
             var document = Document.Create(container =>
             {
                 container.Page(page =>

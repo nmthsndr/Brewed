@@ -218,17 +218,25 @@ namespace Brewed.API.Controllers
                 // Return PDF file
                 return File(pdfBytes, "application/pdf", $"invoice-{invoice.InvoiceNumber}.pdf");
             }
-            catch (KeyNotFoundException)
+            catch (KeyNotFoundException ex)
             {
+                Console.WriteLine($"Invoice not found for order {orderId}: {ex.Message}");
                 return NotFound("Invoice not found");
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException ex)
             {
+                Console.WriteLine($"Unauthorized access to invoice for order {orderId}: {ex.Message}");
                 return Forbid();
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine($"Invalid operation for invoice PDF generation (order {orderId}): {ex.Message}");
+                return BadRequest(new { error = ex.Message });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                Console.WriteLine($"Error generating invoice PDF for order {orderId}: {ex.Message}\n{ex.StackTrace}");
+                return StatusCode(500, new { error = "Failed to generate invoice PDF", details = ex.Message });
             }
         }
     }
