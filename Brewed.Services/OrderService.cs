@@ -604,7 +604,9 @@ namespace Brewed.Services
                     Id = order.User.Id,
                     Name = order.User.Name,
                     Email = order.User.Email
-                } : null
+                } : null,
+                IsGuestOrder = order.IsGuestOrder,
+                GuestOrderDetails = order.GuestOrderDetails != null ? _mapper.Map<GuestOrderDetailsDto>(order.GuestOrderDetails) : null
             };
         }
 

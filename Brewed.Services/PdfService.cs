@@ -48,9 +48,9 @@ namespace Brewed.Services
                                 row.RelativeItem().Column(col =>
                                 {
                                     col.Item().Text($"Invoice #: {invoice.InvoiceNumber}").SemiBold();
-                                    col.Item().Text($"Order #: {order.orderNumber}");
+                                    col.Item().Text($"Order #: {order.OrderNumber}");
                                     col.Item().Text($"Date: {invoice.IssueDate:yyyy-MM-dd}");
-                                    col.Item().Text($"Status: {order.status}");
+                                    col.Item().Text($"Status: {order.Status}");
                                 });
 
                                 row.RelativeItem().AlignRight().Column(col =>
@@ -71,29 +71,29 @@ namespace Brewed.Services
                                     col.Item().Text("Bill To:").SemiBold().FontSize(12);
                                     col.Item().PaddingTop(5);
 
-                                    if (order.isGuestOrder && order.guestOrderDetails != null)
+                                    if (order.IsGuestOrder && order.GuestOrderDetails != null)
                                     {
-                                        var guest = order.guestOrderDetails;
-                                        col.Item().Text($"{guest.firstName} {guest.lastName}");
-                                        col.Item().Text(guest.email);
-                                        col.Item().Text(guest.billingAddressLine1);
-                                        if (!string.IsNullOrEmpty(guest.billingAddressLine2))
-                                            col.Item().Text(guest.billingAddressLine2);
-                                        col.Item().Text($"{guest.billingCity}, {guest.billingPostalCode}");
-                                        col.Item().Text(guest.billingCountry);
-                                        col.Item().Text(guest.billingPhoneNumber);
+                                        var guest = order.GuestOrderDetails;
+                                        col.Item().Text($"{guest.FirstName} {guest.LastName}");
+                                        col.Item().Text(guest.Email);
+                                        col.Item().Text(guest.BillingAddressLine1);
+                                        if (!string.IsNullOrEmpty(guest.BillingAddressLine2))
+                                            col.Item().Text(guest.BillingAddressLine2);
+                                        col.Item().Text($"{guest.BillingCity}, {guest.BillingPostalCode}");
+                                        col.Item().Text(guest.BillingCountry);
+                                        col.Item().Text(guest.BillingPhoneNumber);
                                     }
-                                    else if (order.billingAddress != null)
+                                    else if (order.BillingAddress != null)
                                     {
-                                        var addr = order.billingAddress;
-                                        col.Item().Text($"{addr.firstName} {addr.lastName}");
-                                        col.Item().Text(order.user?.email ?? "");
-                                        col.Item().Text(addr.addressLine1);
-                                        if (!string.IsNullOrEmpty(addr.addressLine2))
-                                            col.Item().Text(addr.addressLine2);
-                                        col.Item().Text($"{addr.city}, {addr.postalCode}");
-                                        col.Item().Text(addr.country);
-                                        col.Item().Text(addr.phoneNumber);
+                                        var addr = order.BillingAddress;
+                                        col.Item().Text($"{addr.FirstName} {addr.LastName}");
+                                        col.Item().Text(order.User?.Email ?? "");
+                                        col.Item().Text(addr.AddressLine1);
+                                        if (!string.IsNullOrEmpty(addr.AddressLine2))
+                                            col.Item().Text(addr.AddressLine2);
+                                        col.Item().Text($"{addr.City}, {addr.PostalCode}");
+                                        col.Item().Text(addr.Country);
+                                        col.Item().Text(addr.PhoneNumber);
                                     }
                                 });
 
@@ -102,27 +102,27 @@ namespace Brewed.Services
                                     col.Item().Text("Ship To:").SemiBold().FontSize(12);
                                     col.Item().PaddingTop(5);
 
-                                    if (order.isGuestOrder && order.guestOrderDetails != null)
+                                    if (order.IsGuestOrder && order.GuestOrderDetails != null)
                                     {
-                                        var guest = order.guestOrderDetails;
-                                        col.Item().Text($"{guest.firstName} {guest.lastName}");
-                                        col.Item().Text(guest.shippingAddressLine1);
-                                        if (!string.IsNullOrEmpty(guest.shippingAddressLine2))
-                                            col.Item().Text(guest.shippingAddressLine2);
-                                        col.Item().Text($"{guest.shippingCity}, {guest.shippingPostalCode}");
-                                        col.Item().Text(guest.shippingCountry);
-                                        col.Item().Text(guest.shippingPhoneNumber);
+                                        var guest = order.GuestOrderDetails;
+                                        col.Item().Text($"{guest.FirstName} {guest.LastName}");
+                                        col.Item().Text(guest.ShippingAddressLine1);
+                                        if (!string.IsNullOrEmpty(guest.ShippingAddressLine2))
+                                            col.Item().Text(guest.ShippingAddressLine2);
+                                        col.Item().Text($"{guest.ShippingCity}, {guest.ShippingPostalCode}");
+                                        col.Item().Text(guest.ShippingCountry);
+                                        col.Item().Text(guest.ShippingPhoneNumber);
                                     }
-                                    else if (order.shippingAddress != null)
+                                    else if (order.ShippingAddress != null)
                                     {
-                                        var addr = order.shippingAddress;
-                                        col.Item().Text($"{addr.firstName} {addr.lastName}");
-                                        col.Item().Text(addr.addressLine1);
-                                        if (!string.IsNullOrEmpty(addr.addressLine2))
-                                            col.Item().Text(addr.addressLine2);
-                                        col.Item().Text($"{addr.city}, {addr.postalCode}");
-                                        col.Item().Text(addr.country);
-                                        col.Item().Text(addr.phoneNumber);
+                                        var addr = order.ShippingAddress;
+                                        col.Item().Text($"{addr.FirstName} {addr.LastName}");
+                                        col.Item().Text(addr.AddressLine1);
+                                        if (!string.IsNullOrEmpty(addr.AddressLine2))
+                                            col.Item().Text(addr.AddressLine2);
+                                        col.Item().Text($"{addr.City}, {addr.PostalCode}");
+                                        col.Item().Text(addr.Country);
+                                        col.Item().Text(addr.PhoneNumber);
                                     }
                                 });
                             });
@@ -150,12 +150,12 @@ namespace Brewed.Services
                                 });
 
                                 // Table rows
-                                foreach (var item in order.orderItems)
+                                foreach (var item in order.Items)
                                 {
-                                    table.Cell().Element(CellStyle).Text(item.product?.name ?? "Product");
-                                    table.Cell().Element(CellStyle).AlignCenter().Text(item.quantity.ToString());
-                                    table.Cell().Element(CellStyle).AlignRight().Text($"€{item.unitPrice:F2}");
-                                    table.Cell().Element(CellStyle).AlignRight().Text($"€{item.totalPrice:F2}");
+                                    table.Cell().Element(CellStyle).Text(item.ProductName ?? "Product");
+                                    table.Cell().Element(CellStyle).AlignCenter().Text(item.Quantity.ToString());
+                                    table.Cell().Element(CellStyle).AlignRight().Text($"€{item.UnitPrice:F2}");
+                                    table.Cell().Element(CellStyle).AlignRight().Text($"€{item.TotalPrice:F2}");
                                 }
 
                                 static IContainer CellStyle(IContainer container)
@@ -175,29 +175,29 @@ namespace Brewed.Services
                                 col.Item().Row(row =>
                                 {
                                     row.AutoItem().Width(120).Text("Subtotal:");
-                                    row.AutoItem().Text($"€{order.subTotal:F2}").AlignRight();
+                                    row.AutoItem().Text($"€{order.SubTotal:F2}").AlignRight();
                                 });
 
                                 col.Item().Row(row =>
                                 {
                                     row.AutoItem().Width(120).Text("Shipping:");
-                                    row.AutoItem().Text(order.shippingCost == 0 ? "FREE" : $"€{order.shippingCost:F2}").AlignRight();
+                                    row.AutoItem().Text(order.ShippingCost == 0 ? "FREE" : $"€{order.ShippingCost:F2}").AlignRight();
                                 });
 
-                                if (order.discount > 0)
+                                if (order.Discount > 0)
                                 {
                                     col.Item().Row(row =>
                                     {
                                         row.AutoItem().Width(120).Text("Discount:");
-                                        row.AutoItem().Text($"-€{order.discount:F2}").FontColor(Colors.Green.Medium).AlignRight();
+                                        row.AutoItem().Text($"-€{order.Discount:F2}").FontColor(Colors.Green.Medium).AlignRight();
                                     });
 
-                                    if (!string.IsNullOrEmpty(order.couponCode))
+                                    if (!string.IsNullOrEmpty(order.CouponCode))
                                     {
                                         col.Item().Row(row =>
                                         {
                                             row.AutoItem().Width(120).Text("Coupon Code:");
-                                            row.AutoItem().Text(order.couponCode).FontSize(9).AlignRight();
+                                            row.AutoItem().Text(order.CouponCode).FontSize(9).AlignRight();
                                         });
                                     }
                                 }
@@ -207,23 +207,23 @@ namespace Brewed.Services
                                 col.Item().Row(row =>
                                 {
                                     row.AutoItem().Width(120).Text("TOTAL:").FontSize(14).SemiBold();
-                                    row.AutoItem().Text($"€{order.totalAmount:F2}").FontSize(14).SemiBold().FontColor(Colors.Blue.Medium).AlignRight();
+                                    row.AutoItem().Text($"€{order.TotalAmount:F2}").FontSize(14).SemiBold().FontColor(Colors.Blue.Medium).AlignRight();
                                 });
 
                                 col.Item().PaddingTop(10).Row(row =>
                                 {
                                     row.AutoItem().Width(120).Text("Payment Method:");
-                                    row.AutoItem().Text(order.paymentMethod).AlignRight();
+                                    row.AutoItem().Text(order.PaymentMethod).AlignRight();
                                 });
                             });
 
                             // Notes section
-                            if (!string.IsNullOrEmpty(order.notes))
+                            if (!string.IsNullOrEmpty(order.Notes))
                             {
                                 column.Item().PaddingTop(15).Column(col =>
                                 {
                                     col.Item().Text("Notes:").SemiBold();
-                                    col.Item().PaddingTop(5).Text(order.notes).FontSize(10);
+                                    col.Item().PaddingTop(5).Text(order.Notes).FontSize(10);
                                 });
                             }
                         });
