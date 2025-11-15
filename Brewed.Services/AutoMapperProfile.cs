@@ -79,6 +79,8 @@ namespace Brewed.Services
                         ? src.Product.ImageUrl.Substring(0, src.Product.ImageUrl.IndexOf(";")).Trim()
                         : src.Product.ImageUrl));
 
+            CreateMap<GuestOrderDetails, GuestOrderDetailsDto>();
+
             // Address Mappings
             CreateMap<Address, AddressDto>();
             CreateMap<AddressCreateDto, Address>();
