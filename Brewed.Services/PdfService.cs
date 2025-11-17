@@ -244,7 +244,7 @@ namespace Brewed.Services
 
                     page.Footer()
                         .AlignCenter()
-                        .Text("Thank you for your purchase! | Questions? Contact us at support@brewed.com")
+                        .Text("Thank you for your purchase! | Questions? Contact us at brewedcs@gmail.com")
                         .FontSize(9)
                         .FontColor(Colors.Grey.Medium);
                 });

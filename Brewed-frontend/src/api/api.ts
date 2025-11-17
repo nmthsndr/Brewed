@@ -229,7 +229,6 @@ const Coupons = {
     axiosInstance.delete(`/api/coupons/${id}`),
   validateCoupon: (data: CouponValidateDto) =>
     axiosInstance.post(`/api/coupons/validate`, data),
-  // New endpoints for user-coupon management
   generateRandomCode: () =>
     axiosInstance.get<{ code: string }>(`/api/coupons/generate-code`),
   assignCouponToUsers: (couponId: number, userIds: number[]) =>

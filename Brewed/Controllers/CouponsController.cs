@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Brewed.DataContext.Dtos;
 using Brewed.Services;
+using System.Security.Claims;
 
 namespace Brewed.API.Controllers
 {
@@ -170,7 +171,7 @@ namespace Brewed.API.Controllers
             try
             {
                 // Users can only see their own coupons unless they're admin
-                var currentUserId = User.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
+                var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 var isAdmin = User.IsInRole("Admin");
 
                 if (!isAdmin && currentUserId != userId.ToString())
