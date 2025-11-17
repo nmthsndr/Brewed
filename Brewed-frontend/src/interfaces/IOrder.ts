@@ -24,6 +24,26 @@ export interface IOrder {
     name: string;
     email: string;
   };
+  isGuestOrder: boolean;
+  guestOrderDetails?: {
+    id: number;
+    orderId: number;
+    email: string;
+    firstName: string;
+    lastName: string;
+    shippingAddressLine1: string;
+    shippingAddressLine2?: string;
+    shippingCity: string;
+    shippingPostalCode: string;
+    shippingCountry: string;
+    shippingPhoneNumber: string;
+    billingAddressLine1: string;
+    billingAddressLine2?: string;
+    billingCity: string;
+    billingPostalCode: string;
+    billingCountry: string;
+    billingPhoneNumber: string;
+  };
 }
 
 export interface IOrderItem {

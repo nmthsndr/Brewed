@@ -12,9 +12,9 @@ import {
   Accordion
 } from "@mantine/core";
 import { IconPackage, IconDownload, IconAlertCircle } from "@tabler/icons-react";
+import { notifications } from "@mantine/notifications";
 import api from "../api/api";
 import { IOrder } from "../interfaces/IOrder";
-import { notifications } from "@mantine/notifications";
 
 const Orders = () => {
   const [orders, setOrders] = useState<IOrder[]>([]);
@@ -153,10 +153,27 @@ const Orders = () => {
                           leftSection={<IconDownload size={16} />}
                           variant="light"
                           color="blue"
-                          component="a"
-                          href={order.invoice.pdfUrl}
-                          target="_blank"
-                          download
+                          onClick={async () => {
+                            try {
+                              const response = await api.Orders.getInvoicePdf(order.id);
+                              const blob = new Blob([response.data], { type: 'application/pdf' });
+                              const url = window.URL.createObjectURL(blob);
+                              const link = document.createElement('a');
+                              link.href = url;
+                              link.download = `invoice-${order.invoice.invoiceNumber}.pdf`;
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                              window.URL.revokeObjectURL(url);
+                            } catch (error) {
+                              console.error('Failed to download invoice:', error);
+                              notifications.show({
+                                title: 'Error',
+                                message: 'Failed to download invoice',
+                                color: 'red',
+                              });
+                            }
+                          }}
                         >
                           Download Invoice
                         </Button>

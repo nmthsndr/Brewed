@@ -203,7 +203,8 @@ const Coupons = () => {
 
       const couponData = {
         ...values,
-        minimumOrderAmount: values.minimumOrderAmount || undefined
+        minimumOrderAmount: values.minimumOrderAmount || undefined,
+        maxUsageCount: values.maxUsageCount || undefined
       };
 
       if (modalMode === 'create') {
@@ -225,9 +226,36 @@ const Coupons = () => {
       await loadCoupons();
       close();
     } catch (error: any) {
+      console.error('Coupon save error:', error);
+
+      let errorMessage = 'Failed to save coupon';
+
+      if (error.response?.data) {
+        const data = error.response.data;
+
+        if (typeof data === 'string') {
+          errorMessage = data;
+        } else if (data.errors) {
+          // Handle .NET validation errors
+          const validationErrors = Object.entries(data.errors)
+            .map(([field, messages]: [string, any]) => {
+              const errorList = Array.isArray(messages) ? messages : [messages];
+              return `${field}: ${errorList.join(', ')}`;
+            })
+            .join('\n');
+          errorMessage = validationErrors || data.title || 'Validation failed';
+        } else if (data.message) {
+          errorMessage = data.message;
+        } else if (data.title) {
+          errorMessage = data.title;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       notifications.show({
         title: 'Error',
-        message: error.response?.data || 'Failed to save coupon',
+        message: errorMessage,
         color: 'red',
       });
     } finally {
@@ -326,6 +354,7 @@ const Coupons = () => {
       >
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <Stack>
+            
             <Checkbox
               label="Generate Random Code"
               {...form.getInputProps('generateRandomCode', { type: 'checkbox' })}

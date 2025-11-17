@@ -501,7 +501,7 @@ namespace Brewed.Services
                         <p style='color: #333; font-size: 16px; line-height: 1.6;'>Hello <strong>{name}</strong>,</p>
 
                         <p style='color: #333; font-size: 16px; line-height: 1.6;'>
-                            Great news! You've been assigned a special coupon code to use on your next purchase at Brewed Coffee Shop.
+                            Great news! You've been assigned a special coupon code to use on your next purchase at Brewed.
                         </p>
 
                         <!-- Coupon Card -->

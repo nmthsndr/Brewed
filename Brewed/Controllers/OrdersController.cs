@@ -12,10 +12,12 @@ namespace Brewed.API.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly IOrderService _orderService;
+        private readonly IPdfService _pdfService;
 
-        public OrdersController(IOrderService orderService)
+        public OrdersController(IOrderService orderService, IPdfService pdfService)
         {
             _orderService = orderService;
+            _pdfService = pdfService;
         }
 
         [HttpGet]
@@ -193,6 +195,48 @@ namespace Brewed.API.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("{orderId}/invoice/pdf")]
+        public async Task<IActionResult> DownloadInvoicePdf(int orderId)
+        {
+            try
+            {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var isAdmin = User.IsInRole("Admin");
+
+                // Get invoice to verify it exists
+                var invoice = await _orderService.GetInvoiceAsync(orderId, userId, isAdmin);
+
+                // Get full order details
+                var order = await _orderService.GetOrderByIdAsync(orderId, userId, isAdmin);
+
+                // Generate PDF
+                var pdfBytes = _pdfService.GenerateInvoicePdf(order, invoice);
+
+                // Return PDF file
+                return File(pdfBytes, "application/pdf", $"invoice-{invoice.InvoiceNumber}.pdf");
+            }
+            catch (KeyNotFoundException ex)
+            {
+                Console.WriteLine($"Invoice not found for order {orderId}: {ex.Message}");
+                return NotFound("Invoice not found");
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Console.WriteLine($"Unauthorized access to invoice for order {orderId}: {ex.Message}");
+                return Forbid();
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine($"Invalid operation for invoice PDF generation (order {orderId}): {ex.Message}");
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error generating invoice PDF for order {orderId}: {ex.Message}\n{ex.StackTrace}");
+                return StatusCode(500, new { error = "Failed to generate invoice PDF", details = ex.Message });
             }
         }
     }

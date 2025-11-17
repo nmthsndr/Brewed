@@ -233,6 +233,20 @@ const Checkout = () => {
     }
   };
 
+  const handleRemoveCoupon = () => {
+    if (isLoggedIn) {
+      loggedInForm.setFieldValue('couponCode', '');
+    } else {
+      guestForm.setFieldValue('couponCode', '');
+    }
+    setCouponDiscount(0);
+    notifications.show({
+      title: 'Coupon Removed',
+      message: 'Coupon has been removed from your order',
+      color: 'blue',
+    });
+  };
+
   const handleLoggedInSubmit = async (values: any) => {
     try {
       setLoading(true);
@@ -262,7 +276,7 @@ const Checkout = () => {
         shippingAddressId,
         billingAddressId,
         paymentMethod: values.paymentMethod,
-        couponCode: values.couponCode || undefined,
+        couponCode: (couponDiscount > 0 && values.couponCode?.trim()) ? values.couponCode.trim() : undefined,
         notes: values.notes || undefined
       };
 
@@ -276,9 +290,36 @@ const Checkout = () => {
       });
       navigate('/app/orders');
     } catch (error: any) {
+      console.error('Order creation error:', error);
+
+      let errorMessage = 'Failed to place order';
+
+      if (error.response?.data) {
+        const data = error.response.data;
+
+        if (typeof data === 'string') {
+          errorMessage = data;
+        } else if (data.errors) {
+          // Handle .NET validation errors
+          const validationErrors = Object.entries(data.errors)
+            .map(([field, messages]: [string, any]) => {
+              const errorList = Array.isArray(messages) ? messages : [messages];
+              return `${field}: ${errorList.join(', ')}`;
+            })
+            .join('\n');
+          errorMessage = validationErrors || data.title || 'Validation failed';
+        } else if (data.message) {
+          errorMessage = data.message;
+        } else if (data.title) {
+          errorMessage = data.title;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       notifications.show({
         title: 'Error',
-        message: error.response?.data || 'Failed to place order',
+        message: errorMessage,
         color: 'red',
       });
     } finally {
@@ -297,7 +338,7 @@ const Checkout = () => {
         shippingAddress: values.shippingAddress,
         billingAddress: values.useSameAddress ? values.shippingAddress : values.billingAddress,
         paymentMethod: values.paymentMethod,
-        couponCode: values.couponCode || undefined,
+        couponCode: (couponDiscount > 0 && values.couponCode?.trim()) ? values.couponCode.trim() : undefined,
         notes: values.notes || undefined,
         sessionId
       };
@@ -312,9 +353,36 @@ const Checkout = () => {
       });
       navigate('/app/dashboard');
     } catch (error: any) {
+      console.error('Guest order creation error:', error);
+
+      let errorMessage = 'Failed to place order';
+
+      if (error.response?.data) {
+        const data = error.response.data;
+
+        if (typeof data === 'string') {
+          errorMessage = data;
+        } else if (data.errors) {
+          // Handle .NET validation errors
+          const validationErrors = Object.entries(data.errors)
+            .map(([field, messages]: [string, any]) => {
+              const errorList = Array.isArray(messages) ? messages : [messages];
+              return `${field}: ${errorList.join(', ')}`;
+            })
+            .join('\n');
+          errorMessage = validationErrors || data.title || 'Validation failed';
+        } else if (data.message) {
+          errorMessage = data.message;
+        } else if (data.title) {
+          errorMessage = data.title;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       notifications.show({
         title: 'Error',
-        message: error.response?.data || 'Failed to place order',
+        message: errorMessage,
         color: 'red',
       });
     } finally {
@@ -462,9 +530,25 @@ const Checkout = () => {
                     placeholder="Enter coupon code"
                     style={{ flex: 1 }}
                     {...guestForm.getInputProps('couponCode')}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleValidateCoupon();
+                      }
+                    }}
                   />
                   <Button onClick={handleValidateCoupon}>Apply</Button>
+                  {couponDiscount > 0 && (
+                    <Button onClick={handleRemoveCoupon} color="red" variant="light">
+                      Remove
+                    </Button>
+                  )}
                 </Group>
+                {couponDiscount > 0 && (
+                  <Text size="sm" c="green" mt="xs">
+                    Coupon applied! Discount: €{couponDiscount.toFixed(2)}
+                  </Text>
+                )}
               </Paper>
             </Stack>
 
@@ -619,9 +703,25 @@ const Checkout = () => {
                   placeholder="Enter coupon code"
                   style={{ flex: 1 }}
                   {...loggedInForm.getInputProps('couponCode')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleValidateCoupon();
+                    }
+                  }}
                 />
                 <Button onClick={handleValidateCoupon}>Apply</Button>
+                {couponDiscount > 0 && (
+                  <Button onClick={handleRemoveCoupon} color="red" variant="light">
+                    Remove
+                  </Button>
+                )}
               </Group>
+              {couponDiscount > 0 && (
+                <Text size="sm" c="green" mt="xs">
+                  Coupon applied! Discount: €{couponDiscount.toFixed(2)}
+                </Text>
+              )}
             </Paper>
           </Stack>
 

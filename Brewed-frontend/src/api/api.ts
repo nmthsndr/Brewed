@@ -177,7 +177,11 @@ const Orders = {
   getInvoice: (orderId: number) =>
     axiosInstance.get(`/api/orders/${orderId}/invoice`),
   generateInvoice: (orderId: number) =>
-    axiosInstance.post(`/api/orders/${orderId}/invoice`)
+    axiosInstance.post(`/api/orders/${orderId}/invoice`),
+  getInvoicePdf: (orderId: number) =>
+    axiosInstance.get(`/api/orders/${orderId}/invoice/pdf`, {
+      responseType: 'blob'
+    })
 };
 
 const Addresses = {
