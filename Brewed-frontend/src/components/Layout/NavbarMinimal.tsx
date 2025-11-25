@@ -1,20 +1,21 @@
 import { useEffect, useState } from "react";
-import { rem, Button, useMantineTheme } from "@mantine/core";
+import { rem, useMantineTheme } from "@mantine/core";
 import {
   IconUserCircle,
   IconLogout,
-  IconHome,
-  IconShoppingBag,
+  IconLayoutDashboard,
+  IconCoffee,
   IconShoppingCart,
-  IconPackage,
   IconStar,
   IconTicket,
-  IconGift,
-  IconCategory,
+  IconDiscount,
+  IconCategory2,
   IconUsers,
-  IconChartBar,
-  IconClipboardList,
-  IconLogin
+  IconChartLine,
+  IconFileInvoice,
+  IconLogin,
+  IconEdit,
+  IconReceipt
 } from "@tabler/icons-react";
 import classes from "./NavbarMinimalColored.module.css";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -22,7 +23,7 @@ import { useMediaQuery } from "@mantine/hooks";
 import useAuth from "../../hooks/useAuth";
 
 interface NavbarLinkProps {
-  icon: typeof IconHome;
+  icon: typeof IconLayoutDashboard;
   label: string;
   color: string;
   active?: boolean;
@@ -37,14 +38,7 @@ function NavbarLink({ icon: Icon, label, color, active, onClick }: NavbarLinkPro
       onClick={onClick}
       data-active={active || undefined}
     >
-      <Button
-        variant="light"
-        color={color}
-        className={classes.iconButton}
-        style={{ width: rem(40), height: rem(35) }}
-      >
-        <Icon className={classes.linkIcon} style={{ width: rem(25), height: rem(25) }} stroke={1.8} />
-      </Button>
+      <Icon style={{ width: rem(20), height: rem(20), minWidth: rem(20) }} stroke={1.5} />
       <span>{label}</span>
     </div>
   );
@@ -60,25 +54,25 @@ export function NavbarMinimal({ toggle }: any) {
 
   const menuItems = [
     {
-      icon: IconHome,
+      icon: IconLayoutDashboard,
       label: "Dashboard",
       url: "dashboard",
       roles: ['Admin', 'RegisteredUser', 'Guest']
     },
     {
-      icon: IconShoppingBag,
+      icon: IconCoffee,
       label: "Products",
       url: "products",
       roles: ['Admin', 'RegisteredUser', 'Guest']
     },
     {
-      icon: IconCategory,
+      icon: IconEdit,
       label: "Manage Products",
       url: "admin-products",
       roles: ['Admin']
     },
     {
-      icon: IconCategory,
+      icon: IconCategory2,
       label: "Categories",
       url: "categories",
       roles: ['Admin']
@@ -90,19 +84,19 @@ export function NavbarMinimal({ toggle }: any) {
       roles: ['Admin', 'RegisteredUser', 'Guest']
     },
     {
-      icon: IconPackage,
+      icon: IconReceipt,
       label: "Orders",
       url: "orders",
       roles: ['Admin','RegisteredUser']
     },
     {
-      icon: IconGift,
+      icon: IconDiscount,
       label: "My Coupons",
       url: "my-coupons",
       roles: ['Admin','RegisteredUser']
     },
     {
-      icon: IconClipboardList,
+      icon: IconFileInvoice,
       label: "All Orders",
       url: "admin-orders",
       roles: ['Admin']
@@ -126,7 +120,7 @@ export function NavbarMinimal({ toggle }: any) {
       roles: ['Admin']
     },
     {
-      icon: IconChartBar,
+      icon: IconChartLine,
       label: "Analytics",
       url: "admin-dashboard",
       roles: ['Admin']

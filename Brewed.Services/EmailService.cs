@@ -111,10 +111,7 @@ namespace Brewed.Services
             var itemsHtml = string.Join("", orderDetails.Items.Select(item => $@"
                 <tr>
                     <td style='padding: 12px; border-bottom: 1px solid #eee;'>
-                        <div style='display: flex; align-items: center;'>
-                            {(string.IsNullOrEmpty(item.ProductImageUrl) ? "" : $"<img src='{item.ProductImageUrl}' alt='{item.ProductName}' style='width: 50px; height: 50px; object-fit: cover; border-radius: 4px; margin-right: 10px;' />")}
-                            <span style='color: #333;'>{item.ProductName}</span>
-                        </div>
+                        <span style='color: #333;'>{item.ProductName}</span>
                     </td>
                     <td style='padding: 12px; border-bottom: 1px solid #eee; text-align: center; color: #666;'>{item.Quantity}</td>
                     <td style='padding: 12px; border-bottom: 1px solid #eee; text-align: right; color: #666;'>€{item.UnitPrice:N2}</td>
@@ -336,10 +333,7 @@ namespace Brewed.Services
             var itemsHtml = string.Join("", orderDetails.Items.Select(item => $@"
                 <tr>
                     <td style='padding: 12px; border-bottom: 1px solid #eee;'>
-                        <div style='display: flex; align-items: center;'>
-                            {(string.IsNullOrEmpty(item.ProductImageUrl) ? "" : $"<img src='{item.ProductImageUrl}' alt='{item.ProductName}' style='width: 50px; height: 50px; object-fit: cover; border-radius: 4px; margin-right: 10px;' />")}
-                            <span style='color: #333;'>{item.ProductName}</span>
-                        </div>
+                        <span style='color: #333;'>{item.ProductName}</span>
                     </td>
                     <td style='padding: 12px; border-bottom: 1px solid #eee; text-align: center; color: #666;'>{item.Quantity}</td>
                     <td style='padding: 12px; border-bottom: 1px solid #eee; text-align: right; color: #666;'>€{item.UnitPrice:N2}</td>

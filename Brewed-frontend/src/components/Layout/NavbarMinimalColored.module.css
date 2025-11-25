@@ -5,11 +5,15 @@
   flex-direction: column;
   height: 100%;
   background-color: white;
+  overflow-y: auto;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
 }
 
 .navbarMain {
   flex: 1;
   margin-top: 20px;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .link {
@@ -18,21 +22,26 @@
   text-decoration: none;
   font-size: 14px;
   color: #495057;
-  padding: 10px 12px;
-  border-radius: 8px;
+  padding: 12px 16px;
+  border-radius: 10px;
   font-weight: 500;
   cursor: pointer;
-  margin-bottom: 5px;
-  transition: all 0.15s ease;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+  position: relative;
 }
 
 .link:hover {
-  background-color: #f8f9fa;
+  background: linear-gradient(135deg, rgba(212, 163, 115, 0.1) 0%, rgba(139, 69, 19, 0.1) 100%);
+  border-left: 3px solid rgba(139, 69, 19, 0.3);
+  padding-left: 13px;
 }
 
 .link[data-active] {
-  background-color: #e7f5ff;
-  color: #228be6;
+  background: linear-gradient(135deg, rgba(212, 163, 115, 0.15) 0%, rgba(139, 69, 19, 0.15) 100%);
+  color: #8B4513;
+  border-left: 3px solid #8B4513;
+  padding-left: 13px;
 }
 
 .link span {
