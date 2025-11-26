@@ -158,6 +158,73 @@ namespace Brewed.Services
                 throw new KeyNotFoundException("User not found");
             }
 
+            // Check if user has orders (cannot delete users with orders to maintain order history)
+            var hasOrders = await _context.Orders
+                .AnyAsync(o => o.UserId == userId);
+
+            if (hasOrders)
+            {
+                throw new InvalidOperationException("Cannot delete user with existing orders. User has order history that must be preserved.");
+            }
+
+            // Delete related CartItems first
+            var cart = await _context.Carts
+                .FirstOrDefaultAsync(c => c.UserId == userId);
+
+            if (cart != null)
+            {
+                var cartItems = await _context.CartItems
+                    .Where(ci => ci.CartId == cart.Id)
+                    .ToListAsync();
+
+                if (cartItems.Any())
+                {
+                    _context.CartItems.RemoveRange(cartItems);
+                }
+
+                _context.Carts.Remove(cart);
+            }
+
+            // Delete related Addresses
+            var addresses = await _context.Addresses
+                .Where(a => a.UserId == userId)
+                .ToListAsync();
+
+            if (addresses.Any())
+            {
+                _context.Addresses.RemoveRange(addresses);
+            }
+
+            // Delete related Reviews
+            var reviews = await _context.Reviews
+                .Where(r => r.UserId == userId)
+                .ToListAsync();
+
+            if (reviews.Any())
+            {
+                _context.Reviews.RemoveRange(reviews);
+            }
+
+            // Delete related UserTokens
+            var userTokens = await _context.UserTokens
+                .Where(ut => ut.UserId == userId)
+                .ToListAsync();
+
+            if (userTokens.Any())
+            {
+                _context.UserTokens.RemoveRange(userTokens);
+            }
+
+            // Delete related UserCoupons
+            var userCoupons = await _context.UserCoupons
+                .Where(uc => uc.UserId == userId)
+                .ToListAsync();
+
+            if (userCoupons.Any())
+            {
+                _context.UserCoupons.RemoveRange(userCoupons);
+            }
+
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
 

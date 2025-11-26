@@ -195,10 +195,11 @@ const AdminProducts = () => {
           message: 'Product deleted successfully',
           color: 'green',
         });
-      } catch (error) {
+      } catch (error: any) {
+        const errorMessage = error?.response?.data?.message || error?.message || 'Failed to delete product';
         notifications.show({
           title: 'Error',
-          message: 'Failed to delete product',
+          message: errorMessage,
           color: 'red',
         });
       } finally {

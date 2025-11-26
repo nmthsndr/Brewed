@@ -13,6 +13,7 @@ namespace Brewed.Services
         Task<AddressDto> CreateAddressAsync(int userId, AddressCreateDto addressDto);
         Task<AddressDto> UpdateAddressAsync(int addressId, int userId, AddressCreateDto addressDto);
         Task<bool> DeleteAddressAsync(int addressId, int userId);
+        Task<bool> DeleteAddressByAdminAsync(int addressId);
         Task<AddressDto> SetDefaultAddressAsync(int addressId, int userId);
     }
 
@@ -43,12 +44,12 @@ namespace Brewed.Services
 
             if (address == null)
             {
-                throw new KeyNotFoundException("Address not found");
+                throw new KeyNotFoundException("Address not found.");
             }
 
             if (address.UserId != userId)
             {
-                throw new UnauthorizedAccessException("You don't have permission to view this address");
+                throw new UnauthorizedAccessException("You don't have permission to view this address.");
             }
 
             return _mapper.Map<AddressDto>(address);
@@ -95,12 +96,12 @@ namespace Brewed.Services
 
             if (address == null)
             {
-                throw new KeyNotFoundException("Address not found");
+                throw new KeyNotFoundException("Address not found.");
             }
 
             if (address.UserId != userId)
             {
-                throw new UnauthorizedAccessException("You don't have permission to update this address");
+                throw new UnauthorizedAccessException("You don't have permission to update this address.");
             }
 
             if (addressDto.IsDefault && !address.IsDefault)
@@ -138,12 +139,12 @@ namespace Brewed.Services
 
             if (address == null)
             {
-                throw new KeyNotFoundException("Address not found");
+                throw new KeyNotFoundException("Address not found.");
             }
 
             if (address.UserId != userId)
             {
-                throw new UnauthorizedAccessException("You don't have permission to delete this address");
+                throw new UnauthorizedAccessException("You don't have permission to delete this address.");
             }
 
             // Check if address is used in any orders
@@ -152,7 +153,31 @@ namespace Brewed.Services
 
             if (isUsedInOrders)
             {
-                throw new Exception("Cannot delete address that is used in existing orders");
+                throw new InvalidOperationException("Cannot delete address that is used in existing orders.");
+            }
+
+            _context.Addresses.Remove(address);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> DeleteAddressByAdminAsync(int addressId)
+        {
+            var address = await _context.Addresses.FindAsync(addressId);
+
+            if (address == null)
+            {
+                throw new KeyNotFoundException("Address not found.");
+            }
+
+            // Check if address is used in any orders
+            var isUsedInOrders = await _context.Orders
+                .AnyAsync(o => o.ShippingAddressId == addressId || o.BillingAddressId == addressId);
+
+            if (isUsedInOrders)
+            {
+                throw new InvalidOperationException("Cannot delete address that is used in existing orders.");
             }
 
             _context.Addresses.Remove(address);
@@ -167,12 +192,12 @@ namespace Brewed.Services
 
             if (address == null)
             {
-                throw new KeyNotFoundException("Address not found");
+                throw new KeyNotFoundException("Address not found.");
             }
 
             if (address.UserId != userId)
             {
-                throw new UnauthorizedAccessException("You don't have permission to update this address");
+                throw new UnauthorizedAccessException("You don't have permission to update this address.");
             }
 
             // Unset all other defaults

@@ -94,13 +94,14 @@ const AddressManagement = () => {
           message: 'Address deleted successfully',
           color: 'green',
         });
-      } catch (error) {
+      } catch (error: any) {
+        const errorMessage = error?.response?.data?.message || error?.message || 'Failed to delete address';
         notifications.show({
           title: 'Error',
-          message: 'Failed to delete address',
+          message: errorMessage,
           color: 'red',
         });
-        } finally {
+      } finally {
         setLoading(false);
       }
     }

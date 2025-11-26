@@ -89,18 +89,19 @@ export function NavbarMinimal({ toggle }: any) {
       url: "orders",
       roles: ['Admin','RegisteredUser']
     },
+    /*
     {
       icon: IconDiscount,
       label: "My Coupons",
       url: "my-coupons",
       roles: ['Admin','RegisteredUser']
-    },
+    },*/
     {
       icon: IconFileInvoice,
       label: "All Orders",
       url: "admin-orders",
       roles: ['Admin']
-    },
+    },/*
     {
       icon: IconStar,
       label: "Reviews",
@@ -112,7 +113,7 @@ export function NavbarMinimal({ toggle }: any) {
       label: "Coupons",
       url: "coupons",
       roles: ['Admin']
-    },
+    },*/
     {
       icon: IconUsers,
       label: "Users",

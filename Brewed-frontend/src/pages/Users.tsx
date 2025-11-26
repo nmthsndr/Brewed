@@ -100,10 +100,11 @@ const Users = () => {
           message: 'User deleted successfully',
           color: 'green',
         });
-      } catch (error) {
+      } catch (error: any) {
+        const errorMessage = error?.response?.data?.message || error?.message || 'Failed to delete user';
         notifications.show({
           title: 'Error',
-          message: 'Failed to delete user',
+          message: errorMessage,
           color: 'red',
         });
       } finally {

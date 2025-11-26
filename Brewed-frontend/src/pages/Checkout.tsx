@@ -695,7 +695,7 @@ const Checkout = () => {
                 {...loggedInForm.getInputProps('paymentMethod')}
               />
             </Paper>
-
+{/*
             <Paper withBorder p="lg">
               <Title order={4} mb="md">Coupon Code (Optional)</Title>
               <Group>
@@ -723,6 +723,8 @@ const Checkout = () => {
                 </Text>
               )}
             </Paper>
+          */}
+
           </Stack>
 
           <Card withBorder p="lg" style={{ width: 350, position: 'sticky', top: 20 }}>

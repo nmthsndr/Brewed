@@ -99,21 +99,32 @@ namespace Brewed.API.Controllers
         {
             try
             {
+                // Check if user is admin
+                if (User.IsInRole("Admin"))
+                {
+                    await _addressService.DeleteAddressByAdminAsync(addressId);
+                    return Ok(new { success = true, message = "Address deleted successfully" });
+                }
+
                 var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-                var result = await _addressService.DeleteAddressAsync(addressId, userId);
-                return Ok(result);
+                await _addressService.DeleteAddressAsync(addressId, userId);
+                return Ok(new { success = true, message = "Address deleted successfully" });
             }
             catch (KeyNotFoundException)
             {
-                return NotFound("Address not found");
+                return NotFound(new { success = false, message = "Address not found" });
             }
             catch (UnauthorizedAccessException)
             {
-                return Forbid();
+                return StatusCode(403, new { success = false, message = "You don't have permission to delete this address" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new { success = false, message = ex.Message });
             }
         }
 

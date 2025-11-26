@@ -96,16 +96,20 @@ namespace Brewed.API.Controllers
             try
             {
                 var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-                var result = await _userService.DeleteUserAsync(userId);
-                return Ok(result);
+                await _userService.DeleteUserAsync(userId);
+                return Ok(new { success = true, message = "Profile deleted successfully" });
             }
             catch (KeyNotFoundException)
             {
-                return NotFound("User not found");
+                return NotFound(new { success = false, message = "User not found" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
@@ -183,16 +187,20 @@ namespace Brewed.API.Controllers
         {
             try
             {
-                var result = await _userService.DeleteUserAsync(userId);
-                return Ok(result);
+                await _userService.DeleteUserAsync(userId);
+                return Ok(new { success = true, message = "User deleted successfully" });
             }
             catch (KeyNotFoundException)
             {
-                return NotFound("User not found");
+                return NotFound(new { success = false, message = "User not found" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new { success = false, message = ex.Message });
             }
         }
 

@@ -247,6 +247,44 @@ namespace Brewed.Services
                 throw new KeyNotFoundException("Product not found");
             }
 
+            // Check if product has been ordered (cannot delete products that have been ordered)
+            var hasOrderItems = await _context.Set<OrderItem>()
+                .AnyAsync(oi => oi.ProductId == productId);
+
+            if (hasOrderItems)
+            {
+                throw new InvalidOperationException("Cannot delete product that has been ordered. Product is part of existing orders.");
+            }
+
+            // Delete related CartItems (it's OK to remove items from carts)
+            var cartItems = await _context.Set<CartItem>()
+                .Where(ci => ci.ProductId == productId)
+                .ToListAsync();
+
+            if (cartItems.Any())
+            {
+                _context.CartItems.RemoveRange(cartItems);
+            }
+
+            // Delete related ProductImages and Reviews
+            var productImages = await _context.Set<ProductImage>()
+                .Where(pi => pi.ProductId == productId)
+                .ToListAsync();
+
+            if (productImages.Any())
+            {
+                _context.ProductImages.RemoveRange(productImages);
+            }
+
+            var reviews = await _context.Set<Review>()
+                .Where(r => r.ProductId == productId)
+                .ToListAsync();
+
+            if (reviews.Any())
+            {
+                _context.Reviews.RemoveRange(reviews);
+            }
+
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
 

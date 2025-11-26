@@ -114,15 +114,19 @@ namespace Brewed.API.Controllers
             try
             {
                 var result = await _productService.DeleteProductAsync(productId);
-                return Ok(result);
+                return Ok(new { success = true, message = "Product deleted successfully" });
             }
             catch (KeyNotFoundException)
             {
-                return NotFound("Product not found");
+                return NotFound(new { success = false, message = "Product not found" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new { success = false, message = ex.Message });
             }
         }
     }
