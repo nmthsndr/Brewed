@@ -172,8 +172,9 @@ const AdminOrders = () => {
   }
 
   return (
-    <div style={{ padding: '20px' }}>
-      <Title order={2} mb="lg">All Orders</Title>
+    <div>
+      <Title order={2} mb="xs" style={{ color: '#3d3d3d' }}>All Orders</Title>
+      <Text size="sm" c="dimmed" mb="lg">Manage and track customer orders</Text>
 
       <Group mb="lg">
         <Select

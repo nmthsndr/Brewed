@@ -39,25 +39,40 @@ const UserMenuDropdown = () => {
   const items = isLoggedIn ? loggedInItems : guestItems;
 
   return (
-    <Menu width={260} position="bottom-end" transitionProps={{ transition: 'pop-top-right' }}>
+    <Menu width={220} position="bottom-end" transitionProps={{ transition: 'pop-top-right' }} shadow="lg" radius="md">
       <Menu.Target>
-        <UnstyledButton>
+        <UnstyledButton
+          style={{
+            padding: '4px 10px',
+            borderRadius: '10px',
+            transition: 'all 0.2s ease',
+          }}
+        >
           <Group gap={7}>
-            <Avatar radius="xl" size={30} color="blue" />
-            <Text fw={500} size="sm" lh={1} mr={3}>
+            <Avatar
+              radius="xl"
+              size={32}
+              color="brown"
+              variant="light"
+              style={{
+                border: '2px solid rgba(139, 69, 19, 0.15)',
+              }}
+            />
+            <Text fw={500} size="sm" lh={1} mr={3} c="#5c5c5c" visibleFrom="sm">
               {isLoggedIn ? email : 'Guest'}
             </Text>
-            <IconChevronDown style={{ width: rem(12), height: rem(12) }} stroke={1.5} />
+            <IconChevronDown style={{ width: rem(12), height: rem(12), color: '#8B4513' }} stroke={1.5} />
           </Group>
         </UnstyledButton>
       </Menu.Target>
 
-      <Menu.Dropdown>
+      <Menu.Dropdown style={{ border: '1px solid rgba(139, 69, 19, 0.1)' }}>
         {items.map(item => (
           <Menu.Item
             key={item.label}
             onClick={item.onClick}
             leftSection={<item.icon style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
+            style={{ borderRadius: '8px' }}
           >
             {item.label}
           </Menu.Item>

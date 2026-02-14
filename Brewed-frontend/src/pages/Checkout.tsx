@@ -570,8 +570,9 @@ const Checkout = () => {
   // Render for guest users
   if (!isLoggedIn) {
     return (
-      <div style={{ padding: '20px' }}>
-        <Title order={2} mb="lg">Guest Checkout</Title>
+      <div>
+        <Title order={2} mb="xs" style={{ color: '#3d3d3d' }}>Guest Checkout</Title>
+        <Text size="sm" c="dimmed" mb="lg">Complete your order as a guest</Text>
 
         <form onSubmit={guestForm.onSubmit(handleGuestSubmit)}>
           <Group align="flex-start" style={{ gap: '20px' }}>
@@ -751,8 +752,9 @@ const Checkout = () => {
 
   // Render for logged-in users
   return (
-    <div style={{ padding: '20px' }}>
-      <Title order={2} mb="lg">Checkout</Title>
+    <div>
+      <Title order={2} mb="xs" style={{ color: '#3d3d3d' }}>Checkout</Title>
+      <Text size="sm" c="dimmed" mb="lg">Review and complete your order</Text>
 
       <form onSubmit={loggedInForm.onSubmit(handleLoggedInSubmit)}>
         <Group align="flex-start" style={{ gap: '20px' }}>

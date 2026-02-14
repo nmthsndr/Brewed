@@ -72,10 +72,14 @@ const Login = () => {
               {...form.getInputProps('email')}
               styles={{
                 input: {
-                  borderColor: '#D4A373',
+                  borderColor: 'rgba(139, 69, 19, 0.2)',
                   '&:focus': {
                     borderColor: '#8B4513'
                   }
+                },
+                label: {
+                  fontWeight: 500,
+                  marginBottom: 4,
                 }
               }}
             />
@@ -88,10 +92,14 @@ const Login = () => {
               {...form.getInputProps('password')}
               styles={{
                 input: {
-                  borderColor: '#D4A373',
+                  borderColor: 'rgba(139, 69, 19, 0.2)',
                   '&:focus': {
                     borderColor: '#8B4513'
                   }
+                },
+                label: {
+                  fontWeight: 500,
+                  marginBottom: 4,
                 }
               }}
             />

@@ -56,21 +56,33 @@ const Orders = () => {
 
   if (orders.length === 0) {
     return (
-      <div style={{ padding: '20px', textAlign: 'center' }}>
-        <IconPackage size={100} color="#ccc" style={{ margin: '0 auto' }} />
-        <Title order={3} mt="md" c="dimmed">No orders yet</Title>
-        <Text c="dimmed" mt="sm">Your orders will appear here</Text>
+      <div style={{ textAlign: 'center', paddingTop: '60px', paddingBottom: '60px' }}>
+        <div style={{
+          width: 100,
+          height: 100,
+          borderRadius: '50%',
+          background: 'linear-gradient(135deg, rgba(212, 163, 115, 0.15) 0%, rgba(139, 69, 19, 0.1) 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '0 auto 20px',
+        }}>
+          <IconPackage size={48} color="#D4A373" stroke={1.5} />
+        </div>
+        <Title order={3} style={{ color: '#5c5c5c' }}>No orders yet</Title>
+        <Text c="dimmed" mt="xs">Your orders will appear here</Text>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '20px' }}>
-      <Title order={2} mb="lg">My Orders</Title>
+    <div>
+      <Title order={2} mb="xs" style={{ color: '#3d3d3d' }}>My Orders</Title>
+      <Text size="sm" c="dimmed" mb="lg">{orders.length} order{orders.length !== 1 ? 's' : ''}</Text>
 
       <Stack gap="md">
         {orders.map((order) => (
-          <Card key={order.id} withBorder shadow="sm" p="lg">
+          <Card key={order.id} withBorder p="lg" style={{ borderColor: 'rgba(139, 69, 19, 0.1)' }}>
             <Accordion>
               <Accordion.Item value={order.id.toString()}>
                 <Accordion.Control>

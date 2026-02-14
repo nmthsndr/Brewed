@@ -264,7 +264,7 @@ const Coupons = () => {
   };
 
   return (
-    <div style={{ padding: '20px', position: 'relative' }}>
+    <div style={{ position: 'relative' }}>
       <LoadingOverlay visible={loading} />
 
       <Group justify="space-between" mb="lg">

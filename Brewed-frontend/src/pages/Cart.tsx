@@ -113,10 +113,28 @@ const Cart = () => {
 
   if (!cart || cart.items.length === 0) {
     return (
-      <div style={{ padding: '20px', textAlign: 'center' }}>
-        <IconShoppingCart size={100} color="#ccc" style={{ margin: '0 auto' }} />
-        <Title order={3} mt="md" c="dimmed">Your cart is empty</Title>
-        <Button mt="lg" onClick={() => navigate('/app/products')}>
+      <div style={{ textAlign: 'center', paddingTop: '60px', paddingBottom: '60px' }}>
+        <div style={{
+          width: 100,
+          height: 100,
+          borderRadius: '50%',
+          background: 'linear-gradient(135deg, rgba(212, 163, 115, 0.15) 0%, rgba(139, 69, 19, 0.1) 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '0 auto 20px',
+        }}>
+          <IconShoppingCart size={48} color="#D4A373" stroke={1.5} />
+        </div>
+        <Title order={3} c="dimmed" style={{ color: '#5c5c5c' }}>Your cart is empty</Title>
+        <Text size="sm" c="dimmed" mt="xs" mb="lg">Browse our products to find something you love</Text>
+        <Button
+          onClick={() => navigate('/app/products')}
+          style={{
+            background: 'linear-gradient(135deg, #D4A373 0%, #8B4513 100%)',
+            border: 'none',
+          }}
+        >
           Continue Shopping
         </Button>
       </div>
@@ -124,15 +142,18 @@ const Cart = () => {
   }
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div>
       <Group justify="space-between" mb="lg">
-        <Title order={2}>Shopping Cart</Title>
-        <Button variant="outline" color="red" onClick={handleClearCart}>
+        <div>
+          <Title order={2} style={{ color: '#3d3d3d' }}>Shopping Cart</Title>
+          <Text size="sm" c="dimmed" mt={4}>{cart.items.length} item{cart.items.length !== 1 ? 's' : ''}</Text>
+        </div>
+        <Button variant="subtle" color="red" onClick={handleClearCart}>
           Clear Cart
         </Button>
       </Group>
 
-      <Card withBorder shadow="sm" p="lg">
+      <Card withBorder p="lg" style={{ borderColor: 'rgba(139, 69, 19, 0.1)' }}>
         <Table>
           <Table.Thead>
             <Table.Tr>
@@ -191,21 +212,35 @@ const Cart = () => {
         </Table>
       </Card>
 
-      <Paper withBorder p="lg" mt="lg" style={{ maxWidth: 400, marginLeft: 'auto' }}>
+      <Paper
+        withBorder
+        p="xl"
+        mt="lg"
+        style={{
+          maxWidth: 400,
+          marginLeft: 'auto',
+          borderColor: 'rgba(139, 69, 19, 0.12)',
+          background: 'linear-gradient(135deg, rgba(250, 248, 245, 0.8) 0%, rgba(245, 230, 211, 0.3) 100%)',
+        }}
+      >
         <Stack>
           <Group justify="space-between">
-            <Text fw={500}>Subtotal:</Text>
-            <Text>€{cart.subTotal.toFixed(2)}</Text>
+            <Text fw={500} c="dimmed">Subtotal:</Text>
+            <Text fw={500}>€{cart.subTotal.toFixed(2)}</Text>
           </Group>
-          <Divider />
+          <Divider color="rgba(139, 69, 19, 0.1)" />
           <Group justify="space-between">
             <Text fw={700} size="lg">Total:</Text>
-            <Text fw={700} size="lg" c="blue">€{cart.subTotal.toFixed(2)}</Text>
+            <Text fw={700} size="lg" style={{ color: '#8B4513' }}>€{cart.subTotal.toFixed(2)}</Text>
           </Group>
           <Button
             fullWidth
             size="lg"
             onClick={() => navigate('/app/checkout')}
+            style={{
+              background: 'linear-gradient(135deg, #D4A373 0%, #8B4513 100%)',
+              border: 'none',
+            }}
           >
             Proceed to Checkout
           </Button>
