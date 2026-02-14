@@ -135,6 +135,7 @@ namespace Brewed.DataContext.Dtos
 
         [Required]
         [StringLength(20)]
+        [RegularExpression(@"^\+?[\d\s\-\(\)]{7,20}$", ErrorMessage = "Invalid phone number format")]
         public string PhoneNumber { get; set; }
     }
 }

@@ -138,7 +138,11 @@ const Checkout = () => {
         city: (val) => (!val ? 'City is required' : null),
         postalCode: (val) => (!val ? 'Postal code is required' : null),
         country: (val) => (!val ? 'Country is required' : null),
-        phoneNumber: (val) => (!val ? 'Phone number is required' : null)
+        phoneNumber: (val) => {
+          if (!val) return 'Phone number is required';
+          if (!/^\+?[\d\s\-()]{7,20}$/.test(val)) return 'Invalid phone number format';
+          return null;
+        }
       },
       billingAddress: {
         firstName: (val, values) => (!values.useSameAddress && !val ? 'First name is required' : null),
@@ -147,7 +151,11 @@ const Checkout = () => {
         city: (val, values) => (!values.useSameAddress && !val ? 'City is required' : null),
         postalCode: (val, values) => (!values.useSameAddress && !val ? 'Postal code is required' : null),
         country: (val, values) => (!values.useSameAddress && !val ? 'Country is required' : null),
-        phoneNumber: (val, values) => (!values.useSameAddress && !val ? 'Phone number is required' : null)
+        phoneNumber: (val, values) => {
+          if (!values.useSameAddress && !val) return 'Phone number is required';
+          if (!values.useSameAddress && val && !/^\+?[\d\s\-()]{7,20}$/.test(val)) return 'Invalid phone number format';
+          return null;
+        }
       },
       paymentMethod: (val) => (!val ? 'Please select a payment method' : null)
     }
