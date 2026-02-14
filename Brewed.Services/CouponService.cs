@@ -491,13 +491,13 @@ namespace Brewed.Services
                 return result;
             }
 
-            // Check max usage count (global limit for the coupon) - only if set (not unlimited)
-            if (coupon.MaxUsageCount.HasValue && coupon.UsageCount >= coupon.MaxUsageCount.Value)
+            // Check max usage count (global limit) - only for public coupons
+            // Assigned coupons track per-user usage via UserCoupon.IsUsed instead
+            if (!hasAssignments && coupon.MaxUsageCount.HasValue && coupon.UsageCount >= coupon.MaxUsageCount.Value)
             {
                 result.Message = "This coupon has reached its maximum usage limit";
                 return result;
             }
-            // If MaxUsageCount is null, coupon is unlimited - no check needed
 
             // Calculate discount
             decimal discount = 0;
@@ -534,25 +534,23 @@ namespace Brewed.Services
             var userCoupon = await _context.UserCoupons
                 .FirstOrDefaultAsync(uc => uc.UserId == userId && uc.CouponId == coupon.Id);
 
-            if (userCoupon == null)
+            if (userCoupon != null)
             {
-                throw new KeyNotFoundException("User coupon assignment not found");
+                if (userCoupon.IsUsed)
+                {
+                    throw new Exception("Coupon has already been used by this user");
+                }
+
+                userCoupon.IsUsed = true;
+                userCoupon.UsedDate = DateTime.UtcNow;
+                userCoupon.OrderId = orderId;
+
+                coupon.UsageCount++;
+
+                _context.UserCoupons.Update(userCoupon);
+                _context.Coupons.Update(coupon);
+                await _context.SaveChangesAsync();
             }
-
-            if (userCoupon.IsUsed)
-            {
-                throw new Exception("Coupon has already been used by this user");
-            }
-
-            userCoupon.IsUsed = true;
-            userCoupon.UsedDate = DateTime.UtcNow;
-            userCoupon.OrderId = orderId;
-
-            coupon.UsageCount++;
-
-            _context.UserCoupons.Update(userCoupon);
-            _context.Coupons.Update(coupon);
-            await _context.SaveChangesAsync();
         }
 
         public async Task<List<UserCouponDto>> GetUserCouponsAsync(int userId)
@@ -574,10 +572,12 @@ namespace Brewed.Services
                 .Where(c => !assignedCouponIds.Contains(c.Id) && c.IsActive)
                 .ToListAsync();
 
-            var usedPublicCouponCodes = await _context.Orders
+            var userOrdersWithCoupons = await _context.Orders
                 .Where(o => o.UserId == userId && o.CouponCode != null)
-                .Select(o => o.CouponCode.ToLower())
+                .Select(o => new { CouponCode = o.CouponCode.ToLower(), o.OrderDate, o.Id })
                 .ToListAsync();
+
+            var usedPublicCouponCodes = userOrdersWithCoupons.Select(o => o.CouponCode).ToList();
 
             foreach (var coupon in publicCoupons)
             {
@@ -588,6 +588,10 @@ namespace Brewed.Services
                     isUsed = false;
                 }
 
+                var orderInfo = isUsed
+                    ? userOrdersWithCoupons.FirstOrDefault(o => o.CouponCode == coupon.Code.ToLower())
+                    : null;
+
                 result.Add(new UserCouponDto
                 {
                     Id = -coupon.Id,
@@ -596,8 +600,8 @@ namespace Brewed.Services
                     Coupon = _mapper.Map<CouponDto>(coupon),
                     IsUsed = isUsed,
                     AssignedDate = coupon.StartDate,
-                    UsedDate = null,
-                    OrderId = null
+                    UsedDate = orderInfo?.OrderDate,
+                    OrderId = orderInfo?.Id
                 });
             }
 
