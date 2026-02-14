@@ -211,10 +211,15 @@ const Checkout = () => {
     if (!couponCode) return;
 
     try {
-      const response = await api.Coupons.validateCoupon({
-        code: couponCode,
-        orderAmount: cart.subTotal
-      });
+      const response = isLoggedIn
+        ? await api.Coupons.validateCouponForUser({
+            code: couponCode,
+            orderAmount: cart.subTotal
+          })
+        : await api.Coupons.validateCoupon({
+            code: couponCode,
+            orderAmount: cart.subTotal
+          });
 
       if (response.data.isValid) {
         setCouponDiscount(response.data.discountAmount);
