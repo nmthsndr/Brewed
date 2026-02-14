@@ -11,7 +11,7 @@ import {
   SimpleGrid,
   Button
 } from "@mantine/core";
-import { IconTicket, IconCopy, IconCheck } from "@tabler/icons-react";
+import { IconTicket, IconCopy, IconCheck, IconWorld } from "@tabler/icons-react";
 import api from "../api/api";
 import { IUserCoupon } from "../interfaces/ICoupon";
 import { notifications } from "@mantine/notifications";
@@ -64,6 +64,8 @@ const MyCoupons = () => {
     }
     return `€${coupon.coupon.discountValue} OFF`;
   };
+
+  const isPublicCoupon = (coupon: IUserCoupon) => coupon.id < 0;
 
   const isExpired = (endDate: string) => {
     return new Date(endDate) < new Date();
@@ -119,14 +121,27 @@ const MyCoupons = () => {
                   >
                     <Stack gap="xs">
                       <Group justify="space-between">
-                        <Badge
-                          color="white"
-                          variant="filled"
-                          size="lg"
-                          style={{ color: '#667eea' }}
-                        >
-                          {getDiscountText(userCoupon)}
-                        </Badge>
+                        <Group gap="xs">
+                          <Badge
+                            color="white"
+                            variant="filled"
+                            size="lg"
+                            style={{ color: '#667eea' }}
+                          >
+                            {getDiscountText(userCoupon)}
+                          </Badge>
+                          {isPublicCoupon(userCoupon) && (
+                            <Badge
+                              color="white"
+                              variant="filled"
+                              size="sm"
+                              style={{ color: '#764ba2' }}
+                              leftSection={<IconWorld size={12} />}
+                            >
+                              Everyone
+                            </Badge>
+                          )}
+                        </Group>
                         <IconTicket size={32} style={{ opacity: 0.3 }} />
                       </Group>
 

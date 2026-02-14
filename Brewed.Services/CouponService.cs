@@ -563,7 +563,45 @@ namespace Brewed.Services
                 .Where(uc => uc.UserId == userId)
                 .ToListAsync();
 
-            return _mapper.Map<List<UserCouponDto>>(userCoupons);
+            var result = _mapper.Map<List<UserCouponDto>>(userCoupons);
+
+            var assignedCouponIds = await _context.UserCoupons
+                .Select(uc => uc.CouponId)
+                .Distinct()
+                .ToListAsync();
+
+            var publicCoupons = await _context.Coupons
+                .Where(c => !assignedCouponIds.Contains(c.Id) && c.IsActive)
+                .ToListAsync();
+
+            var usedPublicCouponCodes = await _context.Orders
+                .Where(o => o.UserId == userId && o.CouponCode != null)
+                .Select(o => o.CouponCode.ToLower())
+                .ToListAsync();
+
+            foreach (var coupon in publicCoupons)
+            {
+                var isUsed = usedPublicCouponCodes.Contains(coupon.Code.ToLower());
+
+                if (isUsed && !coupon.MaxUsageCount.HasValue)
+                {
+                    isUsed = false;
+                }
+
+                result.Add(new UserCouponDto
+                {
+                    Id = -coupon.Id,
+                    UserId = userId,
+                    CouponId = coupon.Id,
+                    Coupon = _mapper.Map<CouponDto>(coupon),
+                    IsUsed = isUsed,
+                    AssignedDate = coupon.StartDate,
+                    UsedDate = null,
+                    OrderId = null
+                });
+            }
+
+            return result;
         }
 
         public async Task<List<UserCouponDto>> GetCouponUsersAsync(int couponId)
