@@ -563,7 +563,49 @@ namespace Brewed.Services
                 .Where(uc => uc.UserId == userId)
                 .ToListAsync();
 
-            return _mapper.Map<List<UserCouponDto>>(userCoupons);
+            var result = _mapper.Map<List<UserCouponDto>>(userCoupons);
+
+            // Also include public/universal coupons (no user assignments)
+            var assignedCouponIds = await _context.UserCoupons
+                .Select(uc => uc.CouponId)
+                .Distinct()
+                .ToListAsync();
+
+            var publicCoupons = await _context.Coupons
+                .Where(c => !assignedCouponIds.Contains(c.Id) && c.IsActive)
+                .ToListAsync();
+
+            // Check which public coupons the user has already used (via orders)
+            var usedPublicCouponCodes = await _context.Orders
+                .Where(o => o.UserId == userId && o.CouponCode != null)
+                .Select(o => o.CouponCode.ToLower())
+                .ToListAsync();
+
+            foreach (var coupon in publicCoupons)
+            {
+                var isUsed = usedPublicCouponCodes.Contains(coupon.Code.ToLower());
+
+                // If coupon has a max usage count and is used, include it as used
+                // If no max usage count (truly unlimited), show as available even if used before
+                if (isUsed && !coupon.MaxUsageCount.HasValue)
+                {
+                    isUsed = false;
+                }
+
+                result.Add(new UserCouponDto
+                {
+                    Id = -coupon.Id, // negative ID to distinguish from real UserCoupon entries
+                    UserId = userId,
+                    CouponId = coupon.Id,
+                    Coupon = _mapper.Map<CouponDto>(coupon),
+                    IsUsed = isUsed,
+                    AssignedDate = coupon.StartDate,
+                    UsedDate = null,
+                    OrderId = null
+                });
+            }
+
+            return result;
         }
 
         public async Task<List<UserCouponDto>> GetCouponUsersAsync(int couponId)
