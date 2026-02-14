@@ -254,8 +254,8 @@ const Checkout = () => {
       let shippingAddressId = values.shippingAddressId;
       let billingAddressId = sameAsShipping ? values.shippingAddressId : values.billingAddressId;
 
-      // If user chose to add new shipping address inline
-      if (showNewShippingForm) {
+      // If user is filling in a new shipping address (either clicked "Add New" or has no saved addresses)
+      if (showNewShippingForm || addresses.length === 0) {
         const newShippingRes = await api.Addresses.createAddress({
           ...values.newShippingAddress,
           isDefault: false
@@ -263,8 +263,11 @@ const Checkout = () => {
         shippingAddressId = newShippingRes.data.id;
       }
 
-      // If user chose to add new billing address inline and not using same as shipping
-      if (!sameAsShipping && showNewBillingForm) {
+      // Update billingAddressId after shipping address creation so it uses the correct ID
+      if (sameAsShipping) {
+        billingAddressId = shippingAddressId;
+      } else if (showNewBillingForm || addresses.length === 0) {
+        // If user is filling in a new billing address (either clicked "Add New" or has no saved addresses)
         const newBillingRes = await api.Addresses.createAddress({
           ...values.newBillingAddress,
           isDefault: false
