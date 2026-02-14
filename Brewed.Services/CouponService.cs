@@ -491,9 +491,9 @@ namespace Brewed.Services
                 return result;
             }
 
-            // Check max usage count (global limit) - only for assigned (non-public) coupons
-            // Public coupons track per-user usage via Orders table instead
-            if (hasAssignments && coupon.MaxUsageCount.HasValue && coupon.UsageCount >= coupon.MaxUsageCount.Value)
+            // Check max usage count (global limit) - only for public coupons
+            // Assigned coupons track per-user usage via UserCoupon.IsUsed instead
+            if (!hasAssignments && coupon.MaxUsageCount.HasValue && coupon.UsageCount >= coupon.MaxUsageCount.Value)
             {
                 result.Message = "This coupon has reached its maximum usage limit";
                 return result;
