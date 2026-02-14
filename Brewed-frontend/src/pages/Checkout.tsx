@@ -12,7 +12,8 @@ import {
   Card,
   LoadingOverlay,
   Checkbox,
-  Radio
+  Radio,
+  Alert
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useNavigate } from "react-router-dom";
@@ -50,6 +51,10 @@ interface GuestOrderData {
   couponCode?: string;
   notes?: string;
   useSameAddress: boolean;
+  cardholderName: string;
+  cardNumber: string;
+  expiryDate: string;
+  cvv: string;
 }
 
 const Checkout = () => {
@@ -96,7 +101,44 @@ const Checkout = () => {
         postalCode: '',
         country: '',
         phoneNumber: ''
-      }
+      },
+      // Card details for Credit/Debit Card
+      cardholderName: '',
+      cardNumber: '',
+      expiryDate: '',
+      cvv: ''
+    },
+    validate: {
+      cardholderName: (val, values) => {
+        if ((values.paymentMethod === 'CreditCard' || values.paymentMethod === 'DebitCard') && !val) return 'Cardholder name is required';
+        return null;
+      },
+      cardNumber: (val, values) => {
+        if (values.paymentMethod === 'CreditCard' || values.paymentMethod === 'DebitCard') {
+          if (!val) return 'Card number is required';
+          const cleaned = val.replace(/\s/g, '');
+          if (!/^\d{13,19}$/.test(cleaned)) return 'Invalid card number';
+        }
+        return null;
+      },
+      expiryDate: (val, values) => {
+        if (values.paymentMethod === 'CreditCard' || values.paymentMethod === 'DebitCard') {
+          if (!val) return 'Expiry date is required';
+          if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(val)) return 'Format: MM/YY';
+          const [month, year] = val.split('/');
+          const expiry = new Date(2000 + parseInt(year), parseInt(month));
+          if (expiry < new Date()) return 'Card has expired';
+        }
+        return null;
+      },
+      cvv: (val, values) => {
+        if (values.paymentMethod === 'CreditCard' || values.paymentMethod === 'DebitCard') {
+          if (!val) return 'CVV is required';
+          if (!/^\d{3,4}$/.test(val)) return 'Invalid CVV (3-4 digits)';
+        }
+        return null;
+      },
+      paymentMethod: (val) => (!val ? 'Please select a payment method' : null)
     }
   });
 
@@ -127,7 +169,11 @@ const Checkout = () => {
       paymentMethod: '',
       couponCode: '',
       notes: '',
-      useSameAddress: true
+      useSameAddress: true,
+      cardholderName: '',
+      cardNumber: '',
+      expiryDate: '',
+      cvv: ''
     },
     validate: {
       email: (val) => (/^\S+@\S+$/.test(val) ? null : 'Invalid email address'),
@@ -157,7 +203,36 @@ const Checkout = () => {
           return null;
         }
       },
-      paymentMethod: (val) => (!val ? 'Please select a payment method' : null)
+      paymentMethod: (val) => (!val ? 'Please select a payment method' : null),
+      cardholderName: (val, values) => {
+        if ((values.paymentMethod === 'CreditCard' || values.paymentMethod === 'DebitCard') && !val) return 'Cardholder name is required';
+        return null;
+      },
+      cardNumber: (val, values) => {
+        if (values.paymentMethod === 'CreditCard' || values.paymentMethod === 'DebitCard') {
+          if (!val) return 'Card number is required';
+          const cleaned = val.replace(/\s/g, '');
+          if (!/^\d{13,19}$/.test(cleaned)) return 'Invalid card number';
+        }
+        return null;
+      },
+      expiryDate: (val, values) => {
+        if (values.paymentMethod === 'CreditCard' || values.paymentMethod === 'DebitCard') {
+          if (!val) return 'Expiry date is required';
+          if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(val)) return 'Format: MM/YY';
+          const [month, year] = val.split('/');
+          const expiry = new Date(2000 + parseInt(year), parseInt(month));
+          if (expiry < new Date()) return 'Card has expired';
+        }
+        return null;
+      },
+      cvv: (val, values) => {
+        if (values.paymentMethod === 'CreditCard' || values.paymentMethod === 'DebitCard') {
+          if (!val) return 'CVV is required';
+          if (!/^\d{3,4}$/.test(val)) return 'Invalid CVV (3-4 digits)';
+        }
+        return null;
+      }
     }
   });
 
@@ -294,11 +369,20 @@ const Checkout = () => {
       await api.Orders.createOrder(orderData);
       await refreshCartCount();
 
-      notifications.show({
-        title: 'Success',
-        message: 'Order placed successfully!',
-        color: 'green',
-      });
+      if (values.paymentMethod === 'BankTransfer') {
+        notifications.show({
+          title: 'Order Placed',
+          message: 'Order placed successfully! Check your email for bank transfer payment details.',
+          color: 'green',
+          autoClose: 8000,
+        });
+      } else {
+        notifications.show({
+          title: 'Success',
+          message: 'Order placed successfully!',
+          color: 'green',
+        });
+      }
       navigate('/app/orders');
     } catch (error: any) {
       console.error('Order creation error:', error);
@@ -357,11 +441,20 @@ const Checkout = () => {
       await api.Orders.createGuestOrder(guestOrderData);
       await refreshCartCount();
 
-      notifications.show({
-        title: 'Success',
-        message: 'Order placed successfully! Check your email for confirmation.',
-        color: 'green',
-      });
+      if (values.paymentMethod === 'BankTransfer') {
+        notifications.show({
+          title: 'Order Placed',
+          message: 'Order placed successfully! Check your email for bank transfer payment details.',
+          color: 'green',
+          autoClose: 8000,
+        });
+      } else {
+        notifications.show({
+          title: 'Success',
+          message: 'Order placed successfully! Check your email for confirmation.',
+          color: 'green',
+        });
+      }
       navigate('/app/dashboard');
     } catch (error: any) {
       console.error('Guest order creation error:', error);
@@ -532,6 +625,64 @@ const Checkout = () => {
                   ]}
                   {...guestForm.getInputProps('paymentMethod')}
                 />
+
+                {(guestForm.values.paymentMethod === 'CreditCard' || guestForm.values.paymentMethod === 'DebitCard') && (
+                  <Stack mt="md" gap="sm">
+                    <Title order={5}>Card Details</Title>
+                    <TextInput
+                      label="Cardholder Name"
+                      placeholder="John Doe"
+                      required
+                      {...guestForm.getInputProps('cardholderName')}
+                    />
+                    <TextInput
+                      label="Card Number"
+                      placeholder="1234 5678 9012 3456"
+                      required
+                      maxLength={19}
+                      {...guestForm.getInputProps('cardNumber')}
+                      onChange={(e) => {
+                        const value = e.currentTarget.value.replace(/[^\d\s]/g, '');
+                        const cleaned = value.replace(/\s/g, '');
+                        const formatted = cleaned.replace(/(.{4})/g, '$1 ').trim();
+                        guestForm.setFieldValue('cardNumber', formatted);
+                      }}
+                    />
+                    <Group grow>
+                      <TextInput
+                        label="Expiry Date"
+                        placeholder="MM/YY"
+                        required
+                        maxLength={5}
+                        {...guestForm.getInputProps('expiryDate')}
+                        onChange={(e) => {
+                          let value = e.currentTarget.value.replace(/[^\d/]/g, '');
+                          if (value.length === 2 && !value.includes('/') && guestForm.values.expiryDate.length < 2) {
+                            value += '/';
+                          }
+                          guestForm.setFieldValue('expiryDate', value);
+                        }}
+                      />
+                      <TextInput
+                        label="CVV"
+                        placeholder="123"
+                        required
+                        maxLength={4}
+                        {...guestForm.getInputProps('cvv')}
+                        onChange={(e) => {
+                          const value = e.currentTarget.value.replace(/\D/g, '');
+                          guestForm.setFieldValue('cvv', value);
+                        }}
+                      />
+                    </Group>
+                  </Stack>
+                )}
+
+                {guestForm.values.paymentMethod === 'BankTransfer' && (
+                  <Alert color="blue" mt="md" title="Bank Transfer">
+                    After placing your order, you will receive an email with our bank account details and payment reference. Please complete the transfer to finalize your order.
+                  </Alert>
+                )}
               </Paper>
 
               <Paper withBorder p="lg">
@@ -705,6 +856,64 @@ const Checkout = () => {
                 ]}
                 {...loggedInForm.getInputProps('paymentMethod')}
               />
+
+              {(loggedInForm.values.paymentMethod === 'CreditCard' || loggedInForm.values.paymentMethod === 'DebitCard') && (
+                <Stack mt="md" gap="sm">
+                  <Title order={5}>Card Details</Title>
+                  <TextInput
+                    label="Cardholder Name"
+                    placeholder="John Doe"
+                    required
+                    {...loggedInForm.getInputProps('cardholderName')}
+                  />
+                  <TextInput
+                    label="Card Number"
+                    placeholder="1234 5678 9012 3456"
+                    required
+                    maxLength={19}
+                    {...loggedInForm.getInputProps('cardNumber')}
+                    onChange={(e) => {
+                      const value = e.currentTarget.value.replace(/[^\d\s]/g, '');
+                      const cleaned = value.replace(/\s/g, '');
+                      const formatted = cleaned.replace(/(.{4})/g, '$1 ').trim();
+                      loggedInForm.setFieldValue('cardNumber', formatted);
+                    }}
+                  />
+                  <Group grow>
+                    <TextInput
+                      label="Expiry Date"
+                      placeholder="MM/YY"
+                      required
+                      maxLength={5}
+                      {...loggedInForm.getInputProps('expiryDate')}
+                      onChange={(e) => {
+                        let value = e.currentTarget.value.replace(/[^\d/]/g, '');
+                        if (value.length === 2 && !value.includes('/') && loggedInForm.values.expiryDate.length < 2) {
+                          value += '/';
+                        }
+                        loggedInForm.setFieldValue('expiryDate', value);
+                      }}
+                    />
+                    <TextInput
+                      label="CVV"
+                      placeholder="123"
+                      required
+                      maxLength={4}
+                      {...loggedInForm.getInputProps('cvv')}
+                      onChange={(e) => {
+                        const value = e.currentTarget.value.replace(/\D/g, '');
+                        loggedInForm.setFieldValue('cvv', value);
+                      }}
+                    />
+                  </Group>
+                </Stack>
+              )}
+
+              {loggedInForm.values.paymentMethod === 'BankTransfer' && (
+                <Alert color="blue" mt="md" title="Bank Transfer">
+                  After placing your order, you will receive an email with our bank account details and payment reference. Please complete the transfer to finalize your order.
+                </Alert>
+              )}
             </Paper>
             <Paper withBorder p="lg">
               <Title order={4} mb="md">Coupon Code (Optional)</Title>

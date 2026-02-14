@@ -14,6 +14,7 @@ namespace Brewed.Services
         Task SendLowStockAlertAsync(string productName, int currentStock, List<string> adminEmails);
         Task SendInvoiceEmailAsync(OrderDto orderDetails);
         Task SendCouponAssignmentAsync(string email, string name, CouponDto coupon);
+        Task SendBankTransferPaymentEmailAsync(OrderDto orderDetails);
     }
 
     public class EmailService : IEmailService
@@ -568,6 +569,132 @@ namespace Brewed.Services
             ";
 
             await SendEmailAsync(email, subject, body);
+        }
+
+        public async Task SendBankTransferPaymentEmailAsync(OrderDto orderDetails)
+        {
+            var subject = $"Bank Transfer Payment Details - {orderDetails.OrderNumber}";
+
+            // Build product items HTML
+            var itemsHtml = string.Join("", orderDetails.Items.Select(item => $@"
+                <tr>
+                    <td style='padding: 10px; border-bottom: 1px solid #eee; color: #333;'>{item.ProductName}</td>
+                    <td style='padding: 10px; border-bottom: 1px solid #eee; text-align: center; color: #666;'>{item.Quantity}</td>
+                    <td style='padding: 10px; border-bottom: 1px solid #eee; text-align: right; color: #333; font-weight: 600;'>€{item.TotalPrice:N2}</td>
+                </tr>
+            "));
+
+            var body = $@"
+                <div style='font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; background: linear-gradient(135deg, #D4A373 0%, #8B4513 100%); padding: 40px; border-radius: 10px;'>
+                    <div style='background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
+
+                        <!-- Header -->
+                        <div style='text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 3px solid #8B4513;'>
+                            <h1 style='color: #8B4513; margin: 0 0 10px 0; font-size: 28px;'>BANK TRANSFER PAYMENT</h1>
+                            <p style='color: #666; margin: 5px 0; font-size: 16px;'><strong>Order:</strong> {orderDetails.OrderNumber}</p>
+                            <p style='color: #666; margin: 5px 0; font-size: 14px;'>Order Date: {orderDetails.OrderDate:MMMM dd, yyyy}</p>
+                        </div>
+
+                        <!-- Greeting -->
+                        <div style='margin-bottom: 25px;'>
+                            <h3 style='color: #8B4513; margin-bottom: 10px;'>Hello {orderDetails.User.Name}!</h3>
+                            <p style='color: #666; line-height: 1.6;'>Thank you for your order! Please complete the bank transfer using the details below to finalize your purchase.</p>
+                        </div>
+
+                        <!-- Bank Details -->
+                        <div style='background: linear-gradient(135deg, #f9f5f0 0%, #f0e8df 100%); padding: 25px; border-radius: 8px; margin-bottom: 25px; border: 2px solid #D4A373;'>
+                            <h3 style='color: #8B4513; margin: 0 0 20px 0; text-align: center; font-size: 20px;'>Bank Account Details</h3>
+                            <table style='width: 100%; border-collapse: collapse;'>
+                                <tr>
+                                    <td style='padding: 10px 0; color: #666; font-weight: 600; width: 40%;'>Bank Name:</td>
+                                    <td style='padding: 10px 0; color: #333; font-weight: 600;'>Brewed Bank (OTP Bank)</td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 10px 0; color: #666; font-weight: 600;'>Account Holder:</td>
+                                    <td style='padding: 10px 0; color: #333; font-weight: 600;'>Brewed Coffee Kft.</td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 10px 0; color: #666; font-weight: 600;'>IBAN:</td>
+                                    <td style='padding: 10px 0; color: #333; font-weight: 600; letter-spacing: 1px;'>HU42 1177 3016 1111 1018 0000 0000</td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 10px 0; color: #666; font-weight: 600;'>SWIFT/BIC:</td>
+                                    <td style='padding: 10px 0; color: #333; font-weight: 600;'>OTPVHUHB</td>
+                                </tr>
+                                <tr style='border-top: 2px solid #D4A373;'>
+                                    <td style='padding: 15px 0 10px 0; color: #8B4513; font-weight: bold; font-size: 16px;'>Payment Reference:</td>
+                                    <td style='padding: 15px 0 10px 0; color: #8B4513; font-weight: bold; font-size: 16px;'>{orderDetails.OrderNumber}</td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Amount -->
+                        <div style='background: #8B4513; padding: 20px; border-radius: 8px; margin-bottom: 25px; text-align: center;'>
+                            <p style='color: rgba(255,255,255,0.8); margin: 0 0 5px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 2px;'>Amount to Transfer</p>
+                            <p style='color: white; margin: 0; font-size: 32px; font-weight: bold;'>€{orderDetails.TotalAmount:N2}</p>
+                        </div>
+
+                        <!-- Order Items -->
+                        <div style='margin-bottom: 25px;'>
+                            <h3 style='color: #8B4513; margin-bottom: 15px;'>Order Summary</h3>
+                            <table style='width: 100%; border-collapse: collapse; border: 1px solid #eee; border-radius: 6px; overflow: hidden;'>
+                                <thead>
+                                    <tr style='background: linear-gradient(135deg, #D4A373 0%, #8B4513 100%);'>
+                                        <th style='padding: 10px; text-align: left; color: white;'>Product</th>
+                                        <th style='padding: 10px; text-align: center; color: white;'>Qty</th>
+                                        <th style='padding: 10px; text-align: right; color: white;'>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {itemsHtml}
+                                </tbody>
+                            </table>
+                            <div style='background: #f9f9f9; padding: 15px; border-radius: 0 0 6px 6px;'>
+                                <table style='width: 100%;'>
+                                    <tr>
+                                        <td style='color: #666;'>Subtotal:</td>
+                                        <td style='text-align: right; color: #333;'>€{orderDetails.SubTotal:N2}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style='color: #666;'>Shipping:</td>
+                                        <td style='text-align: right; color: #333;'>€{orderDetails.ShippingCost:N2}</td>
+                                    </tr>
+                                    {(orderDetails.Discount > 0 ? $@"
+                                    <tr>
+                                        <td style='color: #4CAF50;'>Discount:</td>
+                                        <td style='text-align: right; color: #4CAF50;'>-€{orderDetails.Discount:N2}</td>
+                                    </tr>
+                                    " : "")}
+                                    <tr style='border-top: 2px solid #8B4513;'>
+                                        <td style='padding-top: 10px; color: #8B4513; font-weight: bold; font-size: 16px;'>Total:</td>
+                                        <td style='padding-top: 10px; text-align: right; color: #8B4513; font-weight: bold; font-size: 16px;'>€{orderDetails.TotalAmount:N2}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Important Notes -->
+                        <div style='background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 25px; border-radius: 4px;'>
+                            <h4 style='color: #856404; margin: 0 0 10px 0;'>Important:</h4>
+                            <ul style='color: #856404; margin: 0; padding-left: 20px; line-height: 1.8;'>
+                                <li>Please use <strong>{orderDetails.OrderNumber}</strong> as the payment reference</li>
+                                <li>Your order will be processed after we confirm the payment</li>
+                                <li>Please complete the transfer within 3 business days</li>
+                            </ul>
+                        </div>
+
+                        <!-- Footer -->
+                        <div style='text-align: center; padding-top: 20px; border-top: 2px solid #eee;'>
+                            <p style='color: #666; font-size: 14px; line-height: 1.6;'>
+                                If you have any questions, please contact us at <a href='mailto:{_fromEmail}' style='color: #8B4513;'>{_fromEmail}</a>
+                            </p>
+                            <p style='color: #333; margin-top: 20px; font-size: 16px;'>Best regards,<br/><span style='color: #8B4513; font-weight: bold;'>Brewed Team</span></p>
+                        </div>
+                    </div>
+                </div>
+            ";
+
+            await SendEmailAsync(orderDetails.User.Email, subject, body);
         }
     }
 }
