@@ -201,6 +201,19 @@ namespace Brewed.Services
             var orderDto = await GetOrderByIdAsync(order.Id, userId);
             await _emailService.SendOrderConfirmationAsync(orderDto);
 
+            // Send bank transfer payment details email if payment method is BankTransfer
+            if (orderCreateDto.PaymentMethod == "BankTransfer")
+            {
+                try
+                {
+                    await _emailService.SendBankTransferPaymentEmailAsync(orderDto);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to send bank transfer payment email: {ex.Message}");
+                }
+            }
+
             return orderDto;
         }
 
@@ -396,6 +409,19 @@ namespace Brewed.Services
             // Send order confirmation email to guest
             var orderDto = MapOrderToDto(savedOrder);
             await _emailService.SendOrderConfirmationAsync(orderDto);
+
+            // Send bank transfer payment details email if payment method is BankTransfer
+            if (guestOrderCreateDto.PaymentMethod == "BankTransfer")
+            {
+                try
+                {
+                    await _emailService.SendBankTransferPaymentEmailAsync(orderDto);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to send bank transfer payment email: {ex.Message}");
+                }
+            }
 
             return orderDto;
         }
