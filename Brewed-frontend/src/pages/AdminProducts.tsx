@@ -17,7 +17,8 @@ import {
   Badge,
   Image,
   FileInput,
-  SimpleGrid
+  SimpleGrid,
+  ScrollArea
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
@@ -324,70 +325,72 @@ const AdminProducts = () => {
       {products.length === 0 ? (
         <Text ta="center" c="dimmed">No products found</Text>
       ) : (
-        <Table striped highlightOnHover>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>Image</Table.Th>
-              <Table.Th>Name</Table.Th>
-              <Table.Th>Category</Table.Th>
-              <Table.Th>Price</Table.Th>
-              <Table.Th>Stock</Table.Th>
-              <Table.Th>Origin</Table.Th>
-              <Table.Th>Status</Table.Th>
-              <Table.Th>Actions</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {products.map((product) => (
-              <Table.Tr key={product.id}>
-                <Table.Td>
-                  <Image
-                    src={product.imageUrl}
-                    alt={product.name}
-                    width={50}
-                    height={50}
-                    radius="sm"
-                  />
-                </Table.Td>
-                <Table.Td>
-                  <Text fw={500}>{product.name}</Text>
-                </Table.Td>
-                <Table.Td>{product.categoryName}</Table.Td>
-                <Table.Td>€{product.price.toFixed(2)}</Table.Td>
-                <Table.Td>
-                  <Badge color={product.stockQuantity > 10 ? 'green' : product.stockQuantity > 0 ? 'yellow' : 'red'}>
-                    {product.stockQuantity}
-                  </Badge>
-                </Table.Td>
-                <Table.Td>{product.origin}</Table.Td>
-                <Table.Td>
-                  <Group gap={4}>
-                    {product.isOrganic && <Badge size="xs" color="green">Organic</Badge>}
-                    {product.isCaffeineFree && <Badge size="xs" color="blue">Caffeine Free</Badge>}
-                  </Group>
-                </Table.Td>
-                <Table.Td>
-                  <Group gap="xs">
-                    <ActionIcon
-                      variant="subtle"
-                      color="blue"
-                      onClick={() => handleEdit(product)}
-                    >
-                      <IconEdit size={16} />
-                    </ActionIcon>
-                    <ActionIcon
-                      variant="subtle"
-                      color="red"
-                      onClick={() => handleDelete(product.id)}
-                    >
-                      <IconTrash size={16} />
-                    </ActionIcon>
-                  </Group>
-                </Table.Td>
+        <ScrollArea h="calc(100vh - 200px)">
+          <Table striped highlightOnHover stickyHeader>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th>Image</Table.Th>
+                <Table.Th>Name</Table.Th>
+                <Table.Th>Category</Table.Th>
+                <Table.Th>Price</Table.Th>
+                <Table.Th>Stock</Table.Th>
+                <Table.Th>Origin</Table.Th>
+                <Table.Th>Status</Table.Th>
+                <Table.Th>Actions</Table.Th>
               </Table.Tr>
-            ))}
-          </Table.Tbody>
-        </Table>
+            </Table.Thead>
+            <Table.Tbody>
+              {products.map((product) => (
+                <Table.Tr key={product.id}>
+                  <Table.Td>
+                    <Image
+                      src={product.imageUrl}
+                      alt={product.name}
+                      width={50}
+                      height={50}
+                      radius="sm"
+                    />
+                  </Table.Td>
+                  <Table.Td>
+                    <Text fw={500}>{product.name}</Text>
+                  </Table.Td>
+                  <Table.Td>{product.categoryName}</Table.Td>
+                  <Table.Td>€{product.price.toFixed(2)}</Table.Td>
+                  <Table.Td>
+                    <Badge color={product.stockQuantity > 10 ? 'green' : product.stockQuantity > 0 ? 'yellow' : 'red'}>
+                      {product.stockQuantity}
+                    </Badge>
+                  </Table.Td>
+                  <Table.Td>{product.origin}</Table.Td>
+                  <Table.Td>
+                    <Group gap={4}>
+                      {product.isOrganic && <Badge size="xs" color="green">Organic</Badge>}
+                      {product.isCaffeineFree && <Badge size="xs" color="blue">Caffeine Free</Badge>}
+                    </Group>
+                  </Table.Td>
+                  <Table.Td>
+                    <Group gap="xs">
+                      <ActionIcon
+                        variant="subtle"
+                        color="blue"
+                        onClick={() => handleEdit(product)}
+                      >
+                        <IconEdit size={16} />
+                      </ActionIcon>
+                      <ActionIcon
+                        variant="subtle"
+                        color="red"
+                        onClick={() => handleDelete(product.id)}
+                      >
+                        <IconTrash size={16} />
+                      </ActionIcon>
+                    </Group>
+                  </Table.Td>
+                </Table.Tr>
+              ))}
+            </Table.Tbody>
+          </Table>
+        </ScrollArea>
       )}
 
       <Modal

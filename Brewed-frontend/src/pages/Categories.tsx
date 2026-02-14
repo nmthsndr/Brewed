@@ -11,7 +11,8 @@ import {
   Textarea,
   Stack,
   LoadingOverlay,
-  Badge
+  Badge,
+  ScrollArea
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
@@ -144,48 +145,50 @@ const Categories = () => {
       {categories.length === 0 ? (
         <Text ta="center" c="dimmed">No categories found</Text>
       ) : (
-        <Table striped highlightOnHover>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>Name</Table.Th>
-              <Table.Th>Description</Table.Th>
-              <Table.Th>Products</Table.Th>
-              <Table.Th>Actions</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {categories.map((category) => (
-              <Table.Tr key={category.id}>
-                <Table.Td>
-                  <Text fw={500}>{category.name}</Text>
-                </Table.Td>
-                <Table.Td>{category.description}</Table.Td>
-                <Table.Td>
-                  <Badge>{category.productCount} products</Badge>
-                </Table.Td>
-                <Table.Td>
-                  <Group gap="xs">
-                    <ActionIcon
-                      variant="subtle"
-                      color="blue"
-                      onClick={() => handleEdit(category)}
-                    >
-                      <IconEdit size={16} />
-                    </ActionIcon>
-                    <ActionIcon
-                      variant="subtle"
-                      color="red"
-                      onClick={() => handleDelete(category.id)}
-                      disabled={category.productCount > 0}
-                    >
-                      <IconTrash size={16} />
-                    </ActionIcon>
-                  </Group>
-                </Table.Td>
+        <ScrollArea h="calc(100vh - 200px)">
+          <Table striped highlightOnHover stickyHeader>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th>Name</Table.Th>
+                <Table.Th>Description</Table.Th>
+                <Table.Th>Products</Table.Th>
+                <Table.Th>Actions</Table.Th>
               </Table.Tr>
-            ))}
-          </Table.Tbody>
-        </Table>
+            </Table.Thead>
+            <Table.Tbody>
+              {categories.map((category) => (
+                <Table.Tr key={category.id}>
+                  <Table.Td>
+                    <Text fw={500}>{category.name}</Text>
+                  </Table.Td>
+                  <Table.Td>{category.description}</Table.Td>
+                  <Table.Td>
+                    <Badge>{category.productCount} products</Badge>
+                  </Table.Td>
+                  <Table.Td>
+                    <Group gap="xs">
+                      <ActionIcon
+                        variant="subtle"
+                        color="blue"
+                        onClick={() => handleEdit(category)}
+                      >
+                        <IconEdit size={16} />
+                      </ActionIcon>
+                      <ActionIcon
+                        variant="subtle"
+                        color="red"
+                        onClick={() => handleDelete(category.id)}
+                        disabled={category.productCount > 0}
+                      >
+                        <IconTrash size={16} />
+                      </ActionIcon>
+                    </Group>
+                  </Table.Td>
+                </Table.Tr>
+              ))}
+            </Table.Tbody>
+          </Table>
+        </ScrollArea>
       )}
 
       <Modal
