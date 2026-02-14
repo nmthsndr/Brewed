@@ -124,8 +124,12 @@ namespace Brewed.Services
                 throw new KeyNotFoundException("Coupon not found");
             }
 
-            // Check if new code conflicts with existing (excluding current)
-            if (await _context.Coupons.AnyAsync(c =>
+            // Generate random code if requested or if code is not provided
+            if (couponDto.GenerateRandomCode || string.IsNullOrWhiteSpace(couponDto.Code))
+            {
+                couponDto.Code = await GenerateRandomCouponCodeAsync();
+            }
+            else if (await _context.Coupons.AnyAsync(c =>
                 c.Code.ToLower() == couponDto.Code.ToLower() && c.Id != couponId))
             {
                 throw new Exception("Coupon code already exists");

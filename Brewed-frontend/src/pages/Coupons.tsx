@@ -357,7 +357,23 @@ const Coupons = () => {
             
             <Checkbox
               label="Generate Random Code"
-              {...form.getInputProps('generateRandomCode', { type: 'checkbox' })}
+              checked={form.values.generateRandomCode}
+              onChange={async (event) => {
+                const checked = event.currentTarget.checked;
+                form.setFieldValue('generateRandomCode', checked);
+                if (checked) {
+                  try {
+                    const response = await api.Coupons.generateRandomCode();
+                    form.setFieldValue('code', response.data.code);
+                  } catch {
+                    notifications.show({
+                      title: 'Error',
+                      message: 'Failed to generate random code',
+                      color: 'red',
+                    });
+                  }
+                }
+              }}
             />
 
             <Group grow>
