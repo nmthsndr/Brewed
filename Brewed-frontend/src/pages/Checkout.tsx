@@ -140,7 +140,7 @@ const Checkout = () => {
         country: (val) => (!val ? 'Country is required' : null),
         phoneNumber: (val) => {
           if (!val) return 'Phone number is required';
-          if (!/^\+?[\d\s\-()]{7,20}$/.test(val)) return 'Invalid phone number format';
+          if (!/^\+?[\d\s\-()]{7,19}$/.test(val)) return 'Invalid phone number format (max 20 characters)';
           return null;
         }
       },
@@ -153,7 +153,7 @@ const Checkout = () => {
         country: (val, values) => (!values.useSameAddress && !val ? 'Country is required' : null),
         phoneNumber: (val, values) => {
           if (!values.useSameAddress && !val) return 'Phone number is required';
-          if (!values.useSameAddress && val && !/^\+?[\d\s\-()]{7,20}$/.test(val)) return 'Invalid phone number format';
+          if (!values.useSameAddress && val && !/^\+?[\d\s\-()]{7,19}$/.test(val)) return 'Invalid phone number format (max 20 characters)';
           return null;
         }
       },

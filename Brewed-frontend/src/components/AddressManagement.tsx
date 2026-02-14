@@ -47,7 +47,7 @@ const AddressManagement = () => {
       country: (value) => !value ? 'Country is required' : null,
       phoneNumber: (value) => {
         if (!value) return 'Phone number is required';
-        if (!/^\+?[\d\s\-()]{7,20}$/.test(value)) return 'Invalid phone number format';
+        if (!/^\+?[\d\s\-()]{7,19}$/.test(value)) return 'Invalid phone number format (max 20 characters)';
         return null;
       }
     }
