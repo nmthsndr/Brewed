@@ -545,13 +545,12 @@ namespace Brewed.Services
                 userCoupon.UsedDate = DateTime.UtcNow;
                 userCoupon.OrderId = orderId;
 
+                coupon.UsageCount++;
+
                 _context.UserCoupons.Update(userCoupon);
+                _context.Coupons.Update(coupon);
+                await _context.SaveChangesAsync();
             }
-
-            coupon.UsageCount++;
-
-            _context.Coupons.Update(coupon);
-            await _context.SaveChangesAsync();
         }
 
         public async Task<List<UserCouponDto>> GetUserCouponsAsync(int userId)
