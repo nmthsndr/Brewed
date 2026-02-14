@@ -85,35 +85,34 @@ export function NavbarMinimal({ toggle }: any) {
     },
     {
       icon: IconReceipt,
-      label: "Orders",
+      label: "My Orders",
       url: "orders",
       roles: ['Admin','RegisteredUser']
     },
-    /*
-    {
-      icon: IconDiscount,
-      label: "My Coupons",
-      url: "my-coupons",
-      roles: ['Admin','RegisteredUser']
-    },*/
     {
       icon: IconFileInvoice,
       label: "All Orders",
       url: "admin-orders",
       roles: ['Admin']
-    },/*
+    },
+    {
+      icon: IconDiscount,
+      label: "My Coupons",
+      url: "my-coupons",
+      roles: ['Admin','RegisteredUser']
+    },
+    {
+      icon: IconTicket,
+      label: "All Coupons",
+      url: "coupons",
+      roles: ['Admin']
+    },
     {
       icon: IconStar,
       label: "Reviews",
       url: "admin-reviews",
       roles: ['Admin']
     },
-    {
-      icon: IconTicket,
-      label: "Coupons",
-      url: "coupons",
-      roles: ['Admin']
-    },*/
     {
       icon: IconUsers,
       label: "Users",

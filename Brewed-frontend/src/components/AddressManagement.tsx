@@ -45,7 +45,11 @@ const AddressManagement = () => {
       city: (value) => !value ? 'City is required' : null,
       postalCode: (value) => !value ? 'Postal code is required' : null,
       country: (value) => !value ? 'Country is required' : null,
-      phoneNumber: (value) => !value ? 'Phone number is required' : null
+      phoneNumber: (value) => {
+        if (!value) return 'Phone number is required';
+        if (!/^\+?[\d\s\-()]{7,19}$/.test(value)) return 'Invalid phone number format';
+        return null;
+      }
     }
   });
 
@@ -287,7 +291,7 @@ const AddressManagement = () => {
 
             <TextInput
               label="Phone Number"
-              placeholder="+1 (555) 123-4567"
+              placeholder="+36 (99) 123-4567"
               required
               {...form.getInputProps('phoneNumber')}
             />
