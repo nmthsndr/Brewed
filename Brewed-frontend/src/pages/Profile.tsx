@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   Title,
+  Text,
   Tabs,
   Paper,
   TextInput,
@@ -120,12 +121,13 @@ const Profile = () => {
   }, [searchParams]);
 
   return (
-    <div style={{ padding: '20px', position: 'relative' }}>
+    <div style={{ position: 'relative' }}>
       <LoadingOverlay visible={loading} />
-      <Title order={2} mb="lg">My Profile</Title>
+      <Title order={2} mb="xs" style={{ color: '#3d3d3d' }}>My Profile</Title>
+      <Text size="sm" c="dimmed" mb="lg">Manage your account settings</Text>
 
-      <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'profile')}>
-        <Tabs.List>
+      <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'profile')} color="brown">
+        <Tabs.List style={{ borderBottomColor: 'rgba(139, 69, 19, 0.1)' }}>
           <Tabs.Tab value="profile" leftSection={<IconUser size={16} />}>
             Profile Information
           </Tabs.Tab>
@@ -137,8 +139,8 @@ const Profile = () => {
           </Tabs.Tab>
         </Tabs.List>
 
-        <Tabs.Panel value="profile" pt="md">
-          <Paper withBorder p="lg" maw={600}>
+        <Tabs.Panel value="profile" pt="lg">
+          <Paper withBorder p="lg" maw={600} style={{ borderColor: 'rgba(139, 69, 19, 0.1)' }}>
             <form onSubmit={profileForm.onSubmit(handleUpdateProfile)}>
               <Stack>
                 <TextInput

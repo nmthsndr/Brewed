@@ -101,33 +101,61 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <Title order={2} mb="xl">Admin Dashboard</Title>
+    <div>
+      <Title order={2} mb="xs" style={{ color: '#3d3d3d' }}>Admin Dashboard</Title>
+      <Text size="sm" c="dimmed" mb="xl">Overview of your store's performance</Text>
 
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="lg" mb="xl">
         {statCards.map((stat) => (
-          <Paper key={stat.title} withBorder p="md" radius="md">
+          <Paper
+            key={stat.title}
+            withBorder
+            p="lg"
+            radius="lg"
+            style={{
+              borderColor: 'rgba(139, 69, 19, 0.1)',
+              transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-3px)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(139, 69, 19, 0.08)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '';
+            }}
+          >
             <Group justify="space-between">
               <div>
-                <Text c="dimmed" size="xs" tt="uppercase" fw={700}>
+                <Text c="dimmed" size="xs" tt="uppercase" fw={700} style={{ letterSpacing: '0.05em' }}>
                   {stat.title}
                 </Text>
-                <Text fw={700} size="xl" mt="xs">
+                <Text fw={700} size="xl" mt="xs" style={{ color: '#3d3d3d' }}>
                   {stat.value}
                 </Text>
                 <Text c="dimmed" size="xs" mt="xs">
                   {stat.description}
                 </Text>
               </div>
-              <stat.icon size={40} color={`var(--mantine-color-${stat.color}-6)`} />
+              <div style={{
+                width: 48,
+                height: 48,
+                borderRadius: '14px',
+                background: `linear-gradient(135deg, var(--mantine-color-${stat.color}-1), var(--mantine-color-${stat.color}-2))`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <stat.icon size={24} color={`var(--mantine-color-${stat.color}-6)`} stroke={1.5} />
+              </div>
             </Group>
           </Paper>
         ))}
       </SimpleGrid>
 
       <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg" mb="xl">
-        <Card withBorder>
-          <Title order={4} mb="md">Top Products</Title>
+        <Card withBorder style={{ borderColor: 'rgba(139, 69, 19, 0.1)' }}>
+          <Title order={4} mb="md" style={{ color: '#3d3d3d' }}>Top Products</Title>
           <Table>
             <Table.Thead>
               <Table.Tr>
@@ -154,8 +182,8 @@ const AdminDashboard = () => {
           </Table>
         </Card>
 
-        <Card withBorder>
-          <Title order={4} mb="md">Recent Orders</Title>
+        <Card withBorder style={{ borderColor: 'rgba(139, 69, 19, 0.1)' }}>
+          <Title order={4} mb="md" style={{ color: '#3d3d3d' }}>Recent Orders</Title>
           <Table>
             <Table.Thead>
               <Table.Tr>
@@ -189,8 +217,8 @@ const AdminDashboard = () => {
         </Card>
       </SimpleGrid>
 
-      <Paper withBorder p="md" radius="md">
-        <Title order={4} mb="md">Quick Stats</Title>
+      <Paper withBorder p="lg" radius="lg" style={{ borderColor: 'rgba(139, 69, 19, 0.1)' }}>
+        <Title order={4} mb="md" style={{ color: '#3d3d3d' }}>Quick Stats</Title>
         <SimpleGrid cols={{ base: 1, sm: 3 }}>
           <Center>
             <Stack align="center">

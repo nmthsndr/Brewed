@@ -87,11 +87,11 @@ const MyCoupons = () => {
   const expiredCoupons = coupons.filter(c => !c.isUsed && isExpired(c.coupon.endDate));
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
       <Group justify="space-between" mb="xl">
         <div>
-          <Title order={2}>My Coupons</Title>
-          <Text c="dimmed" size="sm">Manage and use your available discount coupons</Text>
+          <Title order={2} style={{ color: '#3d3d3d' }}>My Coupons</Title>
+          <Text c="dimmed" size="sm" mt={4}>Manage and use your available discount coupons</Text>
         </div>
       </Group>
 

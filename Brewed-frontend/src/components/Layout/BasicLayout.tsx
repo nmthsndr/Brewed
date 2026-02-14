@@ -9,7 +9,7 @@ const BasicLayout = () => {
 
   return (
     <AppShell
-      header={{ height: 80 }}
+      header={{ height: 72 }}
       navbar={{
         width: 250,
         breakpoint: "sm",
@@ -17,12 +17,14 @@ const BasicLayout = () => {
       }}
       padding="md"
       style={{
-        background: 'linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%)'
+        background: 'linear-gradient(160deg, #faf8f5 0%, #f3ede6 50%, #faf8f5 100%)',
       }}
     >
       <AppShell.Header style={{
-        boxShadow: '0 2px 8px rgba(139, 69, 19, 0.08)',
-        borderBottom: 'none'
+        boxShadow: '0 1px 12px rgba(139, 69, 19, 0.06)',
+        borderBottom: '1px solid rgba(139, 69, 19, 0.06)',
+        backdropFilter: 'blur(12px)',
+        background: 'rgba(255, 255, 255, 0.92)',
       }}>
         <Header opened={opened} toggle={toggle} />
       </AppShell.Header>

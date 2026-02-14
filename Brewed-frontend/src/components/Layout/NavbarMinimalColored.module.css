@@ -1,47 +1,53 @@
 .navbar {
   width: 250px;
-  padding: 20px;
+  padding: 16px 12px;
   display: flex;
   flex-direction: column;
   height: 100%;
-  background-color: white;
+  background: linear-gradient(180deg, #fefcfa 0%, #faf6f1 100%);
   overflow-y: auto;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+  overflow-x: hidden;
+  border-right: 1px solid rgba(139, 69, 19, 0.08);
 }
 
 .navbarMain {
   flex: 1;
-  margin-top: 20px;
+  margin-top: 8px;
   overflow-y: auto;
   min-height: 0;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .link {
   display: flex;
   align-items: center;
   text-decoration: none;
-  font-size: 14px;
-  color: #495057;
-  padding: 12px 16px;
+  font-size: 0.875rem;
+  color: #5c5c5c;
+  padding: 10px 14px;
   border-radius: 10px;
   font-weight: 500;
   cursor: pointer;
-  margin-bottom: 8px;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  border: 1px solid transparent;
 }
 
 .link:hover {
-  background: linear-gradient(135deg, rgba(212, 163, 115, 0.1) 0%, rgba(139, 69, 19, 0.1) 100%);
-  border-left: 3px solid rgba(139, 69, 19, 0.3);
-  padding-left: 13px;
+  background: rgba(139, 69, 19, 0.06);
+  color: #8B4513;
+  transform: translateX(2px);
 }
 
 .link[data-active] {
-  background: linear-gradient(135deg, rgba(212, 163, 115, 0.15) 0%, rgba(139, 69, 19, 0.15) 100%);
+  background: linear-gradient(135deg, rgba(212, 163, 115, 0.18) 0%, rgba(139, 69, 19, 0.12) 100%);
   color: #8B4513;
-  border-left: 3px solid #8B4513;
-  padding-left: 13px;
+  font-weight: 600;
+  border: 1px solid rgba(139, 69, 19, 0.12);
+  box-shadow: 0 1px 3px rgba(139, 69, 19, 0.08);
 }
 
 .link span {
@@ -61,9 +67,9 @@
 }
 
 .footer {
-  padding-top: 20px;
-  margin-top: 20px;
-  border-top: 1px solid #dee2e6;
+  padding-top: 16px;
+  margin-top: 16px;
+  border-top: 1px solid rgba(139, 69, 19, 0.1);
 }
 
 @media (max-width: 768px) {

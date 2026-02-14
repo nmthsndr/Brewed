@@ -86,8 +86,9 @@ const AdminReviews = () => {
   }
 
   return (
-    <div style={{ padding: '20px' }}>
-      <Title order={2} mb="lg">All Reviews</Title>
+    <div>
+      <Title order={2} mb="xs" style={{ color: '#3d3d3d' }}>All Reviews</Title>
+      <Text size="sm" c="dimmed" mb="lg">Monitor and moderate customer reviews</Text>
 
       {reviews.length === 0 ? (
         <div style={{ padding: '40px', textAlign: 'center' }}>

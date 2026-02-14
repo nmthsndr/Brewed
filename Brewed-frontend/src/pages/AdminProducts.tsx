@@ -311,11 +311,11 @@ const AdminProducts = () => {
   };
 
   return (
-    <div style={{ padding: '20px', position: 'relative' }}>
+    <div style={{ position: 'relative' }}>
       <LoadingOverlay visible={loading} />
 
       <Group justify="space-between" mb="lg">
-        <Title order={2}>Products Management</Title>
+        <Title order={2} style={{ color: '#3d3d3d' }}>Products Management</Title>
         <Button leftSection={<IconPlus size={16} />} onClick={handleCreate}>
           Add Product
         </Button>

@@ -212,26 +212,28 @@ const ProductDetail = () => {
   }
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div>
       <Button
         leftSection={<IconArrowLeft size={16} />}
         variant="subtle"
+        color="brown"
         onClick={() => navigate('/app/products')}
         mb="lg"
       >
         Back to Products
       </Button>
 
-      <Grid>
+      <Grid gutter="xl">
         <Grid.Col span={{ base: 12, md: 6 }}>
           <Stack gap="sm">
             <div style={{
               width: '100%',
-              height: '400px',
+              height: '440px',
               overflow: 'hidden',
-              borderRadius: '12px',
-              backgroundColor: '#f8f9fa',
-              border: '1px solid #e0e0e0'
+              borderRadius: '16px',
+              backgroundColor: '#faf8f5',
+              border: '1px solid rgba(139, 69, 19, 0.1)',
+              boxShadow: '0 4px 20px rgba(139, 69, 19, 0.06)',
             }}>
               <img
                 src={selectedImage || product.imageUrl}
@@ -239,7 +241,8 @@ const ProductDetail = () => {
                 style={{
                   width: '100%',
                   height: '100%',
-                  objectFit: 'cover'
+                  objectFit: 'cover',
+                  transition: 'transform 0.4s ease',
                 }}
               />
             </div>
@@ -253,11 +256,12 @@ const ProductDetail = () => {
                       width: '80px',
                       height: '80px',
                       overflow: 'hidden',
-                      borderRadius: '8px',
+                      borderRadius: '10px',
                       cursor: 'pointer',
-                      border: selectedImage === img.imageUrl ? '2px solid #228be6' : '2px solid #e0e0e0',
-                      transition: 'border 0.2s',
-                      flexShrink: 0
+                      border: selectedImage === img.imageUrl ? '2px solid #8B4513' : '2px solid rgba(139, 69, 19, 0.15)',
+                      transition: 'all 0.2s ease',
+                      flexShrink: 0,
+                      boxShadow: selectedImage === img.imageUrl ? '0 2px 8px rgba(139, 69, 19, 0.2)' : 'none',
                     }}
                     onClick={() => setSelectedImage(img.imageUrl)}
                   >
@@ -284,11 +288,12 @@ const ProductDetail = () => {
                       width: '80px',
                       height: '80px',
                       overflow: 'hidden',
-                      borderRadius: '8px',
+                      borderRadius: '10px',
                       cursor: 'pointer',
-                      border: selectedImage === url ? '2px solid #228be6' : '2px solid #e0e0e0',
-                      transition: 'border 0.2s',
-                      flexShrink: 0
+                      border: selectedImage === url ? '2px solid #8B4513' : '2px solid rgba(139, 69, 19, 0.15)',
+                      transition: 'all 0.2s ease',
+                      flexShrink: 0,
+                      boxShadow: selectedImage === url ? '0 2px 8px rgba(139, 69, 19, 0.2)' : 'none',
                     }}
                     onClick={() => setSelectedImage(url)}
                   >
@@ -311,49 +316,67 @@ const ProductDetail = () => {
         <Grid.Col span={{ base: 12, md: 6 }}>
           <Stack>
             <div>
-              <Title order={2}>{product.name}</Title>
-              <Group mt="xs" gap="xs">
-                <Badge color={product.stockQuantity > 0 ? "green" : "red"}>
+              <Title order={2} style={{ color: '#3d3d3d' }}>{product.name}</Title>
+              <Group mt="sm" gap="xs">
+                <Badge
+                  color={product.stockQuantity > 0 ? "green" : "red"}
+                  variant="light"
+                  radius="sm"
+                >
                   {product.stockQuantity > 0 ? "In Stock" : "Out of Stock"}
                 </Badge>
-                <Badge variant="light">{product.categoryName}</Badge>
+                <Badge variant="light" color="brown" radius="sm">{product.categoryName}</Badge>
               </Group>
             </div>
 
             {product.reviewCount > 0 && (
               <Group gap="xs">
-                <Rating value={product.averageRating} readOnly fractions={2} />
-                <Text size="sm">
+                <Rating value={product.averageRating} readOnly fractions={2} color="brown" />
+                <Text size="sm" c="dimmed">
                   {product.averageRating.toFixed(1)} ({product.reviewCount} reviews)
                 </Text>
               </Group>
             )}
 
-            <Text size="xl" fw={700} c="blue">
-            €{product.price.toFixed(2)}
+            <Text
+              size="xl"
+              fw={800}
+              style={{
+                color: '#8B4513',
+                fontSize: '2rem',
+              }}
+            >
+              €{product.price.toFixed(2)}
             </Text>
 
-            <Text>{product.description}</Text>
+            <Text style={{ lineHeight: 1.7, color: '#5c5c5c' }}>{product.description}</Text>
 
             {/* Show coffee-specific fields only for Coffee Beans category */}
             {product.categoryName === "Coffee Beans" && (
-              <Paper withBorder p="md">
+              <Paper
+                withBorder
+                p="md"
+                style={{
+                  borderColor: 'rgba(139, 69, 19, 0.1)',
+                  background: 'rgba(139, 69, 19, 0.02)',
+                }}
+              >
                 <Stack gap="xs">
                   <Group>
-                    <Text fw={500}>Roast Level:</Text>
-                    <Text>{product.roastLevel}</Text>
+                    <Text fw={600} size="sm" c="dimmed">Roast Level:</Text>
+                    <Text size="sm">{product.roastLevel}</Text>
                   </Group>
                   <Group>
-                    <Text fw={500}>Origin:</Text>
-                    <Text>{product.origin}</Text>
+                    <Text fw={600} size="sm" c="dimmed">Origin:</Text>
+                    <Text size="sm">{product.origin}</Text>
                   </Group>
                   <Group>
-                    <Text fw={500}>Caffeine Free:</Text>
-                    <Text>{product.isCaffeineFree ? 'Yes' : 'No'}</Text>
+                    <Text fw={600} size="sm" c="dimmed">Caffeine Free:</Text>
+                    <Text size="sm">{product.isCaffeineFree ? 'Yes' : 'No'}</Text>
                   </Group>
                   <Group>
-                    <Text fw={500}>Organic:</Text>
-                    <Text>{product.isOrganic ? 'Yes' : 'No'}</Text>
+                    <Text fw={600} size="sm" c="dimmed">Organic:</Text>
+                    <Text size="sm">{product.isOrganic ? 'Yes' : 'No'}</Text>
                   </Group>
                 </Stack>
               </Paper>
@@ -374,6 +397,10 @@ const ProductDetail = () => {
                   onClick={handleAddToCart}
                   mt="xl"
                   size="lg"
+                  style={{
+                    background: 'linear-gradient(135deg, #D4A373 0%, #8B4513 100%)',
+                    border: 'none',
+                  }}
                 >
                   Add to Cart
                 </Button>
@@ -383,7 +410,7 @@ const ProductDetail = () => {
         </Grid.Col>
       </Grid>
 
-      <Divider my="xl" />
+      <Divider my="xl" color="rgba(139, 69, 19, 0.1)" />
 
       {/* Reviews Section */}
       <Title order={3} mb="md">Customer Reviews</Title>

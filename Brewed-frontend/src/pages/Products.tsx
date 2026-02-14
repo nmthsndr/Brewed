@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   Title,
+  Text,
   Grid,
   Group,
   TextInput,
@@ -118,19 +119,35 @@ const Products = () => {
                                 selectedCategory?.name.toLowerCase().includes('kávébab');
 
   return (
-    <div style={{ padding: '20px', position: 'relative' }}>
+    <div style={{ position: 'relative' }}>
       <LoadingOverlay visible={loading} />
 
-      <Title order={2} mb="lg">Products</Title>
+      <Title order={2} mb="xs" style={{ color: '#3d3d3d' }}>Products</Title>
+      <Text size="sm" c="dimmed" mb="lg">Browse our full collection</Text>
 
       {/* Filters */}
-      <Paper withBorder p="md" mb="lg">
+      <Paper
+        withBorder
+        p="lg"
+        mb="xl"
+        style={{
+          borderColor: 'rgba(139, 69, 19, 0.1)',
+          background: 'rgba(255, 255, 255, 0.7)',
+        }}
+      >
         <Stack gap="md">
           <TextInput
             placeholder="Search products..."
-            leftSection={<IconSearch size={16} />}
+            leftSection={<IconSearch size={16} color="#8B4513" />}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            size="md"
+            radius="md"
+            styles={{
+              input: {
+                borderColor: 'rgba(139, 69, 19, 0.15)',
+              },
+            }}
           />
 
           <Grid>
@@ -210,7 +227,7 @@ const Products = () => {
 
             <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
               <Group mt="xl">
-                <Button variant="outline" onClick={resetFilters}>
+                <Button variant="outline" onClick={resetFilters} color="brown" radius="md">
                   Reset Filters
                 </Button>
               </Group>
@@ -223,8 +240,10 @@ const Products = () => {
       <Grid>
         {products.length === 0 ? (
           <Grid.Col span={12}>
-            <Paper p="xl" ta="center">
+            <Paper p="xl" ta="center" style={{ borderColor: 'rgba(139, 69, 19, 0.1)' }} withBorder>
+              <IconSearch size={48} color="#D4A373" style={{ marginBottom: '12px' }} />
               <Title order={4} c="dimmed">No products found</Title>
+              <Text size="sm" c="dimmed" mt="xs">Try adjusting your filters or search term</Text>
             </Paper>
           </Grid.Col>
         ) : (

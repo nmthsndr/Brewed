@@ -69,66 +69,228 @@ const Dashboard = () => {
   };
 
   return (
-    <div style={{ padding: '20px', position: 'relative' }}>
+    <div style={{ position: 'relative' }}>
       <LoadingOverlay visible={loading} />
 
-      <Title order={2} mb="xl">Welcome to Brewed Coffee!</Title>
+      {/* Hero Section */}
+      <div style={{
+        background: 'linear-gradient(135deg, #8B4513 0%, #6B3410 50%, #4a240b 100%)',
+        borderRadius: '20px',
+        padding: '48px 36px',
+        marginBottom: '32px',
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          width: '40%',
+          background: 'radial-gradient(circle at 70% 50%, rgba(212, 163, 115, 0.15) 0%, transparent 70%)',
+        }} />
+        <Title
+          order={1}
+          style={{
+            color: '#F5E6D3',
+            fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
+            marginBottom: '8px',
+            position: 'relative',
+            zIndex: 1,
+          }}
+        >
+          Welcome to Brewed
+        </Title>
+        <Text
+          size="lg"
+          style={{
+            color: 'rgba(245, 230, 211, 0.75)',
+            maxWidth: '500px',
+            position: 'relative',
+            zIndex: 1,
+          }}
+        >
+          Discover our handpicked selection of premium coffees from around the world.
+        </Text>
+      </div>
 
+      {/* Quick Action Cards */}
       <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="lg" mb="xl">
-        <Paper withBorder p="md" radius="md" style={{ cursor: 'pointer' }} onClick={() => navigate('/app/products')}>
+        <Paper
+          withBorder
+          p="lg"
+          radius="lg"
+          style={{
+            cursor: 'pointer',
+            borderColor: 'rgba(139, 69, 19, 0.1)',
+            transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px)';
+            e.currentTarget.style.boxShadow = '0 8px 24px rgba(139, 69, 19, 0.1)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '';
+          }}
+          onClick={() => navigate('/app/products')}
+        >
           <Group>
-            <IconShoppingBag size={40} color="#228be6" />
+            <div style={{
+              width: 52,
+              height: 52,
+              borderRadius: '14px',
+              background: 'linear-gradient(135deg, rgba(212, 163, 115, 0.2) 0%, rgba(139, 69, 19, 0.15) 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <IconShoppingBag size={28} color="#8B4513" stroke={1.5} />
+            </div>
             <div>
-              <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
+              <Text size="xs" c="dimmed" tt="uppercase" fw={700} style={{ letterSpacing: '0.05em' }}>
                 Browse
               </Text>
-              <Text fw={700} size="xl">Products</Text>
+              <Text fw={700} size="xl" style={{ color: '#3d3d3d' }}>Products</Text>
             </div>
           </Group>
         </Paper>
 
-        <Paper withBorder p="md" radius="md" style={{ cursor: 'pointer' }} onClick={() => navigate('/app/cart')}>
+        <Paper
+          withBorder
+          p="lg"
+          radius="lg"
+          style={{
+            cursor: 'pointer',
+            borderColor: 'rgba(139, 69, 19, 0.1)',
+            transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px)';
+            e.currentTarget.style.boxShadow = '0 8px 24px rgba(139, 69, 19, 0.1)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '';
+          }}
+          onClick={() => navigate('/app/cart')}
+        >
           <Group>
-            <IconShoppingCart size={40} color="#228be6" />
+            <div style={{
+              width: 52,
+              height: 52,
+              borderRadius: '14px',
+              background: 'linear-gradient(135deg, rgba(212, 163, 115, 0.2) 0%, rgba(139, 69, 19, 0.15) 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <IconShoppingCart size={28} color="#8B4513" stroke={1.5} />
+            </div>
             <div>
-              <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
+              <Text size="xs" c="dimmed" tt="uppercase" fw={700} style={{ letterSpacing: '0.05em' }}>
                 View
               </Text>
-              <Text fw={700} size="xl">Cart</Text>
+              <Text fw={700} size="xl" style={{ color: '#3d3d3d' }}>Cart</Text>
             </div>
           </Group>
         </Paper>
 
         {isLoggedIn ? (
-          <Paper withBorder p="md" radius="md" style={{ cursor: 'pointer' }} onClick={() => navigate('/app/orders')}>
+          <Paper
+            withBorder
+            p="lg"
+            radius="lg"
+            style={{
+              cursor: 'pointer',
+              borderColor: 'rgba(139, 69, 19, 0.1)',
+              transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 8px 24px rgba(139, 69, 19, 0.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '';
+            }}
+            onClick={() => navigate('/app/orders')}
+          >
             <Group>
-              <IconPackage size={40} color="#228be6" />
+              <div style={{
+                width: 52,
+                height: 52,
+                borderRadius: '14px',
+                background: 'linear-gradient(135deg, rgba(212, 163, 115, 0.2) 0%, rgba(139, 69, 19, 0.15) 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <IconPackage size={28} color="#8B4513" stroke={1.5} />
+              </div>
               <div>
-                <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
+                <Text size="xs" c="dimmed" tt="uppercase" fw={700} style={{ letterSpacing: '0.05em' }}>
                   Track
                 </Text>
-                <Text fw={700} size="xl">Orders</Text>
+                <Text fw={700} size="xl" style={{ color: '#3d3d3d' }}>Orders</Text>
               </div>
             </Group>
           </Paper>
         ) : (
-          <Paper withBorder p="md" radius="md" style={{ cursor: 'pointer' }} onClick={() => navigate('/login')}>
+          <Paper
+            withBorder
+            p="lg"
+            radius="lg"
+            style={{
+              cursor: 'pointer',
+              borderColor: 'rgba(139, 69, 19, 0.1)',
+              transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 8px 24px rgba(139, 69, 19, 0.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '';
+            }}
+            onClick={() => navigate('/login')}
+          >
             <Group>
-              <IconLogin size={40} color="#228be6" />
+              <div style={{
+                width: 52,
+                height: 52,
+                borderRadius: '14px',
+                background: 'linear-gradient(135deg, rgba(212, 163, 115, 0.2) 0%, rgba(139, 69, 19, 0.15) 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <IconLogin size={28} color="#8B4513" stroke={1.5} />
+              </div>
               <div>
-                <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
+                <Text size="xs" c="dimmed" tt="uppercase" fw={700} style={{ letterSpacing: '0.05em' }}>
                   Sign In
                 </Text>
-                <Text fw={700} size="xl">Login</Text>
+                <Text fw={700} size="xl" style={{ color: '#3d3d3d' }}>Login</Text>
               </div>
             </Group>
           </Paper>
         )}
       </SimpleGrid>
 
-      <Group justify="space-between" mb="md">
-        <Title order={3}>Featured Products</Title>
-        <Button variant="light" onClick={() => navigate('/app/products')}>
+      {/* Featured Products Section */}
+      <Group justify="space-between" mb="lg" align="baseline">
+        <div>
+          <Title order={2} style={{ color: '#3d3d3d' }}>Featured Products</Title>
+          <Text size="sm" c="dimmed" mt={4}>Our top picks for you</Text>
+        </div>
+        <Button
+          variant="subtle"
+          color="brown"
+          onClick={() => navigate('/app/products')}
+          style={{ fontWeight: 600 }}
+        >
           View All
         </Button>
       </Group>

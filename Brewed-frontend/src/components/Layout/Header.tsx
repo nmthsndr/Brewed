@@ -14,39 +14,59 @@ const Header = ({ opened, toggle }: any) => {
       align="center"
       style={{
         height: "100%",
-        paddingLeft: '24px',
-        paddingRight: '24px',
-        background: 'linear-gradient(90deg, rgba(212, 163, 115, 0.08) 0%, rgba(139, 69, 19, 0.08) 100%)',
-        borderBottom: '1px solid rgba(139, 69, 19, 0.1)'
+        paddingLeft: '20px',
+        paddingRight: '20px',
       }}
     >
-      <Image
-        src="/logo.png"
-        alt="Brewed Logo"
-        h={80}
+      <Box
         style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
           cursor: 'pointer',
-          transition: 'transform 0.2s ease',
-          borderRadius: '50%',
-          objectFit: 'cover'
         }}
-        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
         onClick={() => navigate('/app/dashboard')}
-      />
+      >
+        <Image
+          src="/logo.png"
+          alt="Brewed Logo"
+          h={48}
+          w={48}
+          style={{
+            transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+            borderRadius: '50%',
+            objectFit: 'cover',
+            border: '2px solid rgba(139, 69, 19, 0.12)',
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.08) rotate(5deg)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1) rotate(0deg)'}
+        />
+        <Text
+          fw={700}
+          size="xl"
+          style={{
+            fontFamily: '"Playfair Display", Georgia, serif',
+            color: '#8B4513',
+            letterSpacing: '-0.02em',
+          }}
+          visibleFrom="sm"
+        >
+          Brewed
+        </Text>
+      </Box>
 
-      <Box style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+      <Box style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <Box
           style={{
             position: 'relative',
             cursor: 'pointer',
             padding: '8px',
-            borderRadius: '8px',
-            transition: 'all 0.2s ease'
+            borderRadius: '12px',
+            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(139, 69, 19, 0.1)';
-            e.currentTarget.style.transform = 'scale(1.05)';
+            e.currentTarget.style.background = 'rgba(139, 69, 19, 0.08)';
+            e.currentTarget.style.transform = 'scale(1.08)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.background = 'transparent';
@@ -54,27 +74,38 @@ const Header = ({ opened, toggle }: any) => {
           }}
           onClick={() => navigate('/app/cart')}
         >
-          <IconShoppingCart size={26} color="#8B4513" />
+          <IconShoppingCart size={24} color="#8B4513" stroke={1.8} />
           {cartItemCount > 0 && (
             <Badge
-              size="sm"
+              size="xs"
               circle
               style={{
                 position: 'absolute',
                 top: 2,
                 right: 2,
                 padding: 0,
-                minWidth: 20,
-                height: 20,
+                minWidth: 18,
+                height: 18,
+                fontSize: '0.65rem',
                 background: 'linear-gradient(135deg, #D4A373 0%, #8B4513 100%)',
                 border: '2px solid white',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                boxShadow: '0 2px 6px rgba(139, 69, 19, 0.25)',
               }}
             >
               {cartItemCount}
             </Badge>
           )}
         </Box>
+
+        <Box
+          style={{
+            width: '1px',
+            height: '24px',
+            background: 'rgba(139, 69, 19, 0.12)',
+          }}
+          visibleFrom="sm"
+        />
+
         <UserMenuDropdown />
       </Box>
 
