@@ -368,7 +368,7 @@ const Coupons = () => {
                 disabled={form.values.generateRandomCode}
                 {...form.getInputProps('code')}
               />
-              {!form.values.generateRandomCode && (
+              {/*!form.values.generateRandomCode && (
                 <Button
                   variant="light"
                   onClick={handleGenerateCode}
@@ -377,7 +377,7 @@ const Coupons = () => {
                 >
                   Generate
                 </Button>
-              )}
+              )*/}
             </Group>
 
             <TextInput
