@@ -534,23 +534,22 @@ namespace Brewed.Services
             var userCoupon = await _context.UserCoupons
                 .FirstOrDefaultAsync(uc => uc.UserId == userId && uc.CouponId == coupon.Id);
 
-            if (userCoupon == null)
+            if (userCoupon != null)
             {
-                throw new KeyNotFoundException("User coupon assignment not found");
-            }
+                if (userCoupon.IsUsed)
+                {
+                    throw new Exception("Coupon has already been used by this user");
+                }
 
-            if (userCoupon.IsUsed)
-            {
-                throw new Exception("Coupon has already been used by this user");
-            }
+                userCoupon.IsUsed = true;
+                userCoupon.UsedDate = DateTime.UtcNow;
+                userCoupon.OrderId = orderId;
 
-            userCoupon.IsUsed = true;
-            userCoupon.UsedDate = DateTime.UtcNow;
-            userCoupon.OrderId = orderId;
+                _context.UserCoupons.Update(userCoupon);
+            }
 
             coupon.UsageCount++;
 
-            _context.UserCoupons.Update(userCoupon);
             _context.Coupons.Update(coupon);
             await _context.SaveChangesAsync();
         }
@@ -574,10 +573,12 @@ namespace Brewed.Services
                 .Where(c => !assignedCouponIds.Contains(c.Id) && c.IsActive)
                 .ToListAsync();
 
-            var usedPublicCouponCodes = await _context.Orders
+            var userOrdersWithCoupons = await _context.Orders
                 .Where(o => o.UserId == userId && o.CouponCode != null)
-                .Select(o => o.CouponCode.ToLower())
+                .Select(o => new { CouponCode = o.CouponCode.ToLower(), o.OrderDate, o.Id })
                 .ToListAsync();
+
+            var usedPublicCouponCodes = userOrdersWithCoupons.Select(o => o.CouponCode).ToList();
 
             foreach (var coupon in publicCoupons)
             {
@@ -588,6 +589,10 @@ namespace Brewed.Services
                     isUsed = false;
                 }
 
+                var orderInfo = isUsed
+                    ? userOrdersWithCoupons.FirstOrDefault(o => o.CouponCode == coupon.Code.ToLower())
+                    : null;
+
                 result.Add(new UserCouponDto
                 {
                     Id = -coupon.Id,
@@ -596,8 +601,8 @@ namespace Brewed.Services
                     Coupon = _mapper.Map<CouponDto>(coupon),
                     IsUsed = isUsed,
                     AssignedDate = coupon.StartDate,
-                    UsedDate = null,
-                    OrderId = null
+                    UsedDate = orderInfo?.OrderDate,
+                    OrderId = orderInfo?.Id
                 });
             }
 
