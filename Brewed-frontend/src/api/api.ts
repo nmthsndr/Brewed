@@ -168,9 +168,9 @@ const Orders = {
     axiosInstance.post<IOrder>(`/api/orders/guest`, guestOrderData),
   cancelOrder: (id: number) =>
     axiosInstance.post<IOrder>(`/api/orders/${id}/cancel`),
-  getAllOrders: (status?: string, page?: number, pageSize?: number) =>
+  getAllOrders: (status?: string, page?: number, pageSize?: number, search?: string) =>
     axiosInstance.get<PaginatedResult<IOrder>>(`/api/orders/all`, {
-      params: { status, page, pageSize }
+      params: { status, page, pageSize, search }
     }),
   updateOrderStatus: (id: number, status: string, notes?: string) =>
     axiosInstance.put<IOrder>(`/api/orders/${id}/status`, { status, notes }),
@@ -204,9 +204,9 @@ const Reviews = {
     axiosInstance.get<PaginatedResult<IReview>>(`/api/reviews/product/${productId}`, {
       params: { page, pageSize }
     }),
-  getAllReviews: (page?: number, pageSize?: number) =>
+  getAllReviews: (page?: number, pageSize?: number, search?: string) =>
     axiosInstance.get<PaginatedResult<IReview>>(`/api/reviews`, {
-      params: { page, pageSize }
+      params: { page, pageSize, search }
     }),
   getUserReviewForProduct: (productId: number) =>
     axiosInstance.get<{ hasReviewed: boolean; review: IReview | null }>(`/api/reviews/product/${productId}/user-review`),

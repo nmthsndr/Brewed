@@ -118,11 +118,12 @@ namespace Brewed.API.Controllers
         public async Task<IActionResult> GetAllOrders(
             [FromQuery] string status = null,
             [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 20)
+            [FromQuery] int pageSize = 20,
+            [FromQuery] string search = null)
         {
             try
             {
-                var orders = await _orderService.GetAllOrdersAsync(status, page, pageSize);
+                var orders = await _orderService.GetAllOrdersAsync(status, page, pageSize, search);
                 return Ok(orders);
             }
             catch (Exception ex)

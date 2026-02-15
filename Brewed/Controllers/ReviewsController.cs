@@ -21,11 +21,12 @@ namespace Brewed.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllReviews(
             [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10)
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string search = null)
         {
             try
             {
-                var reviews = await _reviewService.GetAllReviewsAsync(page, pageSize);
+                var reviews = await _reviewService.GetAllReviewsAsync(page, pageSize, search);
                 return Ok(reviews);
             }
             catch (Exception ex)

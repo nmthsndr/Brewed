@@ -22,7 +22,7 @@ import {
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
-import { IconEdit, IconTrash, IconPlus, IconUpload, IconX } from "@tabler/icons-react";
+import { IconEdit, IconTrash, IconPlus, IconUpload, IconX, IconSearch } from "@tabler/icons-react";
 import api from "../api/api";
 import { notifications } from "@mantine/notifications";
 
@@ -71,6 +71,7 @@ const AdminProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [opened, { open, close }] = useDisclosure(false);
@@ -322,10 +323,34 @@ const AdminProducts = () => {
         </Button>
       </Group>
 
-      {products.length === 0 ? (
-        <Text ta="center" c="dimmed">No products found</Text>
-      ) : (
-        <ScrollArea h="calc(100vh - 200px)">
+      <Group mb="lg">
+        <TextInput
+          placeholder="Search by name, category or origin..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.currentTarget.value)}
+          leftSection={<IconSearch size={16} />}
+          style={{ flex: 1, maxWidth: 400 }}
+        />
+        {searchQuery && (
+          <Button variant="subtle" color="gray" onClick={() => setSearchQuery("")}>
+            Clear
+          </Button>
+        )}
+      </Group>
+
+      {(() => {
+        const filteredProducts = products.filter((product) => {
+          if (!searchQuery) return true;
+          const q = searchQuery.toLowerCase();
+          return product.name.toLowerCase().includes(q) ||
+            product.categoryName?.toLowerCase().includes(q) ||
+            product.origin?.toLowerCase().includes(q) ||
+            product.description?.toLowerCase().includes(q);
+        });
+        return filteredProducts.length === 0 ? (
+          <Text ta="center" c="dimmed">{searchQuery ? 'No products match your search' : 'No products found'}</Text>
+        ) : (
+        <ScrollArea h="calc(100vh - 260px)">
           <Table striped highlightOnHover stickyHeader>
             <Table.Thead>
               <Table.Tr>
@@ -340,7 +365,7 @@ const AdminProducts = () => {
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {products.map((product) => (
+              {filteredProducts.map((product) => (
                 <Table.Tr key={product.id}>
                   <Table.Td>
                     <Image
@@ -391,7 +416,8 @@ const AdminProducts = () => {
             </Table.Tbody>
           </Table>
         </ScrollArea>
-      )}
+        );
+      })()}
 
       <Modal
         opened={opened}

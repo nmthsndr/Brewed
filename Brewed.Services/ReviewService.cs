@@ -9,7 +9,7 @@ namespace Brewed.Services
     public interface IReviewService
     {
         Task<PaginatedResultDto<ReviewDto>> GetProductReviewsAsync(int productId, int page, int pageSize);
-        Task<PaginatedResultDto<ReviewDto>> GetAllReviewsAsync(int page, int pageSize);
+        Task<PaginatedResultDto<ReviewDto>> GetAllReviewsAsync(int page, int pageSize, string search = null);
         Task<ReviewDto> CreateReviewAsync(int userId, ReviewCreateDto reviewDto);
         Task<bool> DeleteReviewAsync(int reviewId, int userId, bool isAdmin = false);
         Task<ReviewDto?> GetUserReviewForProductAsync(int userId, int productId);
@@ -64,12 +64,25 @@ namespace Brewed.Services
             };
         }
 
-        public async Task<PaginatedResultDto<ReviewDto>> GetAllReviewsAsync(int page, int pageSize)
+        public async Task<PaginatedResultDto<ReviewDto>> GetAllReviewsAsync(int page, int pageSize, string search = null)
         {
             var query = _context.Reviews
                 .Include(r => r.User)
                 .Include(r => r.Product)
-                .OrderByDescending(r => r.CreatedAt);
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                var searchLower = search.ToLower();
+                query = query.Where(r =>
+                    r.User.Name.ToLower().Contains(searchLower) ||
+                    r.User.Email.ToLower().Contains(searchLower) ||
+                    r.Product.Name.ToLower().Contains(searchLower) ||
+                    r.Title.ToLower().Contains(searchLower)
+                );
+            }
+
+            query = query.OrderByDescending(r => r.CreatedAt);
 
             var totalCount = await query.CountAsync();
 
