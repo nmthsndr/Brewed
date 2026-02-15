@@ -575,8 +575,8 @@ const Checkout = () => {
         <Text size="sm" c="dimmed" mb="lg">Complete your order as a guest</Text>
 
         <form onSubmit={guestForm.onSubmit(handleGuestSubmit)}>
-          <Group align="flex-start" style={{ gap: '20px' }}>
-            <Stack style={{ flex: 1 }}>
+          <div style={{ display: 'flex', flexDirection: 'row', gap: '20px', flexWrap: 'wrap' }}>
+            <Stack style={{ flex: '999 1 300px' }}>
               <Paper withBorder p="lg">
                 <Title order={4} mb="md">Contact Information</Title>
                 <TextInput
@@ -688,10 +688,10 @@ const Checkout = () => {
 
               <Paper withBorder p="lg">
                 <Title order={4} mb="md">Coupon Code (Optional)</Title>
-                <Group>
+                <Group wrap="wrap">
                   <TextInput
                     placeholder="Enter coupon code"
-                    style={{ flex: 1 }}
+                    style={{ flex: 1, minWidth: '150px' }}
                     {...guestForm.getInputProps('couponCode')}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
@@ -715,7 +715,7 @@ const Checkout = () => {
               </Paper>
             </Stack>
 
-            <Card withBorder p="lg" style={{ width: 350, position: 'sticky', top: 20 }}>
+            <Card withBorder p="lg" style={{ flex: '1 0 350px', position: 'sticky', top: 20, alignSelf: 'flex-start' }}>
               <Title order={4} mb="md">Order Summary</Title>
               <Stack gap="xs">
                 <Group justify="space-between">
@@ -744,7 +744,7 @@ const Checkout = () => {
                 </Button>
               </Stack>
             </Card>
-          </Group>
+          </div>
         </form>
       </div>
     );
@@ -757,8 +757,8 @@ const Checkout = () => {
       <Text size="sm" c="dimmed" mb="lg">Review and complete your order</Text>
 
       <form onSubmit={loggedInForm.onSubmit(handleLoggedInSubmit)}>
-        <Group align="flex-start" style={{ gap: '20px' }}>
-          <Stack style={{ flex: 1 }}>
+        <div style={{ display: 'flex', flexDirection: 'row', gap: '20px', flexWrap: 'wrap' }}>
+          <Stack style={{ flex: '999 1 300px' }}>
             <Paper withBorder p="lg">
               <Title order={4} mb="md">Shipping Address</Title>
 
@@ -919,10 +919,10 @@ const Checkout = () => {
             </Paper>
             <Paper withBorder p="lg">
               <Title order={4} mb="md">Coupon Code (Optional)</Title>
-              <Group>
+              <Group wrap="wrap">
                 <TextInput
                   placeholder="Enter coupon code"
-                  style={{ flex: 1 }}
+                  style={{ flex: 1, minWidth: '150px' }}
                   {...loggedInForm.getInputProps('couponCode')}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
@@ -947,7 +947,7 @@ const Checkout = () => {
 
           </Stack>
 
-          <Card withBorder p="lg" style={{ width: 350, position: 'sticky', top: 20 }}>
+          <Card withBorder p="lg" style={{ flex: '1 0 350px', position: 'sticky', top: 20, alignSelf: 'flex-start' }}>
             <Title order={4} mb="md">Order Summary</Title>
             <Stack gap="xs">
               <Group justify="space-between">
@@ -976,7 +976,7 @@ const Checkout = () => {
               </Button>
             </Stack>
           </Card>
-        </Group>
+        </div>
       </form>
     </div>
   );

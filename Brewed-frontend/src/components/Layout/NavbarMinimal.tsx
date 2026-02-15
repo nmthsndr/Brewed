@@ -46,7 +46,7 @@ function NavbarLink({ icon: Icon, label, color, active, onClick }: NavbarLinkPro
 
 export function NavbarMinimal({ toggle }: any) {
   const theme = useMantineTheme();
-  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.md})`);
   const [active, setActive] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();

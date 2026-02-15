@@ -13,7 +13,8 @@ import {
   Rating,
   ActionIcon,
   Badge,
-  TextInput
+  TextInput,
+  ScrollArea
 } from "@mantine/core";
 import { IconStar, IconTrash, IconSearch } from "@tabler/icons-react";
 import { useSearchParams } from "react-router-dom";
@@ -105,14 +106,14 @@ const AdminReviews = () => {
       <Title order={2} mb="xs" style={{ color: '#3d3d3d' }}>All Reviews</Title>
       <Text size="sm" c="dimmed" mb="lg">Monitor and moderate customer reviews</Text>
 
-      <Group mb="lg">
+      <Group mb="lg" wrap="wrap">
         <TextInput
           placeholder="Search by customer name, email or product"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.currentTarget.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
           leftSection={<IconSearch size={16} />}
-          style={{ flex: 1, maxWidth: 400 }}
+          style={{ flex: 1, minWidth: '200px', maxWidth: 400 }}
         />
         <Button variant="light" onClick={handleSearch}>
           Search
@@ -138,6 +139,7 @@ const AdminReviews = () => {
       ) : (
         <>
           <Card withBorder>
+            <ScrollArea>
             <Table highlightOnHover>
               <Table.Thead>
                 <Table.Tr>
@@ -200,6 +202,7 @@ const AdminReviews = () => {
                 ))}
               </Table.Tbody>
             </Table>
+            </ScrollArea>
           </Card>
 
           {totalPages > 1 && (

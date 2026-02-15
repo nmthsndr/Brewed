@@ -12,7 +12,8 @@ import {
   Image,
   Stack,
   Paper,
-  Divider
+  Divider,
+  ScrollArea
 } from "@mantine/core";
 import { IconTrash, IconShoppingCart } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
@@ -154,6 +155,7 @@ const Cart = () => {
       </Group>
 
       <Card withBorder p="lg" style={{ borderColor: 'rgba(139, 69, 19, 0.1)' }}>
+        <ScrollArea>
         <Table>
           <Table.Thead>
             <Table.Tr>
@@ -210,6 +212,7 @@ const Cart = () => {
             ))}
           </Table.Tbody>
         </Table>
+        </ScrollArea>
       </Card>
 
       <Paper
@@ -217,8 +220,6 @@ const Cart = () => {
         p="xl"
         mt="lg"
         style={{
-          maxWidth: 400,
-          marginLeft: 'auto',
           borderColor: 'rgba(139, 69, 19, 0.12)',
           background: 'linear-gradient(135deg, rgba(250, 248, 245, 0.8) 0%, rgba(245, 230, 211, 0.3) 100%)',
         }}
