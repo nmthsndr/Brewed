@@ -114,7 +114,7 @@ const Dashboard = () => {
           Crafted for True Coffee Lovers
         </Title>
 
-        <Text c="dimmed" className={classes.description} mt="md">
+        <Text c="dimmed" ta="center" maw={600} mx="auto" mt="md" className={classes.description}>
           Explore single-origin beans and artisan blends, freshly roasted and delivered to your door.
         </Text>
 

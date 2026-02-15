@@ -12,19 +12,12 @@ import {
   Stack,
   RingProgress,
   Center,
-  UnstyledButton
 } from "@mantine/core";
 import {
   IconCurrencyDollar,
   IconShoppingCart,
   IconUsers,
   IconPackage,
-  IconEdit,
-  IconCategory2,
-  IconFileInvoice,
-  IconTicket,
-  IconStar,
-  IconChevronRight
 } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
@@ -230,60 +223,6 @@ const AdminDashboard = () => {
           </Table>
         </Card>
       </SimpleGrid>
-
-      <Paper withBorder p="lg" radius="lg" mb="xl" style={{ borderColor: 'rgba(139, 69, 19, 0.1)' }}>
-        <Title order={4} mb="md" style={{ color: '#3d3d3d' }}>Quick Navigation</Title>
-        <SimpleGrid cols={{ base: 2, sm: 3, lg: 6 }} spacing="md">
-          {[
-            { icon: IconEdit, label: 'Manage Products', url: '/app/admin-products', color: 'blue' },
-            { icon: IconCategory2, label: 'Categories', url: '/app/categories', color: 'teal' },
-            { icon: IconFileInvoice, label: 'All Orders', url: '/app/admin-orders', color: 'green' },
-            { icon: IconTicket, label: 'All Coupons', url: '/app/coupons', color: 'violet' },
-            { icon: IconStar, label: 'Reviews', url: '/app/admin-reviews', color: 'yellow' },
-            { icon: IconUsers, label: 'Users', url: '/app/users', color: 'orange' },
-          ].map((item) => (
-            <UnstyledButton
-              key={item.label}
-              onClick={() => navigate(item.url)}
-              style={{
-                padding: '16px 12px',
-                borderRadius: '12px',
-                border: '1px solid rgba(139, 69, 19, 0.1)',
-                transition: 'all 0.2s ease',
-                textAlign: 'center',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(139, 69, 19, 0.1)';
-                e.currentTarget.style.borderColor = `var(--mantine-color-${item.color}-3)`;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '';
-                e.currentTarget.style.borderColor = 'rgba(139, 69, 19, 0.1)';
-              }}
-            >
-              <Center>
-                <div style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: '10px',
-                  background: `linear-gradient(135deg, var(--mantine-color-${item.color}-1), var(--mantine-color-${item.color}-2))`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: 8,
-                }}>
-                  <item.icon size={20} color={`var(--mantine-color-${item.color}-6)`} stroke={1.5} />
-                </div>
-              </Center>
-              <Text size="sm" fw={500} ta="center" style={{ color: '#3d3d3d' }}>
-                {item.label}
-              </Text>
-            </UnstyledButton>
-          ))}
-        </SimpleGrid>
-      </Paper>
 
       <Paper withBorder p="lg" radius="lg" style={{ borderColor: 'rgba(139, 69, 19, 0.1)' }}>
         <Title order={4} mb="md" style={{ color: '#3d3d3d' }}>Quick Stats</Title>
