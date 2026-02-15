@@ -2,6 +2,7 @@ import { AppShell } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import Header from "./Header";
 import { NavbarMinimal } from "./NavbarMinimal";
+import Footer from "./Footer";
 import { Outlet } from "react-router-dom";
 
 const BasicLayout = () => {
@@ -10,6 +11,7 @@ const BasicLayout = () => {
   return (
     <AppShell
       header={{ height: 72 }}
+      footer={{ height: 60 }}
       navbar={{
         width: 250,
         breakpoint: "sm",
@@ -36,6 +38,14 @@ const BasicLayout = () => {
       <AppShell.Main>
         <Outlet />
       </AppShell.Main>
+
+      <AppShell.Footer style={{
+        borderTop: '1px solid rgba(139, 69, 19, 0.1)',
+        background: 'rgba(255, 255, 255, 0.92)',
+        backdropFilter: 'blur(12px)',
+      }}>
+        <Footer />
+      </AppShell.Footer>
     </AppShell>
   );
 };

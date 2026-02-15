@@ -201,9 +201,9 @@ const Users = () => {
               <Table.Tr>
                 <Table.Th style={{ width: '25%' }}>Name</Table.Th>
                 <Table.Th style={{ width: '30%' }}>Email</Table.Th>
-                <Table.Th style={{ width: '12%' }}>Role</Table.Th>
-                <Table.Th style={{ width: '13%' }}>Email Confirmed</Table.Th>
-                <Table.Th style={{ width: '20%' }}>Actions</Table.Th>
+                <Table.Th style={{ width: '16%' }}>Role</Table.Th>
+                <Table.Th style={{ width: '16%' }}>Email Confirmed</Table.Th>
+                <Table.Th style={{ width: '13%' }}>Actions</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -229,7 +229,7 @@ const Users = () => {
                         <ActionIcon
                           variant="subtle"
                           color="green"
-                          onClick={() => navigate(`/app/admin-orders?search=${encodeURIComponent(user.name)}`)}
+                          onClick={() => navigate(`/app/admin-orders?search=${encodeURIComponent(user.email)}`)}
                         >
                           <IconFileInvoice size={16} />
                         </ActionIcon>
@@ -238,7 +238,7 @@ const Users = () => {
                         <ActionIcon
                           variant="subtle"
                           color="yellow"
-                          onClick={() => navigate(`/app/admin-reviews?search=${encodeURIComponent(user.name)}`)}
+                          onClick={() => navigate(`/app/admin-reviews?search=${encodeURIComponent(user.email)}`)}
                         >
                           <IconStar size={16} />
                         </ActionIcon>

@@ -325,7 +325,7 @@ const AdminProducts = () => {
 
       <Group mb="lg">
         <TextInput
-          placeholder="Search by name, category or origin..."
+          placeholder="Search by name, category, origin or description..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.currentTarget.value)}
           leftSection={<IconSearch size={16} />}
