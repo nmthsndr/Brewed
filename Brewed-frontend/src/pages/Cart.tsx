@@ -220,8 +220,6 @@ const Cart = () => {
         p="xl"
         mt="lg"
         style={{
-          maxWidth: 400,
-          marginLeft: 'auto',
           borderColor: 'rgba(139, 69, 19, 0.12)',
           background: 'linear-gradient(135deg, rgba(250, 248, 245, 0.8) 0%, rgba(245, 230, 211, 0.3) 100%)',
         }}

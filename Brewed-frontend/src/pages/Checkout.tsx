@@ -576,7 +576,7 @@ const Checkout = () => {
 
         <form onSubmit={guestForm.onSubmit(handleGuestSubmit)}>
           <div style={{ display: 'flex', flexDirection: 'row', gap: '20px', flexWrap: 'wrap' }}>
-            <Stack style={{ flex: 1, minWidth: '300px' }}>
+            <Stack style={{ flex: '999 1 300px' }}>
               <Paper withBorder p="lg">
                 <Title order={4} mb="md">Contact Information</Title>
                 <TextInput
@@ -715,7 +715,7 @@ const Checkout = () => {
               </Paper>
             </Stack>
 
-            <Card withBorder p="lg" style={{ width: '100%', maxWidth: 350, flexShrink: 0, position: 'sticky', top: 20, alignSelf: 'flex-start' }}>
+            <Card withBorder p="lg" style={{ flex: '1 0 350px', position: 'sticky', top: 20, alignSelf: 'flex-start' }}>
               <Title order={4} mb="md">Order Summary</Title>
               <Stack gap="xs">
                 <Group justify="space-between">
@@ -758,7 +758,7 @@ const Checkout = () => {
 
       <form onSubmit={loggedInForm.onSubmit(handleLoggedInSubmit)}>
         <div style={{ display: 'flex', flexDirection: 'row', gap: '20px', flexWrap: 'wrap' }}>
-          <Stack style={{ flex: 1, minWidth: '300px' }}>
+          <Stack style={{ flex: '999 1 300px' }}>
             <Paper withBorder p="lg">
               <Title order={4} mb="md">Shipping Address</Title>
 
@@ -947,7 +947,7 @@ const Checkout = () => {
 
           </Stack>
 
-          <Card withBorder p="lg" style={{ width: '100%', maxWidth: 350, flexShrink: 0, position: 'sticky', top: 20, alignSelf: 'flex-start' }}>
+          <Card withBorder p="lg" style={{ flex: '1 0 350px', position: 'sticky', top: 20, alignSelf: 'flex-start' }}>
             <Title order={4} mb="md">Order Summary</Title>
             <Stack gap="xs">
               <Group justify="space-between">
