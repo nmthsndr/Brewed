@@ -15,7 +15,8 @@ import {
   NumberInput,
   Switch,
   MultiSelect,
-  Checkbox
+  Checkbox,
+  ScrollArea
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
@@ -277,73 +278,75 @@ const Coupons = () => {
       {coupons.length === 0 ? (
         <Text ta="center" c="dimmed">No coupons found</Text>
       ) : (
-        <Table striped highlightOnHover>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>Code</Table.Th>
-              <Table.Th>Description</Table.Th>
-              <Table.Th>Discount</Table.Th>
-              <Table.Th>Min Order</Table.Th>
-              <Table.Th>Valid Until</Table.Th>
-              <Table.Th>Status</Table.Th>
-              <Table.Th>Actions</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {coupons.map((coupon) => (
-              <Table.Tr key={coupon.id}>
-                <Table.Td>
-                  <Text fw={600} c="blue">{coupon.code}</Text>
-                </Table.Td>
-                <Table.Td>{coupon.description}</Table.Td>
-                <Table.Td>
-                  {coupon.discountType === 'Percentage'
-                    ? `${coupon.discountValue}%`
-                    : `€${coupon.discountValue}`}
-                </Table.Td>
-                <Table.Td>
-                  {coupon.minimumOrderAmount
-                    ? `€${coupon.minimumOrderAmount}`
-                    : '-'}
-                </Table.Td>
-                <Table.Td>
-                  {new Date(coupon.endDate).toLocaleDateString()}
-                </Table.Td>
-                <Table.Td>
-                  <Badge color={coupon.isActive ? 'green' : 'red'}>
-                    {coupon.isActive ? 'Active' : 'Inactive'}
-                  </Badge>
-                </Table.Td>
-                <Table.Td>
-                  <Group gap="xs">
-                    <ActionIcon
-                      variant="subtle"
-                      color="grape"
-                      onClick={() => handleViewUsers(coupon)}
-                      title="View assigned users"
-                    >
-                      <IconUsers size={16} />
-                    </ActionIcon>
-                    <ActionIcon
-                      variant="subtle"
-                      color="blue"
-                      onClick={() => handleEdit(coupon)}
-                    >
-                      <IconEdit size={16} />
-                    </ActionIcon>
-                    <ActionIcon
-                      variant="subtle"
-                      color="red"
-                      onClick={() => handleDelete(coupon.id)}
-                    >
-                      <IconTrash size={16} />
-                    </ActionIcon>
-                  </Group>
-                </Table.Td>
+        <ScrollArea h="calc(100vh - 200px)">
+          <Table striped highlightOnHover stickyHeader>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th>Code</Table.Th>
+                <Table.Th>Description</Table.Th>
+                <Table.Th>Discount</Table.Th>
+                <Table.Th>Min Order</Table.Th>
+                <Table.Th>Valid Until</Table.Th>
+                <Table.Th>Status</Table.Th>
+                <Table.Th>Actions</Table.Th>
               </Table.Tr>
-            ))}
-          </Table.Tbody>
-        </Table>
+            </Table.Thead>
+            <Table.Tbody>
+              {coupons.map((coupon) => (
+                <Table.Tr key={coupon.id}>
+                  <Table.Td>
+                    <Text fw={600} c="blue">{coupon.code}</Text>
+                  </Table.Td>
+                  <Table.Td>{coupon.description}</Table.Td>
+                  <Table.Td>
+                    {coupon.discountType === 'Percentage'
+                      ? `${coupon.discountValue}%`
+                      : `€${coupon.discountValue}`}
+                  </Table.Td>
+                  <Table.Td>
+                    {coupon.minimumOrderAmount
+                      ? `€${coupon.minimumOrderAmount}`
+                      : '-'}
+                  </Table.Td>
+                  <Table.Td>
+                    {new Date(coupon.endDate).toLocaleDateString()}
+                  </Table.Td>
+                  <Table.Td>
+                    <Badge color={coupon.isActive ? 'green' : 'red'}>
+                      {coupon.isActive ? 'Active' : 'Inactive'}
+                    </Badge>
+                  </Table.Td>
+                  <Table.Td>
+                    <Group gap="xs">
+                      <ActionIcon
+                        variant="subtle"
+                        color="grape"
+                        onClick={() => handleViewUsers(coupon)}
+                        title="View assigned users"
+                      >
+                        <IconUsers size={16} />
+                      </ActionIcon>
+                      <ActionIcon
+                        variant="subtle"
+                        color="blue"
+                        onClick={() => handleEdit(coupon)}
+                      >
+                        <IconEdit size={16} />
+                      </ActionIcon>
+                      <ActionIcon
+                        variant="subtle"
+                        color="red"
+                        onClick={() => handleDelete(coupon.id)}
+                      >
+                        <IconTrash size={16} />
+                      </ActionIcon>
+                    </Group>
+                  </Table.Td>
+                </Table.Tr>
+              ))}
+            </Table.Tbody>
+          </Table>
+        </ScrollArea>
       )}
 
       <Modal

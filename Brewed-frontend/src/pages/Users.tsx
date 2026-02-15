@@ -11,7 +11,8 @@ import {
   Stack,
   LoadingOverlay,
   Badge,
-  PasswordInput
+  PasswordInput,
+  ScrollArea
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
@@ -167,55 +168,57 @@ const Users = () => {
       {users.length === 0 ? (
         <Text ta="center" c="dimmed">No users found</Text>
       ) : (
-        <Table striped highlightOnHover>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>Name</Table.Th>
-              <Table.Th>Email</Table.Th>
-              <Table.Th>Role</Table.Th>
-              <Table.Th>Email Confirmed</Table.Th>
-              <Table.Th>Actions</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {users.map((user) => (
-              <Table.Tr key={user.id}>
-                <Table.Td>
-                  <Text fw={500}>{user.name}</Text>
-                </Table.Td>
-                <Table.Td>{user.email}</Table.Td>
-                <Table.Td>
-                  <Badge color={user.role === 'Admin' ? 'red' : (user.role === 'Guest' ? 'orange' : 'blue')}>
-                    {user.role}
-                  </Badge>
-                </Table.Td>
-                <Table.Td>
-                  <Badge color={user.emailConfirmed ? 'green' : (user.role === 'Guest' ? 'orange' : 'gray')}>
-                    {user.emailConfirmed ? 'Confirmed' : (user.role === 'Guest' ? 'Guest' : 'Pending')}
-                  </Badge>
-                </Table.Td>
-                <Table.Td>
-                  <Group gap="xs">
-                    <ActionIcon
-                      variant="subtle"
-                      color="blue"
-                      onClick={() => handleEdit(user)}
-                    >
-                      <IconEdit size={16} />
-                    </ActionIcon>
-                    <ActionIcon
-                      variant="subtle"
-                      color="red"
-                      onClick={() => handleDelete(user.id)}
-                    >
-                      <IconTrash size={16} />
-                    </ActionIcon>
-                  </Group>
-                </Table.Td>
+        <ScrollArea h="calc(100vh - 200px)">
+          <Table striped highlightOnHover stickyHeader>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th>Name</Table.Th>
+                <Table.Th>Email</Table.Th>
+                <Table.Th>Role</Table.Th>
+                <Table.Th>Email Confirmed</Table.Th>
+                <Table.Th>Actions</Table.Th>
               </Table.Tr>
-            ))}
-          </Table.Tbody>
-        </Table>
+            </Table.Thead>
+            <Table.Tbody>
+              {users.map((user) => (
+                <Table.Tr key={user.id}>
+                  <Table.Td>
+                    <Text fw={500}>{user.name}</Text>
+                  </Table.Td>
+                  <Table.Td>{user.email}</Table.Td>
+                  <Table.Td>
+                    <Badge color={user.role === 'Admin' ? 'red' : (user.role === 'Guest' ? 'orange' : 'blue')}>
+                      {user.role}
+                    </Badge>
+                  </Table.Td>
+                  <Table.Td>
+                    <Badge color={user.emailConfirmed ? 'green' : (user.role === 'Guest' ? 'orange' : 'gray')}>
+                      {user.emailConfirmed ? 'Confirmed' : (user.role === 'Guest' ? 'Guest' : 'Pending')}
+                    </Badge>
+                  </Table.Td>
+                  <Table.Td>
+                    <Group gap="xs">
+                      <ActionIcon
+                        variant="subtle"
+                        color="blue"
+                        onClick={() => handleEdit(user)}
+                      >
+                        <IconEdit size={16} />
+                      </ActionIcon>
+                      <ActionIcon
+                        variant="subtle"
+                        color="red"
+                        onClick={() => handleDelete(user.id)}
+                      >
+                        <IconTrash size={16} />
+                      </ActionIcon>
+                    </Group>
+                  </Table.Td>
+                </Table.Tr>
+              ))}
+            </Table.Tbody>
+          </Table>
+        </ScrollArea>
       )}
 
       <Modal
