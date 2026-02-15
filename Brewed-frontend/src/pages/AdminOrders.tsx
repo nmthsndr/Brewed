@@ -17,16 +17,20 @@ import {
   Textarea
 } from "@mantine/core";
 import { IconPackage, IconSearch } from "@tabler/icons-react";
+import { useSearchParams } from "react-router-dom";
 import api from "../api/api";
 import { IOrder } from "../interfaces/IOrder";
 import { notifications } from "@mantine/notifications";
 
 const AdminOrders = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [orders, setOrders] = useState<IOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>(searchParams.get("search") || "");
+  const [appliedSearch, setAppliedSearch] = useState<string>(searchParams.get("search") || "");
   const [selectedOrder, setSelectedOrder] = useState<IOrder | null>(null);
   const [modalOpened, setModalOpened] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
@@ -36,7 +40,17 @@ const AdminOrders = () => {
 
   useEffect(() => {
     loadOrders();
-  }, [currentPage, statusFilter]);
+  }, [currentPage, statusFilter, appliedSearch]);
+
+  const handleSearch = () => {
+    setCurrentPage(1);
+    setAppliedSearch(searchQuery);
+    if (searchQuery) {
+      setSearchParams({ search: searchQuery });
+    } else {
+      setSearchParams({});
+    }
+  };
 
   const loadOrders = async () => {
     try {
@@ -44,7 +58,8 @@ const AdminOrders = () => {
       const response = await api.Orders.getAllOrders(
         statusFilter || undefined,
         currentPage,
-        10
+        10,
+        appliedSearch || undefined
       );
       setOrders(response.data.items);
       setTotalPages(response.data.totalPages);
@@ -177,6 +192,27 @@ const AdminOrders = () => {
       <Text size="sm" c="dimmed" mb="lg">Manage and track customer orders</Text>
 
       <Group mb="lg">
+        <TextInput
+          placeholder="Search by customer name, email or order #"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.currentTarget.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
+          leftSection={<IconSearch size={16} />}
+          style={{ flex: 1, maxWidth: 400 }}
+        />
+        <Button variant="light" onClick={handleSearch}>
+          Search
+        </Button>
+        {appliedSearch && (
+          <Button variant="subtle" color="gray" onClick={() => {
+            setSearchQuery("");
+            setAppliedSearch("");
+            setSearchParams({});
+            setCurrentPage(1);
+          }}>
+            Clear
+          </Button>
+        )}
         <Select
           placeholder="Filter by status"
           value={statusFilter}

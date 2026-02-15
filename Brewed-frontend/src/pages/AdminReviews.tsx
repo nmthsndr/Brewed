@@ -12,29 +12,44 @@ import {
   Modal,
   Rating,
   ActionIcon,
-  Badge
+  Badge,
+  TextInput
 } from "@mantine/core";
-import { IconStar, IconTrash } from "@tabler/icons-react";
+import { IconStar, IconTrash, IconSearch } from "@tabler/icons-react";
+import { useSearchParams } from "react-router-dom";
 import api from "../api/api";
 import { IReview } from "../interfaces/IReview";
 import { notifications } from "@mantine/notifications";
 
 const AdminReviews = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [reviews, setReviews] = useState<IReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState<string>(searchParams.get("search") || "");
+  const [appliedSearch, setAppliedSearch] = useState<string>(searchParams.get("search") || "");
   const [selectedReview, setSelectedReview] = useState<IReview | null>(null);
   const [modalOpened, setModalOpened] = useState(false);
 
   useEffect(() => {
     loadReviews();
-  }, [currentPage]);
+  }, [currentPage, appliedSearch]);
+
+  const handleSearch = () => {
+    setCurrentPage(1);
+    setAppliedSearch(searchQuery);
+    if (searchQuery) {
+      setSearchParams({ search: searchQuery });
+    } else {
+      setSearchParams({});
+    }
+  };
 
   const loadReviews = async () => {
     try {
       setLoading(true);
-      const response = await api.Reviews.getAllReviews(currentPage, 10);
+      const response = await api.Reviews.getAllReviews(currentPage, 10, appliedSearch || undefined);
       setReviews(response.data.items);
       setTotalPages(response.data.totalPages);
     } catch (error) {
@@ -89,6 +104,30 @@ const AdminReviews = () => {
     <div>
       <Title order={2} mb="xs" style={{ color: '#3d3d3d' }}>All Reviews</Title>
       <Text size="sm" c="dimmed" mb="lg">Monitor and moderate customer reviews</Text>
+
+      <Group mb="lg">
+        <TextInput
+          placeholder="Search by customer name, email or product"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.currentTarget.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
+          leftSection={<IconSearch size={16} />}
+          style={{ flex: 1, maxWidth: 400 }}
+        />
+        <Button variant="light" onClick={handleSearch}>
+          Search
+        </Button>
+        {appliedSearch && (
+          <Button variant="subtle" color="gray" onClick={() => {
+            setSearchQuery("");
+            setAppliedSearch("");
+            setSearchParams({});
+            setCurrentPage(1);
+          }}>
+            Clear
+          </Button>
+        )}
+      </Group>
 
       {reviews.length === 0 ? (
         <div style={{ padding: '40px', textAlign: 'center' }}>

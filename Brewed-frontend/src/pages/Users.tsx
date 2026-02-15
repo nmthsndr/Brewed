@@ -12,11 +12,13 @@ import {
   LoadingOverlay,
   Badge,
   PasswordInput,
-  ScrollArea
+  ScrollArea,
+  Tooltip
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
-import { IconEdit, IconTrash, IconPlus } from "@tabler/icons-react";
+import { IconEdit, IconTrash, IconPlus, IconFileInvoice, IconStar } from "@tabler/icons-react";
+import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import { IUser } from "../interfaces/IUser";
 import { notifications } from "@mantine/notifications";
@@ -28,6 +30,7 @@ interface UserFormValues {
 }
 
 const Users = () => {
+  const navigate = useNavigate();
   const [users, setUsers] = useState<IUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
@@ -198,20 +201,42 @@ const Users = () => {
                   </Table.Td>
                   <Table.Td>
                     <Group gap="xs">
-                      <ActionIcon
-                        variant="subtle"
-                        color="blue"
-                        onClick={() => handleEdit(user)}
-                      >
-                        <IconEdit size={16} />
-                      </ActionIcon>
-                      <ActionIcon
-                        variant="subtle"
-                        color="red"
-                        onClick={() => handleDelete(user.id)}
-                      >
-                        <IconTrash size={16} />
-                      </ActionIcon>
+                      <Tooltip label="View Orders">
+                        <ActionIcon
+                          variant="subtle"
+                          color="green"
+                          onClick={() => navigate(`/app/admin-orders?search=${encodeURIComponent(user.name)}`)}
+                        >
+                          <IconFileInvoice size={16} />
+                        </ActionIcon>
+                      </Tooltip>
+                      <Tooltip label="View Reviews">
+                        <ActionIcon
+                          variant="subtle"
+                          color="yellow"
+                          onClick={() => navigate(`/app/admin-reviews?search=${encodeURIComponent(user.name)}`)}
+                        >
+                          <IconStar size={16} />
+                        </ActionIcon>
+                      </Tooltip>
+                      <Tooltip label="Edit User">
+                        <ActionIcon
+                          variant="subtle"
+                          color="blue"
+                          onClick={() => handleEdit(user)}
+                        >
+                          <IconEdit size={16} />
+                        </ActionIcon>
+                      </Tooltip>
+                      <Tooltip label="Delete User">
+                        <ActionIcon
+                          variant="subtle"
+                          color="red"
+                          onClick={() => handleDelete(user.id)}
+                        >
+                          <IconTrash size={16} />
+                        </ActionIcon>
+                      </Tooltip>
                     </Group>
                   </Table.Td>
                 </Table.Tr>
