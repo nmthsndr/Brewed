@@ -34,8 +34,10 @@ const BasicLayout = () => {
         <NavbarMinimal toggle={toggle} />
       </AppShell.Navbar>
 
-      <AppShell.Main>
-        <Outlet />
+      <AppShell.Main style={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 72px)' }}>
+        <div style={{ flex: 1 }}>
+          <Outlet />
+        </div>
         <Footer />
       </AppShell.Main>
     </AppShell>

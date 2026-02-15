@@ -6,10 +6,8 @@ import {
   Group,
   SimpleGrid,
   LoadingOverlay,
-  Button,
   Badge,
   Card,
-  Container,
 } from "@mantine/core";
 import {
   IconCoffee,
@@ -105,9 +103,9 @@ const Dashboard = () => {
       <LoadingOverlay visible={loading} />
 
       {/* Features Cards Header */}
-      <Container size="lg" py="xl" px={0}>
+      <div className={classes.header}>
         <Group justify="center">
-          <Badge variant="filled" size="lg" color="brown">
+          <Badge variant="filled" size="lg" style={{ background: 'rgba(212, 163, 115, 0.25)', color: '#F5E6D3', border: '1px solid rgba(212, 163, 115, 0.3)' }}>
             Premium Coffee
           </Badge>
         </Group>
@@ -116,7 +114,7 @@ const Dashboard = () => {
           Crafted for True Coffee Lovers
         </Title>
 
-        <Text c="dimmed" className={classes.description} ta="center" mt="md">
+        <Text className={classes.description} ta="center" mt="md">
           Explore single-origin beans and artisan blends, freshly roasted and delivered to your door.
         </Text>
 
@@ -130,7 +128,7 @@ const Dashboard = () => {
               padding="xl"
               onClick={() => navigate(feature.url)}
             >
-              <feature.icon size={50} stroke={1.5} color="#8B4513" />
+              <feature.icon size={50} stroke={1.5} color="#D4A373" />
               <Text fz="lg" fw={500} className={classes.cardTitle} mt="md">
                 {feature.title}
               </Text>
@@ -140,23 +138,13 @@ const Dashboard = () => {
             </Card>
           ))}
         </SimpleGrid>
-      </Container>
+      </div>
 
       {/* Featured Products Section */}
-      <Group justify="space-between" mb="lg" align="baseline">
-        <div>
-          <Title order={2} style={{ color: '#3d3d3d' }}>Featured Products</Title>
-          <Text size="sm" c="dimmed" mt={4}>Our top picks for you</Text>
-        </div>
-        <Button
-          variant="subtle"
-          color="brown"
-          onClick={() => navigate('/app/products')}
-          style={{ fontWeight: 600 }}
-        >
-          View All
-        </Button>
-      </Group>
+      <div style={{ marginBottom: 'var(--mantine-spacing-lg)' }}>
+        <Title order={2} style={{ color: '#3d3d3d' }}>Featured Products</Title>
+        <Text size="sm" c="dimmed" mt={4}>Our top picks for you</Text>
+      </div>
 
       <Grid>
         {featuredProducts.map((product) => (
