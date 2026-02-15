@@ -16,7 +16,7 @@ import {
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
-import { IconEdit, IconTrash, IconPlus } from "@tabler/icons-react";
+import { IconEdit, IconTrash, IconPlus, IconSearch } from "@tabler/icons-react";
 import api from "../api/api";
 import { ICategory } from "../interfaces/ICategory";
 import { notifications } from "@mantine/notifications";
@@ -24,6 +24,7 @@ import { notifications } from "@mantine/notifications";
 const Categories = () => {
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<ICategory | null>(null);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [opened, { open, close }] = useDisclosure(false);
@@ -142,10 +143,32 @@ const Categories = () => {
         </Button>
       </Group>
 
-      {categories.length === 0 ? (
-        <Text ta="center" c="dimmed">No categories found</Text>
-      ) : (
-        <ScrollArea h="calc(100vh - 200px)">
+      <Group mb="lg">
+        <TextInput
+          placeholder="Search by name or description..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.currentTarget.value)}
+          leftSection={<IconSearch size={16} />}
+          style={{ flex: 1, maxWidth: 400 }}
+        />
+        {searchQuery && (
+          <Button variant="subtle" color="gray" onClick={() => setSearchQuery("")}>
+            Clear
+          </Button>
+        )}
+      </Group>
+
+      {(() => {
+        const filteredCategories = categories.filter((cat) => {
+          if (!searchQuery) return true;
+          const q = searchQuery.toLowerCase();
+          return cat.name.toLowerCase().includes(q) ||
+            cat.description?.toLowerCase().includes(q);
+        });
+        return filteredCategories.length === 0 ? (
+          <Text ta="center" c="dimmed">{searchQuery ? 'No categories match your search' : 'No categories found'}</Text>
+        ) : (
+        <ScrollArea h="calc(100vh - 260px)">
           <Table striped highlightOnHover stickyHeader>
             <Table.Thead>
               <Table.Tr>
@@ -156,7 +179,7 @@ const Categories = () => {
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {categories.map((category) => (
+              {filteredCategories.map((category) => (
                 <Table.Tr key={category.id}>
                   <Table.Td>
                     <Text fw={500}>{category.name}</Text>
@@ -189,7 +212,8 @@ const Categories = () => {
             </Table.Tbody>
           </Table>
         </ScrollArea>
-      )}
+        );
+      })()}
 
       <Modal
         opened={opened}

@@ -21,7 +21,7 @@ import {
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { DateInput } from "@mantine/dates";
-import { IconEdit, IconTrash, IconPlus, IconRefresh, IconUsers } from "@tabler/icons-react";
+import { IconEdit, IconTrash, IconPlus, IconRefresh, IconUsers, IconSearch } from "@tabler/icons-react";
 import api from "../api/api";
 import { ICoupon, IUserCoupon } from "../interfaces/ICoupon";
 import { IUser } from "../interfaces/IUser";
@@ -30,6 +30,7 @@ import { notifications } from "@mantine/notifications";
 const Coupons = () => {
   const [coupons, setCoupons] = useState<ICoupon[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCoupon, setSelectedCoupon] = useState<ICoupon | null>(null);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [opened, { open, close }] = useDisclosure(false);
@@ -275,10 +276,32 @@ const Coupons = () => {
         </Button>
       </Group>
 
-      {coupons.length === 0 ? (
-        <Text ta="center" c="dimmed">No coupons found</Text>
-      ) : (
-        <ScrollArea h="calc(100vh - 200px)">
+      <Group mb="lg">
+        <TextInput
+          placeholder="Search by code or description..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.currentTarget.value)}
+          leftSection={<IconSearch size={16} />}
+          style={{ flex: 1, maxWidth: 400 }}
+        />
+        {searchQuery && (
+          <Button variant="subtle" color="gray" onClick={() => setSearchQuery("")}>
+            Clear
+          </Button>
+        )}
+      </Group>
+
+      {(() => {
+        const filteredCoupons = coupons.filter((coupon) => {
+          if (!searchQuery) return true;
+          const q = searchQuery.toLowerCase();
+          return coupon.code.toLowerCase().includes(q) ||
+            coupon.description?.toLowerCase().includes(q);
+        });
+        return filteredCoupons.length === 0 ? (
+          <Text ta="center" c="dimmed">{searchQuery ? 'No coupons match your search' : 'No coupons found'}</Text>
+        ) : (
+        <ScrollArea h="calc(100vh - 260px)">
           <Table striped highlightOnHover stickyHeader>
             <Table.Thead>
               <Table.Tr>
@@ -292,7 +315,7 @@ const Coupons = () => {
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {coupons.map((coupon) => (
+              {filteredCoupons.map((coupon) => (
                 <Table.Tr key={coupon.id}>
                   <Table.Td>
                     <Text fw={600} c="blue">{coupon.code}</Text>
@@ -347,7 +370,8 @@ const Coupons = () => {
             </Table.Tbody>
           </Table>
         </ScrollArea>
-      )}
+        );
+      })()}
 
       <Modal
         opened={opened}

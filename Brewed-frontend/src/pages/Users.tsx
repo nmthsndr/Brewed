@@ -17,7 +17,7 @@ import {
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
-import { IconEdit, IconTrash, IconPlus, IconFileInvoice, IconStar } from "@tabler/icons-react";
+import { IconEdit, IconTrash, IconPlus, IconFileInvoice, IconStar, IconSearch } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import { IUser } from "../interfaces/IUser";
@@ -33,6 +33,7 @@ const Users = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState<IUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [opened, { open, close }] = useDisclosure(false);
@@ -168,22 +169,45 @@ const Users = () => {
         </Button>
       </Group>
 
-      {users.length === 0 ? (
-        <Text ta="center" c="dimmed">No users found</Text>
-      ) : (
-        <ScrollArea h="calc(100vh - 200px)">
-          <Table striped highlightOnHover stickyHeader>
+      <Group mb="lg">
+        <TextInput
+          placeholder="Search by name, email or role..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.currentTarget.value)}
+          leftSection={<IconSearch size={16} />}
+          style={{ flex: 1, maxWidth: 400 }}
+        />
+        {searchQuery && (
+          <Button variant="subtle" color="gray" onClick={() => setSearchQuery("")}>
+            Clear
+          </Button>
+        )}
+      </Group>
+
+      {(() => {
+        const filteredUsers = users.filter((user) => {
+          if (!searchQuery) return true;
+          const q = searchQuery.toLowerCase();
+          return user.name.toLowerCase().includes(q) ||
+            user.email.toLowerCase().includes(q) ||
+            user.role.toLowerCase().includes(q);
+        });
+        return filteredUsers.length === 0 ? (
+          <Text ta="center" c="dimmed">{searchQuery ? 'No users match your search' : 'No users found'}</Text>
+        ) : (
+        <ScrollArea h="calc(100vh - 260px)">
+          <Table striped highlightOnHover stickyHeader style={{ minWidth: '100%' }}>
             <Table.Thead>
               <Table.Tr>
-                <Table.Th>Name</Table.Th>
-                <Table.Th>Email</Table.Th>
-                <Table.Th>Role</Table.Th>
-                <Table.Th>Email Confirmed</Table.Th>
-                <Table.Th>Actions</Table.Th>
+                <Table.Th style={{ width: '25%' }}>Name</Table.Th>
+                <Table.Th style={{ width: '30%' }}>Email</Table.Th>
+                <Table.Th style={{ width: '12%' }}>Role</Table.Th>
+                <Table.Th style={{ width: '13%' }}>Email Confirmed</Table.Th>
+                <Table.Th style={{ width: '20%' }}>Actions</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <Table.Tr key={user.id}>
                   <Table.Td>
                     <Text fw={500}>{user.name}</Text>
@@ -244,7 +268,8 @@ const Users = () => {
             </Table.Tbody>
           </Table>
         </ScrollArea>
-      )}
+        );
+      })()}
 
       <Modal
         opened={opened}
