@@ -1,0 +1,64 @@
+.footer {
+  margin-top: 60px;
+  border-top: 1px solid rgba(139, 69, 19, 0.1);
+  background: linear-gradient(160deg, #faf8f5 0%, #f3ede6 100%);
+}
+
+.inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--mantine-spacing-xl) var(--mantine-spacing-md);
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    flex-direction: column;
+    gap: var(--mantine-spacing-md);
+  }
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.brandName {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: #8B4513;
+  letter-spacing: -0.02em;
+}
+
+.links {
+  display: flex;
+  gap: var(--mantine-spacing-lg);
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+.link {
+  color: var(--mantine-color-dimmed);
+  font-size: var(--mantine-font-size-sm);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #8B4513;
+  }
+}
+
+.socials {
+  display: flex;
+  gap: var(--mantine-spacing-xs);
+}

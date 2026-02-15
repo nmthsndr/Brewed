@@ -2,6 +2,7 @@ import { AppShell } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import Header from "./Header";
 import { NavbarMinimal } from "./NavbarMinimal";
+import Footer from "./Footer";
 import { Outlet } from "react-router-dom";
 
 const BasicLayout = () => {
@@ -35,6 +36,7 @@ const BasicLayout = () => {
 
       <AppShell.Main>
         <Outlet />
+        <Footer />
       </AppShell.Main>
     </AppShell>
   );

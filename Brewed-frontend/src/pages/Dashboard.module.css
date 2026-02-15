@@ -1,0 +1,47 @@
+.title {
+  font-size: 34px;
+  font-weight: 500;
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    font-size: 24px;
+  }
+}
+
+.description {
+  max-width: 600px;
+  margin: auto;
+
+  &::after {
+    content: '';
+    display: block;
+    background-color: #8B4513;
+    width: 45px;
+    height: 2px;
+    margin-top: var(--mantine-spacing-sm);
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+.card {
+  border: 1px solid rgba(139, 69, 19, 0.1);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 28px rgba(139, 69, 19, 0.12);
+    border-color: rgba(139, 69, 19, 0.2);
+  }
+}
+
+.cardTitle {
+  &::after {
+    content: '';
+    display: block;
+    background-color: #8B4513;
+    width: 45px;
+    height: 2px;
+    margin-top: var(--mantine-spacing-sm);
+  }
+}
