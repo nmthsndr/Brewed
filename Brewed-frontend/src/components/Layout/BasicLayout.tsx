@@ -14,7 +14,7 @@ const BasicLayout = () => {
       footer={{ height: 60 }}
       navbar={{
         width: 250,
-        breakpoint: "sm",
+        breakpoint: "md",
         collapsed: { mobile: !opened },
       }}
       padding="md"

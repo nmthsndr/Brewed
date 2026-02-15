@@ -49,7 +49,7 @@ const Header = ({ opened, toggle }: any) => {
             color: '#8B4513',
             letterSpacing: '-0.02em',
           }}
-          visibleFrom="sm"
+          visibleFrom="md"
         >
           Brewed
         </Text>
@@ -103,13 +103,13 @@ const Header = ({ opened, toggle }: any) => {
             height: '24px',
             background: 'rgba(139, 69, 19, 0.12)',
           }}
-          visibleFrom="sm"
+          visibleFrom="md"
         />
 
         <UserMenuDropdown />
       </Box>
 
-      <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" color="#8B4513" />
+      <Burger opened={opened} onClick={toggle} hiddenFrom="md" size="sm" color="#8B4513" />
     </Flex>
   );
 };

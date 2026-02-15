@@ -576,7 +576,7 @@ const Checkout = () => {
 
         <form onSubmit={guestForm.onSubmit(handleGuestSubmit)}>
           <div style={{ display: 'flex', flexDirection: 'row', gap: '20px', flexWrap: 'wrap' }}>
-            <Stack style={{ flex: 1, minWidth: 0 }}>
+            <Stack style={{ flex: 1, minWidth: '300px' }}>
               <Paper withBorder p="lg">
                 <Title order={4} mb="md">Contact Information</Title>
                 <TextInput
@@ -758,7 +758,7 @@ const Checkout = () => {
 
       <form onSubmit={loggedInForm.onSubmit(handleLoggedInSubmit)}>
         <div style={{ display: 'flex', flexDirection: 'row', gap: '20px', flexWrap: 'wrap' }}>
-          <Stack style={{ flex: 1, minWidth: 0 }}>
+          <Stack style={{ flex: 1, minWidth: '300px' }}>
             <Paper withBorder p="lg">
               <Title order={4} mb="md">Shipping Address</Title>
 
