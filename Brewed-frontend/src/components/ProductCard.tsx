@@ -17,11 +17,14 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
       padding="lg"
       radius="lg"
       withBorder
+      h="100%"
       style={{
         borderColor: 'rgba(139, 69, 19, 0.1)',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         cursor: 'pointer',
         overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-6px)';
@@ -65,7 +68,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
         </Badge>
       </Card.Section>
 
-      <Stack mt="md" gap="sm">
+      <Stack mt="md" gap="sm" style={{ flex: 1 }}>
         <Text fw={600} size="lg" lineClamp={1} style={{ color: '#3d3d3d' }}>
           {product.name}
         </Text>
@@ -96,7 +99,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
           )}
         </Group>
 
-        <Group mt="xs" gap="xs">
+        <Group mt="auto" pt="xs" gap="xs">
           <Button
             variant="light"
             fullWidth
