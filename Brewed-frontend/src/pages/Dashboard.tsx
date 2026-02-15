@@ -105,7 +105,7 @@ const Dashboard = () => {
       {/* Features Cards Header */}
       <div className={classes.header}>
         <Group justify="center">
-          <Badge variant="filled" size="lg" style={{ background: 'rgba(212, 163, 115, 0.25)', color: '#F5E6D3', border: '1px solid rgba(212, 163, 115, 0.3)' }}>
+          <Badge variant="filled" size="lg" color="brown">
             Premium Coffee
           </Badge>
         </Group>
@@ -114,7 +114,7 @@ const Dashboard = () => {
           Crafted for True Coffee Lovers
         </Title>
 
-        <Text className={classes.description} ta="center" mt="md">
+        <Text c="dimmed" className={classes.description} mt="md">
           Explore single-origin beans and artisan blends, freshly roasted and delivered to your door.
         </Text>
 
@@ -128,7 +128,7 @@ const Dashboard = () => {
               padding="xl"
               onClick={() => navigate(feature.url)}
             >
-              <feature.icon size={50} stroke={1.5} color="#D4A373" />
+              <feature.icon size={50} stroke={1.5} color="#8B4513" />
               <Text fz="lg" fw={500} className={classes.cardTitle} mt="md">
                 {feature.title}
               </Text>

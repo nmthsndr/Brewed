@@ -11,6 +11,7 @@ const BasicLayout = () => {
   return (
     <AppShell
       header={{ height: 72 }}
+      footer={{ height: 60 }}
       navbar={{
         width: 250,
         breakpoint: "sm",
@@ -34,12 +35,17 @@ const BasicLayout = () => {
         <NavbarMinimal toggle={toggle} />
       </AppShell.Navbar>
 
-      <AppShell.Main style={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 72px)' }}>
-        <div style={{ flex: 1 }}>
-          <Outlet />
-        </div>
-        <Footer />
+      <AppShell.Main>
+        <Outlet />
       </AppShell.Main>
+
+      <AppShell.Footer style={{
+        borderTop: '1px solid rgba(139, 69, 19, 0.1)',
+        background: 'rgba(255, 255, 255, 0.92)',
+        backdropFilter: 'blur(12px)',
+      }}>
+        <Footer />
+      </AppShell.Footer>
     </AppShell>
   );
 };
