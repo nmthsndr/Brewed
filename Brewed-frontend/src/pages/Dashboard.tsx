@@ -2,15 +2,27 @@ import { useEffect, useState } from "react";
 import {
   Title,
   Grid,
-  Card,
   Text,
   Group,
   SimpleGrid,
   Paper,
   LoadingOverlay,
-  Button
+  Button,
+  Badge,
+  Box,
+  Stack,
+  Flex,
 } from "@mantine/core";
-import { IconShoppingBag, IconShoppingCart, IconPackage, IconLogin } from "@tabler/icons-react";
+import {
+  IconShoppingBag,
+  IconShoppingCart,
+  IconPackage,
+  IconLogin,
+  IconCoffee,
+  IconTruckDelivery,
+  IconLeaf,
+  IconArrowRight,
+} from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import { IProduct } from "../interfaces/IProduct";
@@ -73,46 +85,127 @@ const Dashboard = () => {
       <LoadingOverlay visible={loading} />
 
       {/* Hero Section */}
-      <div style={{
-        background: 'linear-gradient(135deg, #8B4513 0%, #6B3410 50%, #4a240b 100%)',
-        borderRadius: '20px',
-        padding: '48px 36px',
-        marginBottom: '32px',
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
+      <Box
+        style={{
+          background: 'linear-gradient(135deg, #8B4513 0%, #6B3410 50%, #4a240b 100%)',
+          borderRadius: '20px',
+          padding: 'clamp(32px, 5vw, 56px) clamp(24px, 4vw, 48px)',
+          marginBottom: '32px',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Decorative background elements */}
         <div style={{
           position: 'absolute',
-          top: 0,
-          right: 0,
-          bottom: 0,
-          width: '40%',
-          background: 'radial-gradient(circle at 70% 50%, rgba(212, 163, 115, 0.15) 0%, transparent 70%)',
+          top: '-20%',
+          right: '-5%',
+          width: '300px',
+          height: '300px',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(212, 163, 115, 0.12) 0%, transparent 70%)',
         }} />
-        <Title
-          order={1}
+        <div style={{
+          position: 'absolute',
+          bottom: '-30%',
+          right: '15%',
+          width: '200px',
+          height: '200px',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(212, 163, 115, 0.08) 0%, transparent 70%)',
+        }} />
+        <IconCoffee
+          size={180}
+          stroke={0.5}
           style={{
-            color: '#F5E6D3',
-            fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
-            marginBottom: '8px',
-            position: 'relative',
-            zIndex: 1,
+            position: 'absolute',
+            right: 'clamp(20px, 5vw, 60px)',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: 'rgba(212, 163, 115, 0.08)',
           }}
-        >
-          Welcome to Brewed
-        </Title>
-        <Text
-          size="lg"
-          style={{
-            color: 'rgba(245, 230, 211, 0.75)',
-            maxWidth: '500px',
-            position: 'relative',
-            zIndex: 1,
-          }}
-        >
-          Discover our handpicked selection of premium coffees from around the world.
-        </Text>
-      </div>
+        />
+
+        <Stack gap="lg" style={{ position: 'relative', zIndex: 1 }}>
+          <Badge
+            size="lg"
+            radius="sm"
+            variant="filled"
+            style={{
+              background: 'rgba(212, 163, 115, 0.2)',
+              color: '#E6D1B3',
+              border: '1px solid rgba(212, 163, 115, 0.25)',
+              fontWeight: 600,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              alignSelf: 'flex-start',
+            }}
+          >
+            Premium Coffee
+          </Badge>
+
+          <Title
+            order={1}
+            style={{
+              color: '#F5E6D3',
+              fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
+              lineHeight: 1.15,
+              maxWidth: '520px',
+            }}
+          >
+            Crafted for True{' '}
+            <span style={{ color: '#D4A373' }}>Coffee Lovers</span>
+          </Title>
+
+          <Text
+            size="lg"
+            style={{
+              color: 'rgba(245, 230, 211, 0.7)',
+              maxWidth: '460px',
+              lineHeight: 1.6,
+            }}
+          >
+            Explore single-origin beans and artisan blends, freshly roasted and delivered to your door.
+          </Text>
+
+          <Group gap="md" mt="xs">
+            <Button
+              size="md"
+              radius="md"
+              rightSection={<IconArrowRight size={18} />}
+              onClick={() => navigate('/app/products')}
+              style={{
+                background: 'linear-gradient(135deg, #D4A373 0%, #C69063 100%)',
+                border: 'none',
+                fontWeight: 600,
+                boxShadow: '0 4px 16px rgba(212, 163, 115, 0.3)',
+              }}
+            >
+              Browse Collection
+            </Button>
+          </Group>
+
+          <Flex
+            gap="xl"
+            mt="sm"
+            wrap="wrap"
+            style={{ color: 'rgba(245, 230, 211, 0.6)' }}
+          >
+            <Group gap={6}>
+              <IconCoffee size={16} stroke={1.5} />
+              <Text size="sm" inherit>Freshly Roasted</Text>
+            </Group>
+            <Group gap={6}>
+              <IconLeaf size={16} stroke={1.5} />
+              <Text size="sm" inherit>Single Origin</Text>
+            </Group>
+            <Group gap={6}>
+              <IconTruckDelivery size={16} stroke={1.5} />
+              <Text size="sm" inherit>Fast Delivery</Text>
+            </Group>
+          </Flex>
+        </Stack>
+      </Box>
 
       {/* Quick Action Cards */}
       <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="lg" mb="xl">
