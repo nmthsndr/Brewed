@@ -12,6 +12,7 @@ import {
   Stack,
   RingProgress,
   Center,
+  ScrollArea,
 } from "@mantine/core";
 import {
   IconCurrencyDollar,
@@ -163,6 +164,7 @@ const AdminDashboard = () => {
       <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg" mb="xl">
         <Card withBorder style={{ borderColor: 'rgba(139, 69, 19, 0.1)' }}>
           <Title order={4} mb="md" style={{ color: '#3d3d3d' }}>Top Products</Title>
+          <ScrollArea>
           <Table>
             <Table.Thead>
               <Table.Tr>
@@ -187,10 +189,12 @@ const AdminDashboard = () => {
               ))}
             </Table.Tbody>
           </Table>
+          </ScrollArea>
         </Card>
 
         <Card withBorder style={{ borderColor: 'rgba(139, 69, 19, 0.1)' }}>
           <Title order={4} mb="md" style={{ color: '#3d3d3d' }}>Recent Orders</Title>
+          <ScrollArea>
           <Table>
             <Table.Thead>
               <Table.Tr>
@@ -221,6 +225,7 @@ const AdminDashboard = () => {
               ))}
             </Table.Tbody>
           </Table>
+          </ScrollArea>
         </Card>
       </SimpleGrid>
 

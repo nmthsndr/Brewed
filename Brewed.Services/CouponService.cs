@@ -453,15 +453,15 @@ namespace Brewed.Services
                 return result;
             }
 
-            // If coupon is public (no assignments) AND has a usage limit, check if user has used it before via orders
+            // If coupon is public (no assignments), check per-user usage count against MaxUsageCount
             if (!hasAssignments && coupon.MaxUsageCount.HasValue)
             {
-                var hasUsedBefore = await _context.Orders
-                    .AnyAsync(o => o.UserId == userId && o.CouponCode.ToLower() == code.ToLower());
+                var userUsageCount = await _context.Orders
+                    .CountAsync(o => o.UserId == userId && o.CouponCode.ToLower() == code.ToLower());
 
-                if (hasUsedBefore)
+                if (userUsageCount >= coupon.MaxUsageCount.Value)
                 {
-                    result.Message = "You have already used this coupon";
+                    result.Message = "You have reached the maximum usage limit for this coupon";
                     return result;
                 }
             }
@@ -488,14 +488,6 @@ namespace Brewed.Services
             if (coupon.MinimumOrderAmount.HasValue && orderAmount < coupon.MinimumOrderAmount.Value)
             {
                 result.Message = $"Minimum order amount is €{coupon.MinimumOrderAmount.Value:N2}";
-                return result;
-            }
-
-            // Check max usage count (global limit) - only for public coupons
-            // Assigned coupons track per-user usage via UserCoupon.IsUsed instead
-            if (!hasAssignments && coupon.MaxUsageCount.HasValue && coupon.UsageCount >= coupon.MaxUsageCount.Value)
-            {
-                result.Message = "This coupon has reached its maximum usage limit";
                 return result;
             }
 
@@ -577,20 +569,18 @@ namespace Brewed.Services
                 .Select(o => new { CouponCode = o.CouponCode.ToLower(), o.OrderDate, o.Id })
                 .ToListAsync();
 
-            var usedPublicCouponCodes = userOrdersWithCoupons.Select(o => o.CouponCode).ToList();
-
             foreach (var coupon in publicCoupons)
             {
-                var isUsed = usedPublicCouponCodes.Contains(coupon.Code.ToLower());
+                var userCouponOrders = userOrdersWithCoupons
+                    .Where(o => o.CouponCode == coupon.Code.ToLower())
+                    .ToList();
 
-                if (isUsed && !coupon.MaxUsageCount.HasValue)
-                {
-                    isUsed = false;
-                }
+                var userUsageCount = userCouponOrders.Count;
 
-                var orderInfo = isUsed
-                    ? userOrdersWithCoupons.FirstOrDefault(o => o.CouponCode == coupon.Code.ToLower())
-                    : null;
+                // Coupon is fully used if MaxUsageCount is set and user reached the limit
+                var isUsed = coupon.MaxUsageCount.HasValue && userUsageCount >= coupon.MaxUsageCount.Value;
+
+                var lastOrder = userCouponOrders.OrderByDescending(o => o.OrderDate).FirstOrDefault();
 
                 result.Add(new UserCouponDto
                 {
@@ -600,8 +590,8 @@ namespace Brewed.Services
                     Coupon = _mapper.Map<CouponDto>(coupon),
                     IsUsed = isUsed,
                     AssignedDate = coupon.StartDate,
-                    UsedDate = orderInfo?.OrderDate,
-                    OrderId = orderInfo?.Id
+                    UsedDate = lastOrder?.OrderDate,
+                    OrderId = lastOrder?.Id
                 });
             }
 

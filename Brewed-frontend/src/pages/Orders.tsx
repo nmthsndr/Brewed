@@ -9,7 +9,8 @@ import {
   LoadingOverlay,
   Button,
   Stack,
-  Accordion
+  Accordion,
+  ScrollArea
 } from "@mantine/core";
 import { IconPackage, IconDownload, IconAlertCircle } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
@@ -86,14 +87,14 @@ const Orders = () => {
             <Accordion>
               <Accordion.Item value={order.id.toString()}>
                 <Accordion.Control>
-                  <Group justify="space-between">
+                  <Group justify="space-between" wrap="wrap" gap="xs">
                     <div>
                       <Text fw={700}>{order.orderNumber}</Text>
                       <Text size="sm" c="dimmed">
                         {new Date(order.orderDate).toLocaleDateString()}
                       </Text>
                     </div>
-                    <Group>
+                    <Group gap="xs" wrap="wrap">
                       <Badge color={getStatusColor(order.status)}>
                         {order.status}
                       </Badge>
@@ -104,6 +105,7 @@ const Orders = () => {
                 <Accordion.Panel>
                   <Stack gap="sm">
                     <Text fw={600}>Order Items:</Text>
+                    <ScrollArea>
                     <Table>
                       <Table.Thead>
                         <Table.Tr>
@@ -122,6 +124,7 @@ const Orders = () => {
                         ))}
                       </Table.Tbody>
                     </Table>
+                    </ScrollArea>
 
                     {order.status === 'Cancelled' && order.notes && (
                       <Card

@@ -28,7 +28,14 @@ const Register = () => {
     validate: {
       name: (val: string) => (val.length < 3 ? 'Name must be at least 3 characters' : null),
       email: (val: string) => (/^\S+@\S+$/.test(val) ? null : 'Invalid email address'),
-      password: (val: string) => (val.length < 6 ? 'Password must be at least 6 characters' : null),
+      password: (val: string) => {
+        if (val.length < 8) return 'Password must be at least 8 characters';
+        if (!/[A-Z]/.test(val)) return 'Password must contain at least one uppercase letter';
+        if (!/[a-z]/.test(val)) return 'Password must contain at least one lowercase letter';
+        if (!/[0-9]/.test(val)) return 'Password must contain at least one number';
+        if (!/[^A-Za-z0-9]/.test(val)) return 'Password must contain at least one special character';
+        return null;
+      },
       confirmPassword: (val: string, values) => (val !== values.password ? 'Passwords do not match' : null),
     },
   });

@@ -18,18 +18,16 @@ const Footer = () => {
 
   return (
     <div className={classes.inner}>
-      <div></div>
       <Text
           fw={500}
-          size="xl"
+          size="sm"
           style={{
             fontFamily: 'serif',
             color: '#8B4513',
             letterSpacing: '-0.02em',
           }}
-          visibleFrom="sm"
         >
-          © 2026 Brewed 
+          © 2026 Brewed
         </Text>
 
       <Group gap="xs" wrap="nowrap" className={classes.socials}>
