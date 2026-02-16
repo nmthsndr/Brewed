@@ -195,7 +195,14 @@ const Users = () => {
           return user.name.toLowerCase().includes(q) ||
             user.email.toLowerCase().includes(q) ||
             user.role.toLowerCase().includes(q);
-        }).sort((a, b) => (a.role || '').localeCompare(b.role || ''));
+        }).sort((a, b) => {
+          const getPriority = (user: IUser) => {
+            if (user.role === 'Admin') return 0;
+            if (user.role === 'Guest') return 3;
+            return user.emailConfirmed ? 1 : 2;
+          };
+          return getPriority(a) - getPriority(b);
+        });
         return filteredUsers.length === 0 ? (
           <Text ta="center" c="dimmed">{searchQuery ? 'No users match your search' : 'No users found'}</Text>
         ) : (
