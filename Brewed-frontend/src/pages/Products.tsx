@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Title,
   Text,
@@ -77,6 +77,15 @@ const Products = () => {
   useEffect(() => {
     loadCategories();
   }, []);
+
+  const isInitialMount = useRef(true);
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+    } else {
+      setPage(1);
+    }
+  }, [debouncedSearch]);
 
   useEffect(() => {
     loadProducts();
@@ -171,6 +180,7 @@ const Products = () => {
                     newFilters.isCaffeineFree = undefined;
                   }
                   setFilters(newFilters);
+                  setPage(1);
                 }}
               />
             </Grid.Col>
@@ -190,7 +200,7 @@ const Products = () => {
                       { value: 'Dark', label: 'Dark' }
                     ]}
                     value={filters.roastLevel || null}
-                    onChange={(value) => setFilters({ ...filters, roastLevel: value || undefined })}
+                    onChange={(value) => { setFilters({ ...filters, roastLevel: value || undefined }); setPage(1); }}
                   />
                 </Grid.Col>
 
@@ -199,12 +209,12 @@ const Products = () => {
                     <Checkbox
                       label="Organic"
                       checked={filters.isOrganic || false}
-                      onChange={(e) => setFilters({ ...filters, isOrganic: e.currentTarget.checked ? true : undefined })}
+                      onChange={(e) => { setFilters({ ...filters, isOrganic: e.currentTarget.checked ? true : undefined }); setPage(1); }}
                     />
                     <Checkbox
                       label="Caffeine Free"
                       checked={filters.isCaffeineFree || false}
-                      onChange={(e) => setFilters({ ...filters, isCaffeineFree: e.currentTarget.checked ? true : undefined })}
+                      onChange={(e) => { setFilters({ ...filters, isCaffeineFree: e.currentTarget.checked ? true : undefined }); setPage(1); }}
                     />
                   </Stack>
                 </Grid.Col>
@@ -221,7 +231,7 @@ const Products = () => {
                   { value: 'rating', label: 'Rating' }
                 ]}
                 value={filters.sortBy}
-                onChange={(value) => setFilters({ ...filters, sortBy: value || 'name' })}
+                onChange={(value) => { setFilters({ ...filters, sortBy: value || 'name' }); setPage(1); }}
               />
             </Grid.Col>
 
