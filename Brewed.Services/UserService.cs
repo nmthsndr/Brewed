@@ -331,6 +331,11 @@ namespace Brewed.Services
                 return true;
             }
 
+            if (user.IsDeleted)
+            {
+                throw new Exception("This account has been deleted. Password reset is not available for deleted accounts.");
+            }
+
             var verificationCode = GenerateVerificationCode();
 
             var userToken = new UserToken
@@ -368,6 +373,11 @@ namespace Brewed.Services
             if (userToken.ExpiresAt < DateTime.UtcNow)
             {
                 throw new Exception("Verification code expired");
+            }
+
+            if (userToken.User.IsDeleted)
+            {
+                throw new Exception("This account has been deleted. Password reset is not available for deleted accounts.");
             }
 
             userToken.User.PasswordHash = HashPassword(newPassword);
