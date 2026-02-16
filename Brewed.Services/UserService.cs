@@ -328,12 +328,12 @@ namespace Brewed.Services
 
             if (user == null)
             {
-                return true;
+                throw new Exception("No account found with this email address.");
             }
 
             if (user.IsDeleted)
             {
-                throw new Exception("This account has been deleted. Password reset is not available for deleted accounts.");
+                throw new Exception("This account has been deleted. Password reset is not available.");
             }
 
             var verificationCode = GenerateVerificationCode();
