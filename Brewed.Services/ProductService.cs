@@ -32,7 +32,7 @@ namespace Brewed.Services
             var query = _context.Products
                 .Include(p => p.Category)
                 .Include(p => p.ProductImages)
-                .Include(p => p.Reviews)
+                .Include(p => p.Reviews.Where(r => !r.User.IsDeleted))
                 .AsQueryable();
 
             // Filters
@@ -81,7 +81,7 @@ namespace Brewed.Services
             {
                 "price-asc" => query.OrderBy(p => p.Price),
                 "price-desc" => query.OrderByDescending(p => p.Price),
-                "rating" => query.OrderByDescending(p => p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0),
+                "rating" => query.OrderByDescending(p => p.Reviews.Any(r => !r.User.IsDeleted) ? p.Reviews.Where(r => !r.User.IsDeleted).Average(r => r.Rating) : 0),
                 _ => query.OrderBy(p => p.Name)
             };
 
@@ -138,7 +138,7 @@ namespace Brewed.Services
             var product = await _context.Products
                 .Include(p => p.Category)
                 .Include(p => p.ProductImages)
-                .Include(p => p.Reviews)
+                .Include(p => p.Reviews.Where(r => !r.User.IsDeleted))
                 .FirstOrDefaultAsync(p => p.Id == productId);
 
             if (product == null)
