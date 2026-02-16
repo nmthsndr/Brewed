@@ -47,9 +47,13 @@ const Users = () => {
     validate: {
       name: (value) => !value ? 'Name is required' : null,
       email: (value) => !/^\S+@\S+$/.test(value) ? 'Invalid email' : null,
-      password: (value, values) => {
-        if (modalMode === 'create' && (!value || value.length < 6)) {
-          return 'Password must be at least 6 characters';
+      password: (value) => {
+        if (modalMode === 'create') {
+          if (!value || value.length < 8) return 'Password must be at least 8 characters';
+          if (!/[A-Z]/.test(value)) return 'Password must contain at least one uppercase letter';
+          if (!/[a-z]/.test(value)) return 'Password must contain at least one lowercase letter';
+          if (!/[0-9]/.test(value)) return 'Password must contain at least one number';
+          if (!/[^A-Za-z0-9]/.test(value)) return 'Password must contain at least one special character';
         }
         return null;
       }
@@ -130,7 +134,7 @@ const Users = () => {
         });
         notifications.show({
           title: 'Success',
-          message: 'User created successfully',
+          message: 'Admin user created successfully',
           color: 'green',
         });
       } else if (selectedUser) {
@@ -165,7 +169,7 @@ const Users = () => {
       <Group justify="space-between" mb="lg">
         <Title order={2}>Users Management</Title>
         <Button leftSection={<IconPlus size={16} />} onClick={handleCreate}>
-          Add User
+          Add Admin User
         </Button>
       </Group>
 
@@ -191,7 +195,7 @@ const Users = () => {
           return user.name.toLowerCase().includes(q) ||
             user.email.toLowerCase().includes(q) ||
             user.role.toLowerCase().includes(q);
-        });
+        }).sort((a, b) => (a.role || '').localeCompare(b.role || ''));
         return filteredUsers.length === 0 ? (
           <Text ta="center" c="dimmed">{searchQuery ? 'No users match your search' : 'No users found'}</Text>
         ) : (
@@ -219,8 +223,8 @@ const Users = () => {
                     </Badge>
                   </Table.Td>
                   <Table.Td>
-                    <Badge color={user.emailConfirmed ? 'green' : (user.role === 'Guest' ? 'orange' : 'gray')}>
-                      {user.emailConfirmed ? 'Confirmed' : (user.role === 'Guest' ? 'Guest' : 'Pending')}
+                    <Badge color={user.role === 'Admin' ? 'red' : user.emailConfirmed ? 'green' : (user.role === 'Guest' ? 'orange' : 'gray')}>
+                      {user.role === 'Admin' ? 'Admin' : (user.emailConfirmed ? 'Confirmed' : (user.role === 'Guest' ? 'Guest' :'Pending'))}
                     </Badge>
                   </Table.Td>
                   <Table.Td>
@@ -276,7 +280,7 @@ const Users = () => {
       <Modal
         opened={opened}
         onClose={close}
-        title={modalMode === 'create' ? 'Add User' : 'Edit User'}
+        title={modalMode === 'create' ? 'Add Admin User' : 'Edit User'}
         size="md"
       >
         <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -298,7 +302,7 @@ const Users = () => {
             {modalMode === 'create' && (
               <PasswordInput
                 label="Password"
-                placeholder="Min 6 characters"
+                placeholder="Min 8 chars, uppercase, lowercase, number, special"
                 required
                 {...form.getInputProps('password')}
               />

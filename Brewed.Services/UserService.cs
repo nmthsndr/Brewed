@@ -429,6 +429,7 @@ namespace Brewed.Services
             var user = _mapper.Map<User>(userDto);
             user.PasswordHash = HashPassword(userDto.Password);
             user.EmailConfirmed = true; // Admin created users are auto-confirmed
+            user.Role = "Admin";
 
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
