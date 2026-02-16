@@ -13,7 +13,7 @@ namespace Brewed.Services
         Task<OrderDto> CreateOrderAsync(int userId, OrderCreateDto orderCreateDto);
         Task<OrderDto> CreateGuestOrderAsync(GuestOrderCreateDto guestOrderCreateDto);
         Task<OrderDto> CancelOrderAsync(int orderId, int userId);
-        Task<PaginatedResultDto<OrderDto>> GetAllOrdersAsync(string status, int page, int pageSize, string search = null);
+        Task<PaginatedResultDto<OrderDto>> GetAllOrdersAsync(string status, int page, int pageSize, string search = null, DateTime? dateFrom = null, DateTime? dateTo = null);
         Task<OrderDto> UpdateOrderStatusAsync(int orderId, OrderStatusUpdateDto statusDto);
         Task<InvoiceDto> GetInvoiceAsync(int orderId, int userId, bool isAdmin = false);
         Task<InvoiceDto> GenerateInvoiceAsync(int orderId);
@@ -465,7 +465,7 @@ namespace Brewed.Services
             return await GetOrderByIdAsync(orderId, userId);
         }
 
-        public async Task<PaginatedResultDto<OrderDto>> GetAllOrdersAsync(string status, int page, int pageSize, string search = null)
+        public async Task<PaginatedResultDto<OrderDto>> GetAllOrdersAsync(string status, int page, int pageSize, string search = null, DateTime? dateFrom = null, DateTime? dateTo = null)
         {
             var query = _context.Orders
                 .Include(o => o.OrderItems)
@@ -491,6 +491,16 @@ namespace Brewed.Services
                     (o.User != null && o.User.Email.ToLower().Contains(searchLower)) ||
                     o.OrderNumber.ToLower().Contains(searchLower)
                 );
+            }
+
+            if (dateFrom.HasValue)
+            {
+                query = query.Where(o => o.OrderDate >= dateFrom.Value.Date);
+            }
+
+            if (dateTo.HasValue)
+            {
+                query = query.Where(o => o.OrderDate < dateTo.Value.Date.AddDays(1));
             }
 
             query = query.OrderByDescending(o => o.OrderDate);

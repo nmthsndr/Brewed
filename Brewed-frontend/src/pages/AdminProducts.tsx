@@ -22,7 +22,7 @@ import {
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
-import { IconEdit, IconTrash, IconPlus, IconUpload, IconX, IconSearch } from "@tabler/icons-react";
+import { IconEdit, IconTrash, IconPlus, IconUpload, IconX, IconSearch, IconChevronUp, IconChevronDown, IconSelector } from "@tabler/icons-react";
 import api from "../api/api";
 import { notifications } from "@mantine/notifications";
 
@@ -67,6 +67,9 @@ interface ProductFormValues {
   categoryId: number;
 }
 
+type SortField = 'name' | 'categoryName' | 'price' | 'stockQuantity';
+type SortDirection = 'asc' | 'desc';
+
 const AdminProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -77,6 +80,27 @@ const AdminProducts = () => {
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string>('');
+  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      if (sortDirection === 'asc') {
+        setSortDirection('desc');
+      } else {
+        setSortField(null);
+        setSortDirection('asc');
+      }
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) return <IconSelector size={14} style={{ opacity: 0.3 }} />;
+    return sortDirection === 'asc' ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />;
+  };
 
   const form = useForm<ProductFormValues>({
     initialValues: {
@@ -346,6 +370,13 @@ const AdminProducts = () => {
             product.categoryName?.toLowerCase().includes(q) ||
             product.origin?.toLowerCase().includes(q) ||
             product.description?.toLowerCase().includes(q);
+        }).sort((a, b) => {
+          if (!sortField) return 0;
+          const dir = sortDirection === 'asc' ? 1 : -1;
+          if (sortField === 'name' || sortField === 'categoryName') {
+            return dir * (a[sortField] || '').localeCompare(b[sortField] || '');
+          }
+          return dir * ((a[sortField] ?? 0) - (b[sortField] ?? 0));
         });
         return filteredProducts.length === 0 ? (
           <Text ta="center" c="dimmed">{searchQuery ? 'No products match your search' : 'No products found'}</Text>
@@ -355,10 +386,18 @@ const AdminProducts = () => {
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>Image</Table.Th>
-                <Table.Th>Name</Table.Th>
-                <Table.Th>Category</Table.Th>
-                <Table.Th>Price</Table.Th>
-                <Table.Th>Stock</Table.Th>
+                <Table.Th onClick={() => handleSort('name')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                  <Group gap={4} wrap="nowrap">Name <SortIcon field="name" /></Group>
+                </Table.Th>
+                <Table.Th onClick={() => handleSort('categoryName')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                  <Group gap={4} wrap="nowrap">Category <SortIcon field="categoryName" /></Group>
+                </Table.Th>
+                <Table.Th onClick={() => handleSort('price')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                  <Group gap={4} wrap="nowrap">Price <SortIcon field="price" /></Group>
+                </Table.Th>
+                <Table.Th onClick={() => handleSort('stockQuantity')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                  <Group gap={4} wrap="nowrap">Stock <SortIcon field="stockQuantity" /></Group>
+                </Table.Th>
                 <Table.Th>Origin</Table.Th>
                 <Table.Th>Status</Table.Th>
                 <Table.Th>Actions</Table.Th>

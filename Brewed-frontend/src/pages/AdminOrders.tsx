@@ -17,7 +17,7 @@ import {
   Textarea,
   ScrollArea
 } from "@mantine/core";
-import { IconPackage, IconSearch } from "@tabler/icons-react";
+import { IconPackage, IconSearch, IconCalendar } from "@tabler/icons-react";
 import { useSearchParams } from "react-router-dom";
 import api from "../api/api";
 import { IOrder } from "../interfaces/IOrder";
@@ -38,10 +38,12 @@ const AdminOrders = () => {
   const [generatingInvoice, setGeneratingInvoice] = useState(false);
   const [cancelModalOpened, setCancelModalOpened] = useState(false);
   const [orderNotes, setOrderNotes] = useState("");
+  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateTo, setDateTo] = useState<string>("");
 
   useEffect(() => {
     loadOrders();
-  }, [currentPage, statusFilter, appliedSearch]);
+  }, [currentPage, statusFilter, appliedSearch, dateFrom, dateTo]);
 
   const handleSearch = () => {
     setCurrentPage(1);
@@ -60,7 +62,9 @@ const AdminOrders = () => {
         statusFilter || undefined,
         currentPage,
         10,
-        appliedSearch || undefined
+        appliedSearch || undefined,
+        dateFrom || undefined,
+        dateTo || undefined
       );
       setOrders(response.data.items);
       setTotalPages(response.data.totalPages);
@@ -192,7 +196,7 @@ const AdminOrders = () => {
       <Title order={2} mb="xs" style={{ color: '#3d3d3d' }}>All Orders</Title>
       <Text size="sm" c="dimmed" mb="lg">Manage and track customer orders</Text>
 
-      <Group mb="lg" wrap="wrap">
+      <Group mb="sm" wrap="wrap">
         <TextInput
           placeholder="Search by customer name, email or order #"
           value={searchQuery}
@@ -214,6 +218,9 @@ const AdminOrders = () => {
             Clear
           </Button>
         )}
+      </Group>
+
+      <Group mb="lg" wrap="wrap" align="center" gap="sm">
         <Select
           placeholder="Filter by status"
           value={statusFilter}
@@ -226,8 +233,31 @@ const AdminOrders = () => {
             { value: "Cancelled", label: "Cancelled" }
           ]}
           clearable
-          style={{ width: 200 }}
+          style={{ flex: '1 1 150px', maxWidth: 200 }}
         />
+        <TextInput
+          type="date"
+          placeholder="From date"
+          value={dateFrom}
+          max={dateTo || undefined}
+          onChange={(e) => { setDateFrom(e.currentTarget.value); setCurrentPage(1); }}
+          leftSection={<IconCalendar size={16} />}
+          style={{ flex: '1 1 140px', maxWidth: 170 }}
+        />
+        <TextInput
+          type="date"
+          placeholder="To date"
+          value={dateTo}
+          min={dateFrom || undefined}
+          onChange={(e) => { setDateTo(e.currentTarget.value); setCurrentPage(1); }}
+          leftSection={<IconCalendar size={16} />}
+          style={{ flex: '1 1 140px', maxWidth: 170 }}
+        />
+        {(dateFrom || dateTo) && (
+          <Button variant="subtle" color="gray" size="compact-sm" onClick={() => { setDateFrom(""); setDateTo(""); setCurrentPage(1); }}>
+            Clear dates
+          </Button>
+        )}
       </Group>
 
       {orders.length === 0 ? (

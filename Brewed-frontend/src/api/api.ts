@@ -168,9 +168,9 @@ const Orders = {
     axiosInstance.post<IOrder>(`/api/orders/guest`, guestOrderData),
   cancelOrder: (id: number) =>
     axiosInstance.post<IOrder>(`/api/orders/${id}/cancel`),
-  getAllOrders: (status?: string, page?: number, pageSize?: number, search?: string) =>
+  getAllOrders: (status?: string, page?: number, pageSize?: number, search?: string, dateFrom?: string, dateTo?: string) =>
     axiosInstance.get<PaginatedResult<IOrder>>(`/api/orders/all`, {
-      params: { status, page, pageSize, search }
+      params: { status, page, pageSize, search, dateFrom, dateTo }
     }),
   updateOrderStatus: (id: number, status: string, notes?: string) =>
     axiosInstance.put<IOrder>(`/api/orders/${id}/status`, { status, notes }),

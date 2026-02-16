@@ -119,11 +119,13 @@ namespace Brewed.API.Controllers
             [FromQuery] string status = null,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 20,
-            [FromQuery] string search = null)
+            [FromQuery] string search = null,
+            [FromQuery] DateTime? dateFrom = null,
+            [FromQuery] DateTime? dateTo = null)
         {
             try
             {
-                var orders = await _orderService.GetAllOrdersAsync(status, page, pageSize, search);
+                var orders = await _orderService.GetAllOrdersAsync(status, page, pageSize, search, dateFrom, dateTo);
                 return Ok(orders);
             }
             catch (Exception ex)
