@@ -31,7 +31,7 @@ namespace Brewed.Services
             var query = _context.Reviews
                 .Include(r => r.User)
                 .Include(r => r.Product)
-                .Where(r => r.ProductId == productId)
+                .Where(r => r.ProductId == productId && !r.User.IsDeleted)
                 .OrderByDescending(r => r.CreatedAt);
 
             var totalCount = await query.CountAsync();
@@ -69,6 +69,7 @@ namespace Brewed.Services
             var query = _context.Reviews
                 .Include(r => r.User)
                 .Include(r => r.Product)
+                .Where(r => !r.User.IsDeleted)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(search))

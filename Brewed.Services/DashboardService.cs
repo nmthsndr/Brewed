@@ -45,7 +45,7 @@ namespace Brewed.Services
 
             // Total Customers
             var totalCustomers = await _context.Users
-                .Where(u => u.Role == "RegisteredUser")
+                .Where(u => u.Role == "RegisteredUser" && !u.IsDeleted)
                 .CountAsync();
 
             // Total Products
@@ -175,7 +175,7 @@ namespace Brewed.Services
         public async Task<List<CustomerStatsDto>> GetTopCustomersAsync(int count = 10)
         {
             var topCustomers = await _context.Users
-                .Where(u => u.Role == "RegisteredUser")
+                .Where(u => u.Role == "RegisteredUser" && !u.IsDeleted)
                 .Select(u => new CustomerStatsDto
                 {
                     UserId = u.Id,

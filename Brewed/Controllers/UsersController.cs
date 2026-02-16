@@ -96,7 +96,7 @@ namespace Brewed.API.Controllers
             try
             {
                 var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-                await _userService.DeleteUserAsync(userId);
+                await _userService.SoftDeleteUserAsync(userId, userId, false);
                 return Ok(new { success = true, message = "Profile deleted successfully" });
             }
             catch (KeyNotFoundException)
@@ -187,7 +187,8 @@ namespace Brewed.API.Controllers
         {
             try
             {
-                await _userService.DeleteUserAsync(userId);
+                var adminId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                await _userService.SoftDeleteUserAsync(userId, adminId, true);
                 return Ok(new { success = true, message = "User deleted successfully" });
             }
             catch (KeyNotFoundException)
@@ -195,6 +196,10 @@ namespace Brewed.API.Controllers
                 return NotFound(new { success = false, message = "User not found" });
             }
             catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
             {
                 return BadRequest(new { success = false, message = ex.Message });
             }
