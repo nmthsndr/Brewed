@@ -47,8 +47,15 @@ const Profile = () => {
       confirmPassword: ''
     },
     validate: {
-      currentPassword: (val) => (val.length < 6 ? 'Password must be at least 6 characters' : null),
-      newPassword: (val) => (val.length < 6 ? 'Password must be at least 6 characters' : null),
+      currentPassword: (val) => (val.length < 1 ? 'Current password is required' : null),
+      newPassword: (val) => {
+        if (val.length < 8) return 'Password must be at least 8 characters';
+        if (!/[A-Z]/.test(val)) return 'Password must contain at least one uppercase letter';
+        if (!/[a-z]/.test(val)) return 'Password must contain at least one lowercase letter';
+        if (!/[0-9]/.test(val)) return 'Password must contain at least one number';
+        if (!/[^A-Za-z0-9]/.test(val)) return 'Password must contain at least one special character';
+        return null;
+      },
       confirmPassword: (val, values) => (val !== values.newPassword ? 'Passwords do not match' : null)
     }
   });
