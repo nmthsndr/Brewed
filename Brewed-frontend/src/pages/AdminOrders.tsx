@@ -217,7 +217,7 @@ const AdminOrders = () => {
         <Select
           placeholder="Filter by status"
           value={statusFilter}
-          onChange={(value) => setStatusFilter(value || "")}
+          onChange={(value) => { setStatusFilter(value || ""); setCurrentPage(1); }}
           data={[
             { value: "", label: "All Statuses" },
             { value: "Processing", label: "Processing" },
