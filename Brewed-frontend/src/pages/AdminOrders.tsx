@@ -196,7 +196,7 @@ const AdminOrders = () => {
       <Title order={2} mb="xs" style={{ color: '#3d3d3d' }}>All Orders</Title>
       <Text size="sm" c="dimmed" mb="lg">Manage and track customer orders</Text>
 
-      <Group mb="lg" wrap="wrap">
+      <Group mb="sm" wrap="wrap">
         <TextInput
           placeholder="Search by customer name, email or order #"
           value={searchQuery}
@@ -218,6 +218,9 @@ const AdminOrders = () => {
             Clear
           </Button>
         )}
+      </Group>
+
+      <Group mb="lg" wrap="wrap" align="center">
         <Select
           placeholder="Filter by status"
           value={statusFilter}
@@ -234,24 +237,22 @@ const AdminOrders = () => {
         />
         <TextInput
           type="date"
-          placeholder="From"
-          label="From"
+          placeholder="From date"
           value={dateFrom}
           onChange={(e) => { setDateFrom(e.currentTarget.value); setCurrentPage(1); }}
           leftSection={<IconCalendar size={16} />}
-          style={{ width: 180 }}
+          style={{ width: 170 }}
         />
         <TextInput
           type="date"
-          placeholder="To"
-          label="To"
+          placeholder="To date"
           value={dateTo}
           onChange={(e) => { setDateTo(e.currentTarget.value); setCurrentPage(1); }}
           leftSection={<IconCalendar size={16} />}
-          style={{ width: 180 }}
+          style={{ width: 170 }}
         />
         {(dateFrom || dateTo) && (
-          <Button variant="subtle" color="gray" onClick={() => { setDateFrom(""); setDateTo(""); setCurrentPage(1); }} mt="auto">
+          <Button variant="subtle" color="gray" size="compact-sm" onClick={() => { setDateFrom(""); setDateTo(""); setCurrentPage(1); }}>
             Clear dates
           </Button>
         )}
