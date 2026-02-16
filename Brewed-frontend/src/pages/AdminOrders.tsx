@@ -220,7 +220,7 @@ const AdminOrders = () => {
         )}
       </Group>
 
-      <Group mb="lg" wrap="wrap" align="center">
+      <Group mb="lg" wrap="wrap" align="center" gap="sm">
         <Select
           placeholder="Filter by status"
           value={statusFilter}
@@ -233,23 +233,25 @@ const AdminOrders = () => {
             { value: "Cancelled", label: "Cancelled" }
           ]}
           clearable
-          style={{ width: 200 }}
+          style={{ flex: '1 1 150px', maxWidth: 200 }}
         />
         <TextInput
           type="date"
           placeholder="From date"
           value={dateFrom}
+          max={dateTo || undefined}
           onChange={(e) => { setDateFrom(e.currentTarget.value); setCurrentPage(1); }}
           leftSection={<IconCalendar size={16} />}
-          style={{ width: 170 }}
+          style={{ flex: '1 1 140px', maxWidth: 170 }}
         />
         <TextInput
           type="date"
           placeholder="To date"
           value={dateTo}
+          min={dateFrom || undefined}
           onChange={(e) => { setDateTo(e.currentTarget.value); setCurrentPage(1); }}
           leftSection={<IconCalendar size={16} />}
-          style={{ width: 170 }}
+          style={{ flex: '1 1 140px', maxWidth: 170 }}
         />
         {(dateFrom || dateTo) && (
           <Button variant="subtle" color="gray" size="compact-sm" onClick={() => { setDateFrom(""); setDateTo(""); setCurrentPage(1); }}>
