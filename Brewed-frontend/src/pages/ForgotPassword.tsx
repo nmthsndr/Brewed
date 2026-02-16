@@ -30,10 +30,21 @@ const ForgotPassword = () => {
         message: 'If your email is in our system, you will receive a 6-digit verification code.',
         color: 'blue',
       });
-    } catch (error) {
+    } catch (error: any) {
+      let errorMessage = 'Failed to send reset email. Please try again.';
+      if (error.response?.data) {
+        const data = error.response.data;
+        if (typeof data === 'string') {
+          errorMessage = data;
+        } else if (data.message) {
+          errorMessage = data.message;
+        } else if (data.Message) {
+          errorMessage = data.Message;
+        }
+      }
       notifications.show({
         title: 'Error',
-        message: 'Failed to send reset email. Please try again.',
+        message: errorMessage,
         color: 'red',
       });
     } finally {

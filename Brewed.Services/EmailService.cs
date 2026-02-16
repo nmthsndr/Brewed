@@ -15,6 +15,7 @@ namespace Brewed.Services
         Task SendInvoiceEmailAsync(OrderDto orderDetails);
         Task SendCouponAssignmentAsync(string email, string name, CouponDto coupon);
         Task SendBankTransferPaymentEmailAsync(OrderDto orderDetails);
+        Task SendAccountDeletionAsync(string email, string name);
     }
 
     public class EmailService : IEmailService
@@ -695,6 +696,28 @@ namespace Brewed.Services
             ";
 
             await SendEmailAsync(orderDetails.User.Email, subject, body);
+        }
+
+        public async Task SendAccountDeletionAsync(string email, string name)
+        {
+            var subject = "Account Deleted - Brewed";
+
+            var body = $@"
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #D4A373 0%, #8B4513 100%); padding: 40px; border-radius: 10px;'>
+                <div style='background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
+                    <h2 style='color: #8B4513; margin-bottom: 20px;'>Hello {name},</h2>
+                    <p style='color: #333; font-size: 16px; line-height: 1.6;'>We're writing to confirm that your Brewed account has been successfully deleted.</p>
+                    <p style='color: #333; font-size: 16px; line-height: 1.6;'>Your account data has been deactivated and your profile will no longer be visible.</p>
+                    <div style='background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px;'>
+                        <p style='color: #856404; margin: 0; font-size: 14px;'>If you did not request this deletion or believe this was done in error, please contact us immediately at <a href='mailto:{_fromEmail}' style='color: #8B4513;'>{_fromEmail}</a>.</p>
+                    </div>
+                    <p style='color: #666; font-size: 14px;'>We're sorry to see you go. You're always welcome back!</p>
+                    <p style='color: #333; font-size: 16px; margin-top: 30px;'>Best regards,<br/><span style='color: #8B4513; font-weight: bold;'>Brewed Team</span></p>
+                </div>
+            </div>
+        ";
+
+            await SendEmailAsync(email, subject, body);
         }
     }
 }

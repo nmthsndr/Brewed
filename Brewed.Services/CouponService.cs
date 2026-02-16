@@ -603,7 +603,7 @@ namespace Brewed.Services
             var userCoupons = await _context.UserCoupons
                 .Include(uc => uc.User)
                 .Include(uc => uc.Coupon)
-                .Where(uc => uc.CouponId == couponId)
+                .Where(uc => uc.CouponId == couponId && !uc.User.IsDeleted)
                 .ToListAsync();
 
             return _mapper.Map<List<UserCouponDto>>(userCoupons);

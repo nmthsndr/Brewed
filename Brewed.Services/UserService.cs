@@ -19,6 +19,7 @@ namespace Brewed.Services
         Task<UserDto> GetUserByIdAsync(int userId);
         Task<UserDto> UpdateUserAsync(int userId, UserUpdateDto userDto);
         Task<bool> DeleteUserAsync(int userId);
+        Task<bool> SoftDeleteUserAsync(int userId, int requestingUserId, bool isAdmin);
         Task<bool> ConfirmEmailAsync(string token);
         Task<bool> ForgotPasswordAsync(string email);
         Task<bool> ResetPasswordAsync(string token, string newPassword);
@@ -47,7 +48,7 @@ namespace Brewed.Services
         {
             if (await _context.Users.AnyAsync(u => u.Email == userDto.Email))
             {
-                throw new Exception("This email is already registered. Please use a different email or log in.");
+                throw new Exception("This email is already associated with an account. Please use a different email or log in.");
             }
 
             var user = _mapper.Map<User>(userDto);
@@ -91,6 +92,11 @@ namespace Brewed.Services
                 throw new UnauthorizedAccessException("Invalid credentials");
             }
 
+            if (user.IsDeleted)
+            {
+                throw new UnauthorizedAccessException("This account has been deleted.");
+            }
+
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
             var expireDays = int.Parse(_configuration["Jwt:ExpireDays"]);
@@ -118,7 +124,7 @@ namespace Brewed.Services
         {
             var user = await _context.Users.FindAsync(userId);
 
-            if (user == null)
+            if (user == null || user.IsDeleted)
             {
                 throw new KeyNotFoundException("User not found");
             }
@@ -231,6 +237,60 @@ namespace Brewed.Services
             return true;
         }
 
+        public async Task<bool> SoftDeleteUserAsync(int userId, int requestingUserId, bool isAdmin)
+        {
+            var user = await _context.Users.FindAsync(userId);
+
+            if (user == null || user.IsDeleted)
+            {
+                throw new KeyNotFoundException("User not found");
+            }
+
+            // Admin can delete any non-admin user; users can delete themselves
+            if (isAdmin)
+            {
+                if (user.Role == "Admin")
+                {
+                    throw new InvalidOperationException("Cannot delete an admin user.");
+                }
+            }
+            else
+            {
+                if (userId != requestingUserId)
+                {
+                    throw new UnauthorizedAccessException("You can only delete your own account.");
+                }
+            }
+
+            // Soft delete: set IsDeleted flag
+            user.IsDeleted = true;
+            _context.Users.Update(user);
+
+            // Remove user coupon assignments
+            var userCoupons = await _context.UserCoupons
+                .Where(uc => uc.UserId == userId)
+                .ToListAsync();
+
+            if (userCoupons.Any())
+            {
+                _context.UserCoupons.RemoveRange(userCoupons);
+            }
+
+            await _context.SaveChangesAsync();
+
+            // Send deletion notification email
+            try
+            {
+                await _emailService.SendAccountDeletionAsync(user.Email, user.Name);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send account deletion email to {user.Email}: {ex.Message}");
+            }
+
+            return true;
+        }
+
         public async Task<bool> ConfirmEmailAsync(string code)
         {
             var userToken = await _context.UserTokens
@@ -268,7 +328,12 @@ namespace Brewed.Services
 
             if (user == null)
             {
-                return true;
+                throw new Exception("No account found with this email address.");
+            }
+
+            if (user.IsDeleted)
+            {
+                throw new Exception("This account has been deleted. Password reset is not available.");
             }
 
             var verificationCode = GenerateVerificationCode();
@@ -310,6 +375,11 @@ namespace Brewed.Services
                 throw new Exception("Verification code expired");
             }
 
+            if (userToken.User.IsDeleted)
+            {
+                throw new Exception("This account has been deleted. Password reset is not available for deleted accounts.");
+            }
+
             userToken.User.PasswordHash = HashPassword(newPassword);
             userToken.IsUsed = true;
 
@@ -343,7 +413,9 @@ namespace Brewed.Services
 
         public async Task<List<UserDto>> GetAllUsersAsync()
         {
-            var users = await _context.Users.ToListAsync();
+            var users = await _context.Users
+                .Where(u => !u.IsDeleted)
+                .ToListAsync();
             return _mapper.Map<List<UserDto>>(users);
         }
 
@@ -351,7 +423,7 @@ namespace Brewed.Services
         {
             if (await _context.Users.AnyAsync(u => u.Email == userDto.Email))
             {
-                throw new Exception("This email is already registered. Please use a different email.");
+                throw new Exception("This email is already associated with an account. Please use a different email or log in.");
             }
 
             var user = _mapper.Map<User>(userDto);

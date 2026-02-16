@@ -163,7 +163,7 @@ namespace Brewed.Services
                     {
                         // Get all admin users from database
                         var adminEmails = await _context.Users
-                            .Where(u => u.Role == "Admin")
+                            .Where(u => u.Role == "Admin" && !u.IsDeleted)
                             .Select(u => u.Email)
                             .ToListAsync();
 
@@ -225,7 +225,7 @@ namespace Brewed.Services
 
             if (existingUser != null && existingUser.Role != "Guest")
             {
-                throw new Exception("This email is already registered. Please log in to place your order.");
+                throw new Exception("This email is already associated with an account. Please use a different email or log in.");
             }
 
             // Get guest cart
@@ -352,7 +352,7 @@ namespace Brewed.Services
                     {
                         // Get all admin users from database
                         var adminEmails = await _context.Users
-                            .Where(u => u.Role == "Admin")
+                            .Where(u => u.Role == "Admin" && !u.IsDeleted)
                             .Select(u => u.Email)
                             .ToListAsync();
 
@@ -475,6 +475,7 @@ namespace Brewed.Services
                 .Include(o => o.Invoice)
                 .Include(o => o.User)
                 .Include(o => o.GuestOrderDetails)
+                .Where(o => o.User == null || !o.User.IsDeleted)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(status))

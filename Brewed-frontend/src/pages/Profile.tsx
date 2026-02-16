@@ -9,11 +9,13 @@ import {
   Group,
   Stack,
   LoadingOverlay,
-  PasswordInput
+  PasswordInput,
+  Modal
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { IconUser, IconMapPin, IconLock } from "@tabler/icons-react";
-import { useSearchParams } from "react-router-dom";
+import { useDisclosure } from "@mantine/hooks";
+import { IconUser, IconMapPin, IconLock, IconTrash } from "@tabler/icons-react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import api from "../api/api";
 import AddressManagement from "../components/AddressManagement";
 import { notifications } from "@mantine/notifications";
@@ -21,9 +23,11 @@ import useAuth from "../hooks/useAuth";
 
 const Profile = () => {
   const [loading, setLoading] = useState(false);
-  const { email } = useAuth();
+  const { email, logout } = useAuth();
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'profile');
+  const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
+  const navigate = useNavigate();
 
   const profileForm = useForm({
     initialValues: {
@@ -43,8 +47,15 @@ const Profile = () => {
       confirmPassword: ''
     },
     validate: {
-      currentPassword: (val) => (val.length < 6 ? 'Password must be at least 6 characters' : null),
-      newPassword: (val) => (val.length < 6 ? 'Password must be at least 6 characters' : null),
+      currentPassword: (val) => (val.length < 1 ? 'Current password is required' : null),
+      newPassword: (val) => {
+        if (val.length < 8) return 'Password must be at least 8 characters';
+        if (!/[A-Z]/.test(val)) return 'Password must contain at least one uppercase letter';
+        if (!/[a-z]/.test(val)) return 'Password must contain at least one lowercase letter';
+        if (!/[0-9]/.test(val)) return 'Password must contain at least one number';
+        if (!/[^A-Za-z0-9]/.test(val)) return 'Password must contain at least one special character';
+        return null;
+      },
       confirmPassword: (val, values) => (val !== values.newPassword ? 'Passwords do not match' : null)
     }
   });
@@ -113,6 +124,30 @@ const Profile = () => {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    try {
+      setLoading(true);
+      await api.Users.deleteProfile();
+      notifications.show({
+        title: 'Account Deleted',
+        message: 'Your account has been deleted successfully.',
+        color: 'green',
+      });
+      closeDeleteModal();
+      logout();
+      navigate('/login');
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || 'Failed to delete account';
+      notifications.show({
+        title: 'Error',
+        message: errorMessage,
+        color: 'red',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     const tab = searchParams.get('tab');
     if (tab) {
@@ -161,6 +196,21 @@ const Profile = () => {
               </Stack>
             </form>
           </Paper>
+
+          <Paper withBorder p="lg" maw={600} mt="xl" style={{ borderColor: '#e03131' }}>
+            <Title order={4} c="red" mb="sm">Delete Account</Title>
+            <Text size="sm" c="dimmed" mb="md">
+              Once your account is deleted, your profile, orders, and reviews will no longer be visible. This action cannot be undone.
+            </Text>
+            <Button
+              color="red"
+              variant="outline"
+              leftSection={<IconTrash size={16} />}
+              onClick={openDeleteModal}
+            >
+              Delete My Account
+            </Button>
+          </Paper>
         </Tabs.Panel>
 
         <Tabs.Panel value="addresses" pt="md">
@@ -197,6 +247,21 @@ const Profile = () => {
           </Paper>
         </Tabs.Panel>
       </Tabs>
+
+      <Modal
+        opened={deleteModalOpened}
+        onClose={closeDeleteModal}
+        title="Delete Account"
+        centered
+      >
+        <Text mb="lg">
+          Are you sure you want to delete your account? This action cannot be undone. Your profile, orders, and reviews will no longer be visible.
+        </Text>
+        <Group justify="flex-end">
+          <Button variant="outline" onClick={closeDeleteModal}>Cancel</Button>
+          <Button color="red" onClick={handleDeleteAccount}>Delete Account</Button>
+        </Group>
+      </Modal>
     </div>
   );
 };
