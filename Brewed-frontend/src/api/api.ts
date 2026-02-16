@@ -154,7 +154,9 @@ const Cart = {
   removeFromCart: (cartItemId: number) =>
     axiosInstance.delete(`/api/cart/items/${cartItemId}`),
   clearCart: (sessionId?: string) =>
-    axiosInstance.delete(`/api/cart`, { params: { sessionId } })
+    axiosInstance.delete(`/api/cart`, { params: { sessionId } }),
+  mergeGuestCart: (sessionId: string) =>
+    axiosInstance.post<ICart>(`/api/cart/merge`, null, { params: { sessionId } })
 };
 
 const Orders = {

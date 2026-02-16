@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Brewed.DataContext.Dtos;
 using Brewed.Services;
 using System.Security.Claims;
@@ -99,6 +100,28 @@ namespace Brewed.API.Controllers
                 var userId = userIdClaim != null ? int.Parse(userIdClaim) : (int?)null;
 
                 var result = await _cartService.ClearCartAsync(userId, sessionId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPost("merge")]
+        public async Task<IActionResult> MergeGuestCart([FromQuery] string sessionId)
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userIdClaim == null)
+                {
+                    return Unauthorized();
+                }
+
+                var userId = int.Parse(userIdClaim);
+                var result = await _cartService.MergeGuestCartAsync(userId, sessionId);
                 return Ok(result);
             }
             catch (Exception ex)

@@ -30,6 +30,12 @@ const CartProvider = ({ children }: CartProviderProps) => {
     return () => clearInterval(interval);
   }, [isLoggedIn]);
 
+  useEffect(() => {
+    const handleCartUpdated = () => refreshCartCount();
+    window.addEventListener('cart-updated', handleCartUpdated);
+    return () => window.removeEventListener('cart-updated', handleCartUpdated);
+  }, []);
+
   return (
     <CartContext.Provider value={{ cartItemCount, refreshCartCount }}>
       {children}
