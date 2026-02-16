@@ -13,6 +13,7 @@ namespace Brewed.Services
         Task<CartDto> UpdateCartItemAsync(int cartItemId, int quantity);
         Task<bool> RemoveFromCartAsync(int cartItemId);
         Task<bool> ClearCartAsync(int? userId, string sessionId);
+        Task<CartDto> MergeGuestCartAsync(int userId, string sessionId);
     }
 
     public class CartService : ICartService
@@ -183,6 +184,65 @@ namespace Brewed.Services
             await _context.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task<CartDto> MergeGuestCartAsync(int userId, string sessionId)
+        {
+            if (string.IsNullOrEmpty(sessionId))
+            {
+                return await GetCartAsync(userId, null);
+            }
+
+            var guestCart = await _context.Carts
+                .Include(c => c.CartItems)
+                .ThenInclude(ci => ci.Product)
+                .FirstOrDefaultAsync(c => c.SessionId == sessionId);
+
+            if (guestCart == null || !guestCart.CartItems.Any())
+            {
+                return await GetCartAsync(userId, null);
+            }
+
+            var userCart = await GetOrCreateCartAsync(userId, null);
+
+            foreach (var guestItem in guestCart.CartItems)
+            {
+                var existingItem = userCart.CartItems.FirstOrDefault(ci => ci.ProductId == guestItem.ProductId);
+
+                if (existingItem != null)
+                {
+                    var newQuantity = existingItem.Quantity + guestItem.Quantity;
+                    if (guestItem.Product.StockQuantity < newQuantity)
+                    {
+                        newQuantity = guestItem.Product.StockQuantity;
+                    }
+                    existingItem.Quantity = newQuantity;
+                    _context.CartItems.Update(existingItem);
+                }
+                else
+                {
+                    var quantity = guestItem.Quantity;
+                    if (guestItem.Product.StockQuantity < quantity)
+                    {
+                        quantity = guestItem.Product.StockQuantity;
+                    }
+                    var cartItem = new CartItem
+                    {
+                        CartId = userCart.Id,
+                        ProductId = guestItem.ProductId,
+                        Quantity = quantity,
+                        Price = guestItem.Product.Price
+                    };
+                    await _context.CartItems.AddAsync(cartItem);
+                }
+            }
+
+            _context.CartItems.RemoveRange(guestCart.CartItems);
+            _context.Carts.Remove(guestCart);
+
+            await _context.SaveChangesAsync();
+
+            return await GetCartAsync(userId, null);
         }
     }
 }

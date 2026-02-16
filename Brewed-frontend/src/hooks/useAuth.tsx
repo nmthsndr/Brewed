@@ -3,7 +3,7 @@ import { AuthContext } from "../context/AuthContext";
 import { emailKeyName, roleKeyName, tokenKeyName, userIdKeyName, roleTokenKey, emailTokenKey, userIdTokenKey } from "../constants/constants";
 import api from "../api/api";
 import { jwtDecode } from "jwt-decode";
-import { clearGuestSession } from "../utils/guestSession";
+import { clearGuestSession, getGuestSessionId, hasGuestSession } from "../utils/guestSession";
 
 const useAuth = () => {
   const { token, setToken, email, setEmail, role, setRole, userId, setUserId } = useContext(AuthContext);
@@ -43,6 +43,17 @@ const useAuth = () => {
       localStorage.setItem(userIdKeyName, id);
       
       console.log("All data saved to localStorage");
+
+      // Merge guest cart into user cart before clearing guest session
+      if (hasGuestSession()) {
+        try {
+          const guestSessionId = getGuestSessionId();
+          await api.Cart.mergeGuestCart(guestSessionId);
+          console.log("Guest cart merged into user cart");
+        } catch (mergeError) {
+          console.error("Failed to merge guest cart:", mergeError);
+        }
+      }
 
       // Clear guest session after successful login
       clearGuestSession();
