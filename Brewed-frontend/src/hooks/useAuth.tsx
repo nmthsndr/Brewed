@@ -59,6 +59,9 @@ const useAuth = () => {
       clearGuestSession();
       console.log("Guest session cleared after login");
 
+      // Notify CartProvider to refresh cart count after merge
+      window.dispatchEvent(new Event('cart-updated'));
+
       return true;
     } catch (error) {
       console.error("Login failed:", error);

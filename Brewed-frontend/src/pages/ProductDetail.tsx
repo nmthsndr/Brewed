@@ -175,8 +175,7 @@ const ProductDetail = () => {
         color: 'green',
       });
       reviewForm.reset();
-      await loadReviews();
-      await checkUserReview();
+      await Promise.all([loadReviews(), checkUserReview(), loadProduct()]);
     } catch (error: any) {
       notifications.show({
         title: 'Error',
@@ -195,8 +194,7 @@ const ProductDetail = () => {
           message: 'Review deleted successfully',
           color: 'green',
         });
-        await loadReviews();
-        await checkUserReview();
+        await Promise.all([loadReviews(), checkUserReview(), loadProduct()]);
       } catch (error) {
         notifications.show({
           title: 'Error',
