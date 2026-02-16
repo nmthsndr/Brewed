@@ -17,7 +17,7 @@ import {
   Textarea,
   ScrollArea
 } from "@mantine/core";
-import { IconPackage, IconSearch } from "@tabler/icons-react";
+import { IconPackage, IconSearch, IconCalendar } from "@tabler/icons-react";
 import { useSearchParams } from "react-router-dom";
 import api from "../api/api";
 import { IOrder } from "../interfaces/IOrder";
@@ -38,10 +38,12 @@ const AdminOrders = () => {
   const [generatingInvoice, setGeneratingInvoice] = useState(false);
   const [cancelModalOpened, setCancelModalOpened] = useState(false);
   const [orderNotes, setOrderNotes] = useState("");
+  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateTo, setDateTo] = useState<string>("");
 
   useEffect(() => {
     loadOrders();
-  }, [currentPage, statusFilter, appliedSearch]);
+  }, [currentPage, statusFilter, appliedSearch, dateFrom, dateTo]);
 
   const handleSearch = () => {
     setCurrentPage(1);
@@ -60,7 +62,9 @@ const AdminOrders = () => {
         statusFilter || undefined,
         currentPage,
         10,
-        appliedSearch || undefined
+        appliedSearch || undefined,
+        dateFrom || undefined,
+        dateTo || undefined
       );
       setOrders(response.data.items);
       setTotalPages(response.data.totalPages);
@@ -228,6 +232,29 @@ const AdminOrders = () => {
           clearable
           style={{ width: 200 }}
         />
+        <TextInput
+          type="date"
+          placeholder="From"
+          label="From"
+          value={dateFrom}
+          onChange={(e) => { setDateFrom(e.currentTarget.value); setCurrentPage(1); }}
+          leftSection={<IconCalendar size={16} />}
+          style={{ width: 180 }}
+        />
+        <TextInput
+          type="date"
+          placeholder="To"
+          label="To"
+          value={dateTo}
+          onChange={(e) => { setDateTo(e.currentTarget.value); setCurrentPage(1); }}
+          leftSection={<IconCalendar size={16} />}
+          style={{ width: 180 }}
+        />
+        {(dateFrom || dateTo) && (
+          <Button variant="subtle" color="gray" onClick={() => { setDateFrom(""); setDateTo(""); setCurrentPage(1); }} mt="auto">
+            Clear dates
+          </Button>
+        )}
       </Group>
 
       {orders.length === 0 ? (
