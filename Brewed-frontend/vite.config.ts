@@ -5,5 +5,16 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000
+  },
+  optimizeDeps: {
+    include: [
+      '@mantine/core',
+      '@mantine/hooks',
+      '@mantine/notifications',
+      'react',
+      'react-dom',
+      'react-router-dom',
+      'axios'
+    ]
   }
 })

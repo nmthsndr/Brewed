@@ -16,29 +16,29 @@ const useAuth = () => {
       
       console.log("Login successful, token received:", token);
       
-      // Token mentése
+      // Save token
       setToken(token);
       localStorage.setItem(tokenKeyName, token);
       
-      // Token dekódolása
+      // Decode token
       const decodedToken: any = jwtDecode(token);
-      console.log("Decoded token:", decodedToken);
+      //console.log("Decoded token:", decodedToken);
       
       // Role
       const userRole = decodedToken[roleTokenKey];
-      console.log("User role:", userRole);
+      //console.log("User role:", userRole);
       setRole(userRole);
       localStorage.setItem(roleKeyName, userRole);
       
       // Email
       const userEmail = decodedToken[emailTokenKey];
-      console.log("User email:", userEmail);
+      //console.log("User email:", userEmail);
       setEmail(userEmail);
       localStorage.setItem(emailKeyName, userEmail);
       
       // UserId
       const id = decodedToken[userIdTokenKey];
-      console.log("User ID:", id);
+      //console.log("User ID:", id);
       setUserId(id);
       localStorage.setItem(userIdKeyName, id);
       

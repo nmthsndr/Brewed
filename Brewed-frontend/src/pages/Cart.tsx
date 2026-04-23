@@ -177,6 +177,8 @@ const Cart = () => {
                       width={60}
                       height={60}
                       radius="md"
+                      fit="contain"
+                      style={{ objectFit: "contain", width: 60, height: 60 }}
                     />
                     <div>
                       <Text fw={500}>{item.productName}</Text>

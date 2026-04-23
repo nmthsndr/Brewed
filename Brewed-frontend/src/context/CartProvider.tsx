@@ -25,7 +25,7 @@ const CartProvider = ({ children }: CartProviderProps) => {
 
   useEffect(() => {
     refreshCartCount();
-    // Poll every 30 seconds as backup
+    // Poll every 30s as backup
     const interval = setInterval(refreshCartCount, 30000);
     return () => clearInterval(interval);
   }, [isLoggedIn]);
