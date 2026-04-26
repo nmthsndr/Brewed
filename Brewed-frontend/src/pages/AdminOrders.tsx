@@ -9,7 +9,6 @@ import {
   LoadingOverlay,
   Button,
   Stack,
-  Accordion,
   Select,
   TextInput,
   Pagination,

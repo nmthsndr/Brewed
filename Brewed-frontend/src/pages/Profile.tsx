@@ -23,7 +23,7 @@ import useAuth from "../hooks/useAuth";
 
 const Profile = () => {
   const [loading, setLoading] = useState(false);
-  const { email, logout } = useAuth();
+  const { logout } = useAuth();
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'profile');
   const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);

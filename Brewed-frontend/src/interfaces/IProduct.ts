@@ -1,6 +1,3 @@
-import { ICategory } from "./ICategory";
-import { IProductImage } from "./IProductImage";
-
 export interface IProduct {
   id: number;
   name: string;

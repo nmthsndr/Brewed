@@ -11,11 +11,9 @@ import {
   Pagination,
   Paper,
   Stack,
-  MultiSelect,
-  NumberInput,
   Checkbox
 } from "@mantine/core";
-import { IconSearch, IconFilter } from "@tabler/icons-react";
+import { IconSearch } from "@tabler/icons-react";
 import { useDebouncedValue } from "@mantine/hooks";
 import api, { ProductFilterDto } from "../api/api";
 import { IProduct } from "../interfaces/IProduct";

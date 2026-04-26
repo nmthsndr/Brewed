@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   Title,
   Text,
-  Image,
   Group,
   Badge,
   Button,
@@ -16,10 +15,9 @@ import {
   Card,
   Rating,
   Textarea,
-  ActionIcon,
   TextInput
 } from "@mantine/core";
-import { IconShoppingCart, IconArrowLeft, IconStar } from "@tabler/icons-react";
+import { IconShoppingCart, IconArrowLeft } from "@tabler/icons-react";
 import { useForm } from "@mantine/form";
 import api, { ReviewCreateDto } from "../api/api";
 import { IProduct } from "../interfaces/IProduct";

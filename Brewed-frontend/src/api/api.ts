@@ -1,8 +1,8 @@
 import axiosInstance from "./axios.config";
 import { IProduct } from "../interfaces/IProduct";
 import { ICategory } from "../interfaces/ICategory";
-import { ICart, ICartItem } from "../interfaces/ICart";
-import { IOrder, IOrderItem } from "../interfaces/IOrder";
+import { ICart } from "../interfaces/ICart";
+import { IOrder } from "../interfaces/IOrder";
 import { IUser } from "../interfaces/IUser";
 import { IAddress } from "../interfaces/IAddress";
 import { IReview } from "../interfaces/IReview";

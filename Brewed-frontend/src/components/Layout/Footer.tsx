@@ -1,20 +1,13 @@
-import { ActionIcon, Group, Image, Text } from "@mantine/core";
+import { ActionIcon, Group, Text } from "@mantine/core";
 import {
   IconBrandInstagram,
   IconBrandTwitter,
   IconBrandFacebook,
 } from "@tabler/icons-react";
-import { useNavigate } from "react-router-dom";
 import classes from "./Footer.module.css";
 
-const links = [
-  { label: "Products", url: "/app/products" },
-  { label: "Cart", url: "/app/cart" },
-  { label: "Dashboard", url: "/app/dashboard" },
-];
 
 const Footer = () => {
-  const navigate = useNavigate();
 
   return (
     <div className={classes.inner}>

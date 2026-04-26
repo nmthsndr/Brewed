@@ -175,7 +175,7 @@ const Orders = () => {
                               const url = window.URL.createObjectURL(blob);
                               const link = document.createElement('a');
                               link.href = url;
-                              link.download = `invoice-${order.invoice.invoiceNumber}.pdf`;
+                              link.download = `invoice-${order.invoice?.invoiceNumber ?? 'unknown'}.pdf`;
                               document.body.appendChild(link);
                               link.click();
                               document.body.removeChild(link);

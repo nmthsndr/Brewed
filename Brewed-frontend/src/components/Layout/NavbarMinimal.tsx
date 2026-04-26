@@ -30,7 +30,7 @@ interface NavbarLinkProps {
   onClick?(): void;
 }
 
-function NavbarLink({ icon: Icon, label, color, active, onClick }: NavbarLinkProps) {
+function NavbarLink({ icon: Icon, label, color: _color, active, onClick }: NavbarLinkProps) {
   return (
     <div
       role="button"
@@ -73,7 +73,7 @@ export function NavbarMinimal({ toggle }: any) {
     },
     {
       icon: IconCategory2,
-      label: "Categories",
+      label: "Manage Categories",
       url: "categories",
       roles: ['Admin']
     },
@@ -91,7 +91,7 @@ export function NavbarMinimal({ toggle }: any) {
     },
     {
       icon: IconFileInvoice,
-      label: "All Orders",
+      label: "Manage Orders",
       url: "admin-orders",
       roles: ['Admin']
     },
@@ -103,19 +103,19 @@ export function NavbarMinimal({ toggle }: any) {
     },
     {
       icon: IconTicket,
-      label: "All Coupons",
+      label: "Manage Coupons",
       url: "coupons",
       roles: ['Admin']
     },
     {
       icon: IconStar,
-      label: "Reviews",
+      label: "Manage Reviews",
       url: "admin-reviews",
       roles: ['Admin']
     },
     {
       icon: IconUsers,
-      label: "Users",
+      label: "Manage Users",
       url: "users",
       roles: ['Admin']
     },

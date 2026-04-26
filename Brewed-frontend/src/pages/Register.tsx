@@ -5,7 +5,6 @@ import {
   Group,
   Button,
   Anchor,
-  Divider,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useNavigate } from "react-router-dom";

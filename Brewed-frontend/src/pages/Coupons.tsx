@@ -21,7 +21,7 @@ import {
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { DateInput } from "@mantine/dates";
-import { IconEdit, IconTrash, IconPlus, IconRefresh, IconUsers, IconSearch } from "@tabler/icons-react";
+import { IconEdit, IconTrash, IconPlus, IconUsers, IconSearch } from "@tabler/icons-react";
 import api from "../api/api";
 import { ICoupon, IUserCoupon } from "../interfaces/ICoupon";
 import { IUser } from "../interfaces/IUser";
@@ -163,7 +163,7 @@ const Coupons = () => {
     }
   };
 
-  const handleGenerateCode = async () => {
+  /*const handleGenerateCode = async () => {
     try {
       const response = await api.Coupons.generateRandomCode();
       form.setFieldValue('code', response.data.code);
@@ -179,7 +179,7 @@ const Coupons = () => {
         color: 'red',
       });
     }
-  };
+  };*/
 
   const handleViewUsers = async (coupon: ICoupon) => {
     try {

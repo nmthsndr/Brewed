@@ -12,7 +12,6 @@ import {
   Card,
   LoadingOverlay,
   Checkbox,
-  Radio,
   Alert
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
@@ -69,7 +68,7 @@ const Checkout = () => {
   const [sameAsShipping, setSameAsShipping] = useState(true);
 
   // For logged-in users: use existing addresses or add new inline
-  const [useExistingAddress, setUseExistingAddress] = useState(true);
+  //const [useExistingAddress, setUseExistingAddress] = useState(true);
   const [showNewShippingForm, setShowNewShippingForm] = useState(false);
   const [showNewBillingForm, setShowNewBillingForm] = useState(false);
 

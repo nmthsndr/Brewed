@@ -20,7 +20,6 @@ import {
   IconUsers,
   IconPackage,
 } from "@tabler/icons-react";
-import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import { notifications } from "@mantine/notifications";
 
@@ -38,7 +37,6 @@ interface DashboardStats {
 }
 
 const AdminDashboard = () => {
-  const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 

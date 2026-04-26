@@ -9,8 +9,7 @@ import {
   TextInput,
   Stack,
   LoadingOverlay,
-  Checkbox,
-  Select
+  Checkbox
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
