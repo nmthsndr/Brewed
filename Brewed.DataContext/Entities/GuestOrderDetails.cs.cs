@@ -21,7 +21,6 @@ namespace Brewed.DataContext.Entities
         [StringLength(100)]
         public string LastName { get; set; }
 
-        // Shipping Address
         [Required]
         [StringLength(200)]
         public string ShippingAddressLine1 { get; set; }
@@ -45,7 +44,6 @@ namespace Brewed.DataContext.Entities
         [StringLength(20)]
         public string ShippingPhoneNumber { get; set; }
 
-        // Billing Address
         [Required]
         [StringLength(200)]
         public string BillingAddressLine1 { get; set; }

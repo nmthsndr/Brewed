@@ -147,7 +147,6 @@ namespace Brewed.Services
                 throw new UnauthorizedAccessException("You don't have permission to delete this address.");
             }
 
-            // Check if address is used in any orders
             var isUsedInOrders = await _context.Orders
                 .AnyAsync(o => o.ShippingAddressId == addressId || o.BillingAddressId == addressId);
 
@@ -171,7 +170,6 @@ namespace Brewed.Services
                 throw new KeyNotFoundException("Address not found.");
             }
 
-            // Check if address is used in any orders
             var isUsedInOrders = await _context.Orders
                 .AnyAsync(o => o.ShippingAddressId == addressId || o.BillingAddressId == addressId);
 
@@ -200,7 +198,6 @@ namespace Brewed.Services
                 throw new UnauthorizedAccessException("You don't have permission to update this address.");
             }
 
-            // Unset all other defaults
             var existingDefaults = await _context.Addresses
                 .Where(a => a.UserId == userId && a.IsDefault)
                 .ToListAsync();
@@ -211,7 +208,6 @@ namespace Brewed.Services
                 _context.Addresses.Update(addr);
             }
 
-            // Set this as default
             address.IsDefault = true;
             _context.Addresses.Update(address);
             await _context.SaveChangesAsync();

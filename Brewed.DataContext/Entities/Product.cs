@@ -13,7 +13,6 @@
         public bool IsOrganic { get; set; } = false;
         public string ImageUrl { get; set; } = null!;
 
-        // Foreign Key
         public int CategoryId { get; set; }
 
         public virtual Category Category { get; set; }

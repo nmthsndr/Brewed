@@ -14,7 +14,6 @@ namespace Brewed.Services
     {
         public PdfService()
         {
-            // Configure QuestPDF license (Community license is free for non-commercial use)
             QuestPDF.Settings.License = LicenseType.Community;
         }
 
@@ -49,7 +48,6 @@ namespace Brewed.Services
                         {
                             column.Spacing(15);
 
-                            // Invoice details section
                             column.Item().Row(row =>
                             {
                                 row.RelativeItem().Column(col =>
@@ -69,7 +67,6 @@ namespace Brewed.Services
 
                             column.Item().LineHorizontal(1).LineColor(Colors.Grey.Medium);
 
-                            // Customer information
                             column.Item().Row(row =>
                             {
                                 row.RelativeItem().Column(col =>
@@ -143,18 +140,16 @@ namespace Brewed.Services
 
                             column.Item().LineHorizontal(1).LineColor(Colors.Grey.Medium);
 
-                            // Order items table
                             column.Item().Table(table =>
                             {
                                 table.ColumnsDefinition(columns =>
                                 {
-                                    columns.RelativeColumn(3);  // Product name
-                                    columns.RelativeColumn(1);  // Quantity
-                                    columns.RelativeColumn(1);  // Unit Price
-                                    columns.RelativeColumn(1);  // Total
+                                    columns.RelativeColumn(3);  
+                                    columns.RelativeColumn(1); 
+                                    columns.RelativeColumn(1); 
+                                    columns.RelativeColumn(1); 
                                 });
 
-                                // Table header
                                 table.Header(header =>
                                 {
                                     header.Cell().Element(CellStyle).Text("Product").SemiBold();
@@ -163,7 +158,6 @@ namespace Brewed.Services
                                     header.Cell().Element(CellStyle).AlignRight().Text("Total").SemiBold();
                                 });
 
-                                // Table rows
                                 foreach (var item in order.Items)
                                 {
                                     table.Cell().Element(CellStyle).Text(item.ProductName ?? "Product");
@@ -181,7 +175,6 @@ namespace Brewed.Services
                                 }
                             });
 
-                            // Payment information section
                             column.Item().AlignRight().Column(col =>
                             {
                                 col.Spacing(5);
@@ -231,7 +224,6 @@ namespace Brewed.Services
                                 });
                             });
 
-                            // Notes section
                             if (!string.IsNullOrEmpty(order.Notes))
                             {
                                 column.Item().PaddingTop(15).Column(col =>

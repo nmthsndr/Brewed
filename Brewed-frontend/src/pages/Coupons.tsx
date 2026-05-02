@@ -102,7 +102,6 @@ const Coupons = () => {
     setModalMode('edit');
     setSelectedCoupon(coupon);
 
-    // Load assigned users for this coupon
     try {
       const response = await api.Coupons.getCouponUsers(coupon.id);
       const assignedUserIds = response.data.map((uc: IUserCoupon) => uc.userId);
@@ -238,7 +237,6 @@ const Coupons = () => {
         if (typeof data === 'string') {
           errorMessage = data;
         } else if (data.errors) {
-          // Handle .NET validation errors
           const validationErrors = Object.entries(data.errors)
             .map(([field, messages]: [string, any]) => {
               const errorList = Array.isArray(messages) ? messages : [messages];

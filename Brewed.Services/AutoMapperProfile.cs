@@ -10,7 +10,6 @@ namespace Brewed.Services
     {
         public AutoMapperProfile()
         {
-            // User Mappings
             CreateMap<User, UserDto>();
             CreateMap<UserRegisterDto, User>()
                 .ForMember(dest => dest.Orders, opt => opt.Ignore())
@@ -27,7 +26,6 @@ namespace Brewed.Services
                 .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
                 .ForMember(dest => dest.Role, opt => opt.Ignore());
 
-            // Product Mappings
             CreateMap<Product, ProductDto>()
                 .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.Category.Id))
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
@@ -39,17 +37,14 @@ namespace Brewed.Services
             CreateMap<ProductCreateDto, Product>();
             CreateMap<ProductUpdateDto, Product>();
 
-            // ProductImage Mappings
             CreateMap<ProductImage, ProductImageDto>();
 
-            // Category Mappings
             CreateMap<Category, CategoryDto>()
                 .ForMember(dest => dest.ProductCount, opt => opt.MapFrom(src => src.Products.Count));
 
             CreateMap<CategoryCreateDto, Category>();
             CreateMap<CategoryUpdateDto, Category>();
 
-            // Cart Mappings
             CreateMap<Cart, CartDto>()
                 .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.CartItems))
                 .ForMember(dest => dest.SubTotal, opt => opt.MapFrom(src =>
@@ -67,7 +62,6 @@ namespace Brewed.Services
                 .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.Price * src.Quantity))
                 .ForMember(dest => dest.StockQuantity, opt => opt.MapFrom(src => src.Product.StockQuantity));
 
-            // Order Mappings
             CreateMap<Order, OrderDto>()
                 .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.OrderItems));
 
@@ -81,27 +75,22 @@ namespace Brewed.Services
 
             CreateMap<GuestOrderDetails, GuestOrderDetailsDto>();
 
-            // Address Mappings
             CreateMap<Address, AddressDto>();
             CreateMap<AddressCreateDto, Address>();
 
-            // Coupon Mappings
             CreateMap<Coupon, CouponDto>();
             CreateMap<CouponCreateDto, Coupon>();
 
-            // UserCoupon Mappings
             CreateMap<UserCoupon, UserCouponDto>()
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.Name))
                 .ForMember(dest => dest.UserEmail, opt => opt.MapFrom(src => src.User.Email))
                 .ForMember(dest => dest.Coupon, opt => opt.MapFrom(src => src.Coupon));
 
-            // Review Mappings
             CreateMap<Review, ReviewDto>()
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.Name));
 
             CreateMap<ReviewCreateDto, Review>();
 
-            // Invoice Mappings
             CreateMap<Invoice, InvoiceDto>();
         }
     }

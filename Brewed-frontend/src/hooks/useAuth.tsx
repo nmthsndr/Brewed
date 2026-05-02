@@ -16,27 +16,22 @@ const useAuth = () => {
       
       console.log("Login successful, token received:", token);
       
-      // Save token
       setToken(token);
       localStorage.setItem(tokenKeyName, token);
       
-      // Decode token
       const decodedToken: any = jwtDecode(token);
       //console.log("Decoded token:", decodedToken);
       
-      // Role
       const userRole = decodedToken[roleTokenKey];
       //console.log("User role:", userRole);
       setRole(userRole);
       localStorage.setItem(roleKeyName, userRole);
       
-      // Email
       const userEmail = decodedToken[emailTokenKey];
       //console.log("User email:", userEmail);
       setEmail(userEmail);
       localStorage.setItem(emailKeyName, userEmail);
       
-      // UserId
       const id = decodedToken[userIdTokenKey];
       //console.log("User ID:", id);
       setUserId(id);
@@ -44,7 +39,7 @@ const useAuth = () => {
       
       console.log("All data saved to localStorage");
 
-      // Merge guest cart into user cart before clearing guest session
+      // Merge guest cart into user cart
       if (hasGuestSession()) {
         try {
           const guestSessionId = getGuestSessionId();
@@ -55,11 +50,11 @@ const useAuth = () => {
         }
       }
 
-      // Clear guest session after successful login
+      // Clear guest session after login
       clearGuestSession();
       console.log("Guest session cleared after login");
 
-      // Notify CartProvider to refresh cart count after merge
+      // Notify cartprovider to refresh cart count after merge
       window.dispatchEvent(new Event('cart-updated'));
 
       return true;

@@ -25,41 +25,32 @@ namespace Brewed.Services
             var now = DateTime.UtcNow;
             var monthStart = new DateTime(now.Year, now.Month, 1);
 
-            // Total Revenue
             var totalRevenue = await _context.Orders
                 .Where(o => o.Status == "Delivered")
                 .SumAsync(o => o.TotalAmount);
 
-            // Monthly Revenue
             var monthlyRevenue = await _context.Orders
                 .Where(o => o.Status == "Delivered" && o.OrderDate >= monthStart)
                 .SumAsync(o => o.TotalAmount);
 
-            // Total Orders
             var totalOrders = await _context.Orders.CountAsync();
 
-            // Monthly Orders
             var monthlyOrders = await _context.Orders
                 .Where(o => o.OrderDate >= monthStart)
                 .CountAsync();
 
-            // Total Customers
             var totalCustomers = await _context.Users
                 .Where(u => u.Role == "RegisteredUser" && !u.IsDeleted)
                 .CountAsync();
 
-            // Total Products
             var totalProducts = await _context.Products.CountAsync();
 
-            // Low Stock Products (< 10)
             var lowStockProducts = await _context.Products
                 .Where(p => p.StockQuantity < 10)
                 .CountAsync();
 
-            // Average Order Value
             var averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
-            // Top 5 Products
             var topProducts = await _context.OrderItems
                 .Include(oi => oi.Product)
                 .Where(oi => oi.Product != null)
@@ -76,7 +67,6 @@ namespace Brewed.Services
                 .Take(5)
                 .ToListAsync();
 
-            // Recent 10 Orders
             var recentOrders = await _context.Orders
                 .Include(o => o.User)
                 .Where(o => o.User != null)
@@ -93,7 +83,6 @@ namespace Brewed.Services
                 })
                 .ToListAsync();
 
-            // Monthly Revenue Chart (Last 6 months)
             var sixMonthsAgo = now.AddMonths(-6);
             var monthlyRevenueData = await _context.Orders
                 .Where(o => o.Status == "Delivered" && o.OrderDate >= sixMonthsAgo)
@@ -117,7 +106,6 @@ namespace Brewed.Services
                .ToList();
 
 
-            // Category Sales
             var categorySales = await _context.OrderItems
                 .Include(oi => oi.Product)
                 .ThenInclude(p => p.Category)

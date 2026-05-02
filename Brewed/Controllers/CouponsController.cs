@@ -17,7 +17,6 @@ namespace Brewed.API.Controllers
             _couponService = couponService;
         }
 
-        // Admin endpoints
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAllCoupons()
@@ -75,7 +74,6 @@ namespace Brewed.API.Controllers
             {
                 var result = await _couponService.UpdateCouponAsync(couponId, couponDto);
 
-                // Update user assignments if UserIds are provided
                 if (couponDto.UserIds != null && couponDto.UserIds.Any())
                 {
                     await _couponService.UpdateUserAssignmentsAsync(couponId, couponDto.UserIds);
@@ -112,7 +110,6 @@ namespace Brewed.API.Controllers
             }
         }
 
-        // Public endpoint for validation
         [HttpPost("validate")]
         public async Task<IActionResult> ValidateCoupon([FromBody] CouponValidateDto dto)
         {
@@ -127,7 +124,6 @@ namespace Brewed.API.Controllers
             }
         }
 
-        /// Generate a random coupon code
         [Authorize(Roles = "Admin")]
         [HttpGet("generate-code")]
         public async Task<IActionResult> GenerateRandomCouponCode()
@@ -143,7 +139,6 @@ namespace Brewed.API.Controllers
             }
         }
 
-        /// Assign coupon to users
         [Authorize(Roles = "Admin")]
         [HttpPost("assign")]
         public async Task<IActionResult> AssignCouponToUsers([FromBody] AssignCouponDto dto)
@@ -163,14 +158,12 @@ namespace Brewed.API.Controllers
             }
         }
 
-        /// Get all coupons for a specific user
         [Authorize]
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetUserCoupons(int userId)
         {
             try
             {
-                // Users can only see their own coupons unless they're admin
                 var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 var isAdmin = User.IsInRole("Admin");
 
@@ -188,7 +181,6 @@ namespace Brewed.API.Controllers
             }
         }
 
-        /// Get all users assigned to a specific coupon (Admin only)
         [Authorize(Roles = "Admin")]
         [HttpGet("{couponId}/users")]
         public async Task<IActionResult> GetCouponUsers(int couponId)
@@ -204,7 +196,6 @@ namespace Brewed.API.Controllers
             }
         }
 
-        /// Validate coupon for a specific user (checks if user has the coupon and hasn't used it)
         [Authorize]
         [HttpPost("validate-for-user")]
         public async Task<IActionResult> ValidateCouponForUser([FromBody] CouponValidateDto dto)
@@ -226,7 +217,6 @@ namespace Brewed.API.Controllers
             }
         }
 
-        /// Check if user can use a specific coupon
         [Authorize]
         [HttpGet("can-use/{couponCode}")]
         public async Task<IActionResult> CanUserUseCoupon(string couponCode)

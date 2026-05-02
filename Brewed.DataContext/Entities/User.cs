@@ -11,7 +11,6 @@ namespace Brewed.DataContext.Entities
         public string PasswordHash { get; set; } = null!;
 
         public ICollection<Order> Orders { get; set; } = new List<Order>();
-        // Role: RegisteredUser, Admin
         [Required]
         [StringLength(20)]
         public string Role { get; set; } = "RegisteredUser";

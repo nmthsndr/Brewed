@@ -102,7 +102,6 @@ const Dashboard = () => {
     <div style={{ position: 'relative' }}>
       <LoadingOverlay visible={loading} />
 
-      {/* Features Cards Header */}
       <div className={classes.header}>
         <Group justify="center">
           <Badge variant="filled" size="lg" color="brown">
@@ -140,7 +139,6 @@ const Dashboard = () => {
         </SimpleGrid>
       </div>
 
-      {/* Featured Products Section */}
       <div style={{ marginBottom: 'var(--mantine-spacing-lg)' }}>
         <Title order={2} style={{ color: '#3d3d3d' }}>Featured Products</Title>
         <Text size="sm" c="dimmed" mt={4}>Our top picks for you</Text>

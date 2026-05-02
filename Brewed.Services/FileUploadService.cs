@@ -17,8 +17,6 @@ namespace Brewed.Services
 
         public FileUploadService(string webRootPath)
         {
-            // Always use the frontend images folder regardless of webRootPath
-            // Go up from backend project to solution root, then into frontend images
             var projectRoot = Directory.GetCurrentDirectory();
             var solutionRoot = Directory.GetParent(projectRoot)?.FullName;
 
@@ -28,14 +26,11 @@ namespace Brewed.Services
             }
             else
             {
-                // Fallback: use relative path
                 _uploadPath = Path.Combine(projectRoot, "..", "Brewed-frontend", "images");
             }
 
-            // Normalize the path
             _uploadPath = Path.GetFullPath(_uploadPath);
 
-            // Create upload directory if it doesn't exist
             if (!Directory.Exists(_uploadPath))
             {
                 Directory.CreateDirectory(_uploadPath);
@@ -49,37 +44,31 @@ namespace Brewed.Services
                 throw new Exception("No file provided");
             }
 
-            // Validate file size
             if (file.Length > _maxFileSize)
             {
                 throw new Exception($"File size exceeds maximum allowed size of {_maxFileSize / (1024 * 1024)}MB");
             }
 
-            // Validate file extension
             var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
             if (!_allowedExtensions.Contains(extension))
             {
                 throw new Exception($"File type not allowed. Allowed types: {string.Join(", ", _allowedExtensions)}");
             }
 
-            // Create folder if it doesn't exist
             var folderPath = Path.Combine(_uploadPath, folder);
             if (!Directory.Exists(folderPath))
             {
                 Directory.CreateDirectory(folderPath);
             }
 
-            // Generate unique filename
             var fileName = $"{Guid.NewGuid()}{extension}";
             var filePath = Path.Combine(folderPath, fileName);
 
-            // Save file
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
             }
 
-            // Return relative URL
             return $"/images/{folder}/{fileName}";
         }
 
@@ -96,7 +85,6 @@ namespace Brewed.Services
                 }
                 catch
                 {
-                    // If any upload fails, delete previously uploaded files
                     foreach (var uploadedUrl in uploadedUrls)
                     {
                         await DeleteImageAsync(uploadedUrl);
@@ -117,12 +105,9 @@ namespace Brewed.Services
                     return Task.FromResult(false);
                 }
 
-                // Convert URL to physical path
-                // imageUrl format: /images/products/filename.jpg
-                // Extract the path after /images/ and combine with _uploadPath
+                // image url format: /images/products/filename.jpg
                 var imageUrlParts = imageUrl.TrimStart('/').Split('/');
 
-                // Skip 'images' part and get the rest (e.g., "products/filename.jpg")
                 if (imageUrlParts.Length > 1)
                 {
                     var relativePath = string.Join(Path.DirectorySeparatorChar.ToString(), imageUrlParts.Skip(1));

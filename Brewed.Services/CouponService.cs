@@ -17,7 +17,6 @@ namespace Brewed.Services
         Task<CouponValidationResultDto> ValidateCouponAsync(string code, decimal orderAmount);
         Task<decimal> ApplyCouponAsync(string code, decimal orderAmount);
 
-        // New methods for user-coupon management
         Task<string> GenerateRandomCouponCodeAsync();
         Task AssignCouponToUsersAsync(int couponId, List<int> userIds);
         Task UpdateUserAssignmentsAsync(int couponId, List<int> userIds);
@@ -74,27 +73,23 @@ namespace Brewed.Services
 
         public async Task<CouponDto> CreateCouponAsync(CouponCreateDto couponDto)
         {
-            // Generate random code if requested or if code is not provided
             if (couponDto.GenerateRandomCode || string.IsNullOrWhiteSpace(couponDto.Code))
             {
                 couponDto.Code = await GenerateRandomCouponCodeAsync();
             }
             else
             {
-                // Check if code already exists
                 if (await _context.Coupons.AnyAsync(c => c.Code.ToLower() == couponDto.Code.ToLower()))
                 {
                     throw new Exception("Coupon code already exists");
                 }
             }
 
-            // Validate dates
             if (couponDto.EndDate <= couponDto.StartDate)
             {
                 throw new Exception("End date must be after start date");
             }
 
-            // Validate discount value
             if (couponDto.DiscountType == "Percentage" && couponDto.DiscountValue > 100)
             {
                 throw new Exception("Percentage discount cannot exceed 100%");
@@ -106,7 +101,6 @@ namespace Brewed.Services
             await _context.Coupons.AddAsync(coupon);
             await _context.SaveChangesAsync();
 
-            // Assign coupon to users if UserIds are provided
             if (couponDto.UserIds != null && couponDto.UserIds.Any())
             {
                 await AssignCouponToUsersAsync(coupon.Id, couponDto.UserIds);
@@ -124,7 +118,6 @@ namespace Brewed.Services
                 throw new KeyNotFoundException("Coupon not found");
             }
 
-            // Check if new code conflicts with existing (excluding current)
             if (await _context.Coupons.AnyAsync(c =>
                 c.Code.ToLower() == couponDto.Code.ToLower() && c.Id != couponId))
             {
@@ -208,18 +201,16 @@ namespace Brewed.Services
                 return result;
             }
 
-            // Calculate discount
             decimal discount = 0;
             if (coupon.DiscountType == "Percentage")
             {
                 discount = orderAmount * (coupon.DiscountValue / 100);
             }
-            else // FixedAmount
+            else 
             {
                 discount = coupon.DiscountValue;
             }
 
-            // Discount cannot exceed order amount
             discount = Math.Min(discount, orderAmount);
 
             result.IsValid = true;
@@ -242,8 +233,6 @@ namespace Brewed.Services
             return validation.DiscountAmount;
         }
 
-        // ===== New User-Coupon Management Methods =====
-
         public async Task<string> GenerateRandomCouponCodeAsync()
         {
             string code;
@@ -251,7 +240,7 @@ namespace Brewed.Services
 
             do
             {
-                code = CouponCodeGenerator.GenerateFormatted(4, 2); // Generates format like XXXX-XXXX
+                code = CouponCodeGenerator.GenerateFormatted(4, 2);
                 exists = await _context.Coupons.AnyAsync(c => c.Code == code);
             } while (exists);
 
@@ -276,7 +265,6 @@ namespace Brewed.Services
             var userCoupons = new List<UserCoupon>();
             foreach (var userId in newUserIds)
             {
-                // Verify user exists
                 var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
                 if (!userExists)
                 {
@@ -297,7 +285,6 @@ namespace Brewed.Services
                 await _context.UserCoupons.AddRangeAsync(userCoupons);
                 await _context.SaveChangesAsync();
 
-                // Send email notifications to newly assigned users
                 var couponDto = _mapper.Map<CouponDto>(coupon);
                 var users = await _context.Users
                     .Where(u => newUserIds.Contains(u.Id))
@@ -311,7 +298,6 @@ namespace Brewed.Services
                     }
                     catch (Exception ex)
                     {
-                        // Log error but don't fail the assignment
                         Console.WriteLine($"Failed to send coupon email to {user.Email}: {ex.Message}");
                     }
                 }
@@ -326,28 +312,23 @@ namespace Brewed.Services
                 throw new KeyNotFoundException("Coupon not found");
             }
 
-            // Get all current assignments
             var existingAssignments = await _context.UserCoupons
                 .Where(uc => uc.CouponId == couponId)
                 .ToListAsync();
 
             var existingUserIds = existingAssignments.Select(uc => uc.UserId).ToList();
 
-            // Find users to add (in new list but not in existing)
             var userIdsToAdd = userIds.Except(existingUserIds).ToList();
 
-            // Find users to remove (in existing but not in new list, AND haven't used the coupon)
             var assignmentsToRemove = existingAssignments
                 .Where(uc => !userIds.Contains(uc.UserId) && !uc.IsUsed)
                 .ToList();
 
-            // Add new users
             if (userIdsToAdd.Any())
             {
                 var userCoupons = new List<UserCoupon>();
                 foreach (var userId in userIdsToAdd)
                 {
-                    // Verify user exists
                     var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
                     if (!userExists)
                     {
@@ -366,7 +347,6 @@ namespace Brewed.Services
                 await _context.UserCoupons.AddRangeAsync(userCoupons);
             }
 
-            // Remove users who haven't used the coupon
             if (assignmentsToRemove.Any())
             {
                 _context.UserCoupons.RemoveRange(assignmentsToRemove);
@@ -374,7 +354,6 @@ namespace Brewed.Services
 
             await _context.SaveChangesAsync();
 
-            // Send email notifications to newly added users
             if (userIdsToAdd.Any())
             {
                 var couponDto = _mapper.Map<CouponDto>(coupon);
@@ -390,7 +369,6 @@ namespace Brewed.Services
                     }
                     catch (Exception ex)
                     {
-                        // Log error but don't fail the assignment
                         Console.WriteLine($"Failed to send coupon email to {user.Email}: {ex.Message}");
                     }
                 }
@@ -410,7 +388,6 @@ namespace Brewed.Services
             var userCoupon = await _context.UserCoupons
                 .FirstOrDefaultAsync(uc => uc.UserId == userId && uc.CouponId == coupon.Id);
 
-            // User must have the coupon assigned and not used yet
             return userCoupon != null && !userCoupon.IsUsed;
         }
 
@@ -432,28 +409,23 @@ namespace Brewed.Services
                 return result;
             }
 
-            // Check if this coupon has any user assignments
             var hasAssignments = await _context.UserCoupons.AnyAsync(uc => uc.CouponId == coupon.Id);
 
-            // Check if user has this coupon assigned
             var userCoupon = await _context.UserCoupons
                 .FirstOrDefaultAsync(uc => uc.UserId == userId && uc.CouponId == coupon.Id);
 
-            // If coupon has assignments, user must have it assigned
             if (hasAssignments && userCoupon == null)
             {
                 result.Message = "This coupon is not assigned to you";
                 return result;
             }
 
-            // If user has the coupon assigned, check if already used
             if (userCoupon != null && userCoupon.IsUsed)
             {
                 result.Message = "You have already used this coupon";
                 return result;
             }
 
-            // If coupon is public (no assignments), check per-user usage count against MaxUsageCount
             if (!hasAssignments && coupon.MaxUsageCount.HasValue)
             {
                 var userUsageCount = await _context.Orders
@@ -491,18 +463,16 @@ namespace Brewed.Services
                 return result;
             }
 
-            // Calculate discount
             decimal discount = 0;
             if (coupon.DiscountType == "Percentage")
             {
                 discount = orderAmount * (coupon.DiscountValue / 100);
             }
-            else // FixedAmount
+            else 
             {
                 discount = coupon.DiscountValue;
             }
 
-            // Discount cannot exceed order amount
             discount = Math.Min(discount, orderAmount);
 
             result.IsValid = true;
@@ -577,7 +547,6 @@ namespace Brewed.Services
 
                 var userUsageCount = userCouponOrders.Count;
 
-                // Coupon is fully used if MaxUsageCount is set and user reached the limit
                 var isUsed = coupon.MaxUsageCount.HasValue && userUsageCount >= coupon.MaxUsageCount.Value;
 
                 var lastOrder = userCouponOrders.OrderByDescending(o => o.OrderDate).FirstOrDefault();

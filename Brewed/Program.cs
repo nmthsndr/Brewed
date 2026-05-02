@@ -44,11 +44,10 @@
             builder.Services.AddScoped<IFileUploadService>(provider =>
             {
                 var env = provider.GetRequiredService<IWebHostEnvironment>();
-                // Pass WebRootPath or null - FileUploadService will handle null case
                 return new FileUploadService(env.WebRootPath ?? string.Empty);
             });
 
-            // JWT Authentication
+            // JWT auth
             var jwtSettings = builder.Configuration.GetSection("Jwt");
             var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]);
 
@@ -142,7 +141,7 @@
             app.UseAuthorization();
             app.MapControllers();
 
-            // Database seeding
+            // db seeding
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;

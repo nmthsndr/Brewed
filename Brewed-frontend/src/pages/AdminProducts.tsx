@@ -121,7 +121,6 @@ const AdminProducts = () => {
       price: (value) => value <= 0 ? 'Price must be greater than 0' : null,
       stockQuantity: (value) => value < 0 ? 'Stock cannot be negative' : null,
       origin: (value, values) => {
-        // Only require origin for Coffee Beans category
         const selectedCategory = categories.find(c => c.id === values.categoryId);
         if (selectedCategory?.name === 'Coffee Beans' && !value) {
           return 'Origin is required for coffee beans';
@@ -129,7 +128,6 @@ const AdminProducts = () => {
         return null;
       },
       roastLevel: (value, values) => {
-        // Only require roast level for Coffee Beans category
         const selectedCategory = categories.find(c => c.id === values.categoryId);
         if (selectedCategory?.name === 'Coffee Beans' && !value) {
           return 'Roast level is required for coffee beans';
@@ -184,7 +182,7 @@ const AdminProducts = () => {
     setSelectedProduct(product);
     setSelectedFiles([]);
 
-    // Use productImages if available, otherwise fall back to imageUrl or imageUrls
+    // Use productImages if available, otherwise imageUrl or imageUrls
     let allImageUrls = '';
     if (product.productImages && product.productImages.length > 0) {
       allImageUrls = product.productImages.map(img => img.imageUrl).join(';');
@@ -288,7 +286,6 @@ const AdminProducts = () => {
   };
 
   const handleSubmit = async (values: ProductFormValues) => {
-    // Check if image is uploaded
     if (!uploadedImageUrl && !values.imageUrl) {
       notifications.show({
         title: 'Error',
@@ -301,7 +298,6 @@ const AdminProducts = () => {
     try {
       setLoading(true);
 
-      // Use uploaded image URL or existing image URL
       const productData = {
         ...values,
         imageUrl: uploadedImageUrl || values.imageUrl
@@ -509,7 +505,6 @@ const AdminProducts = () => {
               onChange={(value) => form.setFieldValue('categoryId', value ? parseInt(value) : 0)}
             />
 
-            {/* Show coffee-specific fields only for Coffee Beans category */}
             {categories.find(c => c.id === form.values.categoryId)?.name === 'Coffee Beans' && (
               <Group grow>
                 <Select
@@ -597,7 +592,6 @@ const AdminProducts = () => {
               )}
             </Stack>
 
-            {/* Show coffee-specific switches only for Coffee Beans category */}
             {categories.find(c => c.id === form.values.categoryId)?.name === 'Coffee Beans' && (
               <Group grow>
                 <Switch

@@ -68,7 +68,6 @@ const ProductDetail = () => {
       //console.log("Product loaded successfully:", response.data);
       setProduct(response.data);
 
-      // Set initial selected image - prefer productImages first, then imageUrls, then imageUrl
       if (response.data.productImages && response.data.productImages.length > 0) {
         setSelectedImage(response.data.productImages[0].imageUrl);
       } else if (response.data.imageUrls && response.data.imageUrls.length > 0) {
@@ -85,7 +84,6 @@ const ProductDetail = () => {
         message: 'Failed to load product details',
         color: 'red',
       });
-      // Navigate back to products page on error
       navigate('/app/products');
     } finally {
       setLoading(false);
@@ -242,7 +240,6 @@ const ProductDetail = () => {
                 }}
               />
             </div>
-            {/* Thumbnail images */}
             {(product.productImages && product.productImages.length > 1) && (
               <Group gap="xs">
                 {product.productImages.map((img) => (
@@ -274,7 +271,6 @@ const ProductDetail = () => {
                 ))}
               </Group>
             )}
-            {/* Fallback to imageUrls if no productImages */}
             {(!product.productImages || product.productImages.length === 0) && product.imageUrls && product.imageUrls.length > 1 && (
               <Group gap="xs">
                 {product.imageUrls.map((url, index) => (
@@ -347,7 +343,6 @@ const ProductDetail = () => {
 
             <Text style={{ lineHeight: 1.7, color: '#5c5c5c' }}>{product.description}</Text>
 
-            {/* Show coffee-specific fields only for Coffee Beans category */}
             {product.categoryName === "Coffee Beans" && (
               <Paper
                 withBorder
@@ -408,7 +403,6 @@ const ProductDetail = () => {
 
       <Divider my="xl" color="rgba(139, 69, 19, 0.1)" />
 
-      {/* Reviews Section */}
       <Title order={3} mb="md">Customer Reviews</Title>
 
       <Grid>

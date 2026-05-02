@@ -15,7 +15,7 @@ namespace Brewed.DataContext.Entities
 
         [Required]
         [StringLength(50)]
-        public string TokenType { get; set; } // EmailConfirmation, PasswordReset
+        public string TokenType { get; set; } 
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

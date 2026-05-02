@@ -20,7 +20,7 @@ namespace Brewed.DataContext.Dtos
     public class CouponCreateDto
     {
         [StringLength(50)]
-        public string Code { get; set; }  // Optional - can be auto-generated
+        public string Code { get; set; }
 
         [StringLength(200)]
         public string Description { get; set; }
@@ -47,9 +47,9 @@ namespace Brewed.DataContext.Dtos
         [Range(1, 1000000)]
         public int? MaxUsageCount { get; set; }
 
-        public List<int> UserIds { get; set; } = new List<int>();  // User IDs to assign the coupon to
+        public List<int> UserIds { get; set; } = new List<int>();
 
-        public bool GenerateRandomCode { get; set; } = false;  // Flag to generate random code
+        public bool GenerateRandomCode { get; set; } = false;
     }
 
     public class CouponValidateDto

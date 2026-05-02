@@ -55,7 +55,7 @@ const Register = () => {
         color: 'green',
       });
 
-      navigate('/confirm-email'); // Itt irányítsuk a confirmation oldalra
+      navigate('/confirm-email');
     } catch (error: any) {
       notifications.show({
         title: 'Registration Failed',

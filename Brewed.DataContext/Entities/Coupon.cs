@@ -20,7 +20,7 @@ namespace Brewed.DataContext.Entities
         public string Description { get; set; }
 
         [StringLength(20)]
-        public string DiscountType { get; set; } = "Percentage"; // Percentage, FixedAmount
+        public string DiscountType { get; set; } = "Percentage";
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal DiscountValue { get; set; }
@@ -34,13 +34,10 @@ namespace Brewed.DataContext.Entities
 
         public bool IsActive { get; set; } = true;
 
-        /// Maximum number of times this coupon can be used in total (optional)
         public int? MaxUsageCount { get; set; }
 
-        /// Current usage count
         public int UsageCount { get; set; } = 0;
 
-        /// Felhasználók akikhez hozzá van rendelve ez a kupon
         public virtual ICollection<UserCoupon> UserCoupons { get; set; } = new List<UserCoupon>();
     }
 }

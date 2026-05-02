@@ -11,7 +11,6 @@ namespace Brewed.DataContext.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Add new columns to Coupons table
             migrationBuilder.AddColumn<int>(
                 name: "MaxUsageCount",
                 table: "Coupons",
@@ -25,7 +24,6 @@ namespace Brewed.DataContext.Migrations
                 nullable: false,
                 defaultValue: 0);
 
-            // Create UserCoupons table
             migrationBuilder.CreateTable(
                 name: "UserCoupons",
                 columns: table => new
@@ -62,7 +60,6 @@ namespace Brewed.DataContext.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
-            // Create indexes
             migrationBuilder.CreateIndex(
                 name: "IX_UserCoupons_UserId",
                 table: "UserCoupons",
@@ -78,7 +75,6 @@ namespace Brewed.DataContext.Migrations
                 table: "UserCoupons",
                 column: "OrderId");
 
-            // Unique constraint: egy felhasználó egy kupont csak egyszer kaphat meg
             migrationBuilder.CreateIndex(
                 name: "IX_UserCoupons_UserId_CouponId",
                 table: "UserCoupons",

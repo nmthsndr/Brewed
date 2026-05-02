@@ -252,7 +252,6 @@ const Users = {
     axiosInstance.put<IUser>(`/api/users/profile`, userData),
   deleteProfile: () =>
     axiosInstance.delete(`/api/users/profile`),
-  // ADMIN ENDPOINTS
   getAllUsers: () =>
     axiosInstance.get<IUser[]>(`/api/users`),
   getUser: (userId: number) =>

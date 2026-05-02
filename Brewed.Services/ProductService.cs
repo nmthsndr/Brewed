@@ -35,7 +35,6 @@ namespace Brewed.Services
                 .Include(p => p.Reviews.Where(r => !r.User.IsDeleted))
                 .AsQueryable();
 
-            // Filters
             if (filter.CategoryId.HasValue && filter.CategoryId.Value > 0)
             {
                 query = query.Where(p => p.CategoryId == filter.CategoryId.Value);
@@ -76,7 +75,6 @@ namespace Brewed.Services
                 query = query.Where(p => p.IsOrganic == filter.IsOrganic.Value);
             }
 
-            // Sorting
             query = filter.SortBy?.ToLower() switch
             {
                 "price-asc" => query.OrderBy(p => p.Price),
@@ -247,7 +245,6 @@ namespace Brewed.Services
                 throw new KeyNotFoundException("Product not found");
             }
 
-            // Check if product has been ordered (cannot delete products that have been ordered)
             var hasOrderItems = await _context.Set<OrderItem>()
                 .AnyAsync(oi => oi.ProductId == productId);
 
@@ -256,7 +253,6 @@ namespace Brewed.Services
                 throw new InvalidOperationException("Cannot delete product that has been ordered. Product is part of existing orders.");
             }
 
-            // Delete related CartItems (it's OK to remove items from carts)
             var cartItems = await _context.Set<CartItem>()
                 .Where(ci => ci.ProductId == productId)
                 .ToListAsync();
@@ -266,7 +262,6 @@ namespace Brewed.Services
                 _context.CartItems.RemoveRange(cartItems);
             }
 
-            // Delete related ProductImages and Reviews
             var productImages = await _context.Set<ProductImage>()
                 .Where(pi => pi.ProductId == productId)
                 .ToListAsync();

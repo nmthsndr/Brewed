@@ -67,12 +67,11 @@ const Checkout = () => {
   const [shippingCost, setShippingCost] = useState(0);
   const [sameAsShipping, setSameAsShipping] = useState(true);
 
-  // For logged-in users: use existing addresses or add new inline
+  // For logged in users: use existing addresses or add new inline
   //const [useExistingAddress, setUseExistingAddress] = useState(true);
   const [showNewShippingForm, setShowNewShippingForm] = useState(false);
   const [showNewBillingForm, setShowNewBillingForm] = useState(false);
 
-  // Form for logged-in users
   const loggedInForm = useForm({
     initialValues: {
       shippingAddressId: 0,
@@ -80,7 +79,6 @@ const Checkout = () => {
       paymentMethod: '',
       couponCode: '',
       notes: '',
-      // New address fields for logged-in users
       newShippingAddress: {
         firstName: '',
         lastName: '',
@@ -101,7 +99,6 @@ const Checkout = () => {
         country: '',
         phoneNumber: ''
       },
-      // Card details for Credit/Debit Card
       cardholderName: '',
       cardNumber: '',
       expiryDate: '',
@@ -141,7 +138,6 @@ const Checkout = () => {
     }
   });
 
-  // Form for guest users
   const guestForm = useForm<GuestOrderData>({
     initialValues: {
       email: '',
@@ -242,7 +238,6 @@ const Checkout = () => {
       const cartRes = await api.Cart.getCart(sessionId);
       setCart(cartRes.data);
 
-      // Calculate shipping
       const subtotal = cartRes.data.subTotal;
       if (subtotal >= 50) {
         setShippingCost(0);
@@ -250,12 +245,11 @@ const Checkout = () => {
         setShippingCost(10);
       }
 
-      // Load addresses for logged-in users
       if (isLoggedIn) {
         const addressesRes = await api.Addresses.getAddresses();
         setAddresses(addressesRes.data);
 
-        // Auto-select default address if exists
+        // Auto select default address if exists
         const defaultAddress = addressesRes.data.find((addr: IAddress) => addr.isDefault);
         if (defaultAddress) {
           loggedInForm.setFieldValue('shippingAddressId', defaultAddress.id);
@@ -336,7 +330,7 @@ const Checkout = () => {
       let shippingAddressId = values.shippingAddressId;
       let billingAddressId = sameAsShipping ? values.shippingAddressId : values.billingAddressId;
 
-      // If user is filling in a new shipping address (either clicked "Add New" or has no saved addresses)
+      // If user is filling in a new shipping address
       if (showNewShippingForm || addresses.length === 0) {
         const newShippingRes = await api.Addresses.createAddress({
           ...values.newShippingAddress,
@@ -345,11 +339,9 @@ const Checkout = () => {
         shippingAddressId = newShippingRes.data.id;
       }
 
-      // Update billingAddressId after shipping address creation so it uses the correct ID
       if (sameAsShipping) {
         billingAddressId = shippingAddressId;
       } else if (showNewBillingForm || addresses.length === 0) {
-        // If user is filling in a new billing address (either clicked "Add New" or has no saved addresses)
         const newBillingRes = await api.Addresses.createAddress({
           ...values.newBillingAddress,
           isDefault: false
@@ -394,7 +386,6 @@ const Checkout = () => {
         if (typeof data === 'string') {
           errorMessage = data;
         } else if (data.errors) {
-          // Handle .NET validation errors
           const validationErrors = Object.entries(data.errors)
             .map(([field, messages]: [string, any]) => {
               const errorList = Array.isArray(messages) ? messages : [messages];
@@ -466,7 +457,6 @@ const Checkout = () => {
         if (typeof data === 'string') {
           errorMessage = data;
         } else if (data.errors) {
-          // Handle .NET validation errors
           const validationErrors = Object.entries(data.errors)
             .map(([field, messages]: [string, any]) => {
               const errorList = Array.isArray(messages) ? messages : [messages];
@@ -504,7 +494,6 @@ const Checkout = () => {
 
   const totalAmount = cart.subTotal + shippingCost - couponDiscount;
 
-  // Render address form fields
   const renderAddressFields = (prefix: string, form: any, isGuest: boolean = false) => (
     <>
       <Group grow>
@@ -566,7 +555,6 @@ const Checkout = () => {
     </>
   );
 
-  // Render for guest users
   if (!isLoggedIn) {
     return (
       <div>
@@ -749,7 +737,6 @@ const Checkout = () => {
     );
   }
 
-  // Render for logged-in users
   return (
     <div>
       <Title order={2} mb="xs" style={{ color: '#3d3d3d' }}>Checkout</Title>

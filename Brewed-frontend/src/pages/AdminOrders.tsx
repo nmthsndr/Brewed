@@ -80,7 +80,6 @@ const AdminOrders = () => {
   };
 
   const handleStatusUpdate = async (orderId: number, newStatus: string) => {
-    // If cancelling, open the cancellation note modal
     if (newStatus === "Cancelled") {
       setCancelModalOpened(true);
       return;
@@ -154,7 +153,6 @@ const AdminOrders = () => {
         color: 'green',
       });
       loadOrders();
-      // Refresh the selected order to show invoice
       if (selectedOrder) {
         const response = await api.Orders.getOrder(orderId);
         setSelectedOrder(response.data);

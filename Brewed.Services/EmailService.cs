@@ -109,7 +109,6 @@ namespace Brewed.Services
         {
             var subject = $"Order Confirmation - {orderDetails.OrderNumber}";
 
-            // Build product items HTML
             var itemsHtml = string.Join("", orderDetails.Items.Select(item => $@"
                 <tr>
                     <td style='padding: 12px; border-bottom: 1px solid #eee;'>
@@ -121,7 +120,6 @@ namespace Brewed.Services
                 </tr>
             "));
 
-            // Format addresses
             var shippingAddress = orderDetails.ShippingAddress;
             var billingAddress = orderDetails.BillingAddress ?? orderDetails.ShippingAddress;
 
@@ -298,7 +296,7 @@ namespace Brewed.Services
         {
             if (adminEmails == null || !adminEmails.Any())
             {
-                return; // No admin emails to send to
+                return;
             }
 
             var subject = $"Low Stock Alert - {productName}";
@@ -312,7 +310,6 @@ namespace Brewed.Services
                 </div>
             ";
 
-            // Send email to all admin users
             foreach (var adminEmail in adminEmails)
             {
                 try
@@ -321,7 +318,6 @@ namespace Brewed.Services
                 }
                 catch (Exception ex)
                 {
-                    // Log error but continue sending to other admins
                     Console.WriteLine($"Failed to send low stock alert to {adminEmail}: {ex.Message}");
                 }
             }
@@ -331,7 +327,6 @@ namespace Brewed.Services
         {
             var subject = $"Invoice {orderDetails.Invoice.InvoiceNumber} - Order {orderDetails.OrderNumber}";
 
-            // Build product items HTML
             var itemsHtml = string.Join("", orderDetails.Items.Select(item => $@"
                 <tr>
                     <td style='padding: 12px; border-bottom: 1px solid #eee;'>
@@ -343,7 +338,6 @@ namespace Brewed.Services
                 </tr>
             "));
 
-            // Format addresses
             var shippingAddress = orderDetails.ShippingAddress;
             var billingAddress = orderDetails.BillingAddress ?? orderDetails.ShippingAddress;
 
@@ -576,7 +570,6 @@ namespace Brewed.Services
         {
             var subject = $"Bank Transfer Payment Details - {orderDetails.OrderNumber}";
 
-            // Build product items HTML
             var itemsHtml = string.Join("", orderDetails.Items.Select(item => $@"
                 <tr>
                     <td style='padding: 10px; border-bottom: 1px solid #eee; color: #333;'>{item.ProductName}</td>

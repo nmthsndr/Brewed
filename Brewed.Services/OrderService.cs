@@ -68,7 +68,6 @@ namespace Brewed.Services
                 throw new KeyNotFoundException("Order not found");
             }
 
-            // Allow access if admin, or if user owns the order
             if (!isAdmin && order.UserId != userId)
             {
                 throw new UnauthorizedAccessException("You don't have permission to view this order");
@@ -105,7 +104,6 @@ namespace Brewed.Services
                 }
             }
 
-            // Check stock availability
             foreach (var cartItem in cart.CartItems)
             {
                 if (cartItem.Product.StockQuantity < cartItem.Quantity)
@@ -118,7 +116,6 @@ namespace Brewed.Services
             var shippingCost = CalculateShippingCost(subTotal);
             var discount = 0m;
 
-            // Apply coupon if provided
             if (!string.IsNullOrEmpty(orderCreateDto.CouponCode))
             {
                 discount = await ApplyCouponAsync(orderCreateDto.CouponCode, subTotal, userId);
@@ -150,18 +147,15 @@ namespace Brewed.Services
 
             await _context.Orders.AddAsync(order);
 
-            // Update stock
             foreach (var cartItem in cart.CartItems)
             {
                 cartItem.Product.StockQuantity -= cartItem.Quantity;
                 _context.Products.Update(cartItem.Product);
 
-                // Send low stock alert if stock is below threshold (e.g., 10)
                 if (cartItem.Product.StockQuantity <= 10 && cartItem.Product.StockQuantity > 0)
                 {
                     try
                     {
-                        // Get all admin users from database
                         var adminEmails = await _context.Users
                             .Where(u => u.Role == "Admin" && !u.IsDeleted)
                             .Select(u => u.Email)
@@ -171,19 +165,15 @@ namespace Brewed.Services
                     }
                     catch (Exception ex)
                     {
-                        // Log error but don't fail the order
                         Console.WriteLine($"Failed to send low stock alert for {cartItem.Product.Name}: {ex.Message}");
                     }
                 }
             }
 
-            // Clear cart
             _context.CartItems.RemoveRange(cart.CartItems);
 
-            // Save order
             await _context.SaveChangesAsync();
 
-            // Mark coupon as used if provided
             if (!string.IsNullOrEmpty(orderCreateDto.CouponCode))
             {
                 try
@@ -192,16 +182,13 @@ namespace Brewed.Services
                 }
                 catch (Exception ex)
                 {
-                    // Log error but don't fail the order
                     Console.WriteLine($"Failed to mark coupon as used: {ex.Message}");
                 }
             }
 
-            // Send order confirmation email
             var orderDto = await GetOrderByIdAsync(order.Id, userId);
             await _emailService.SendOrderConfirmationAsync(orderDto);
 
-            // Send bank transfer payment details email if payment method is BankTransfer
             if (orderCreateDto.PaymentMethod == "BankTransfer")
             {
                 try
@@ -219,7 +206,6 @@ namespace Brewed.Services
 
         public async Task<OrderDto> CreateGuestOrderAsync(GuestOrderCreateDto guestOrderCreateDto)
         {
-            // Check if email is registered as a user (not guest)
             var existingUser = await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == guestOrderCreateDto.Email);
 
@@ -228,7 +214,6 @@ namespace Brewed.Services
                 throw new Exception("This email is already associated with an account. Please use a different email or log in.");
             }
 
-            // Get guest cart
             var cart = await _context.Carts
                 .Include(c => c.CartItems)
                 .ThenInclude(ci => ci.Product)
@@ -239,7 +224,6 @@ namespace Brewed.Services
                 throw new Exception("Cart is empty");
             }
 
-            // Check stock availability
             foreach (var cartItem in cart.CartItems)
             {
                 if (cartItem.Product.StockQuantity < cartItem.Quantity)
@@ -252,7 +236,6 @@ namespace Brewed.Services
             var shippingCost = CalculateShippingCost(subTotal);
             var discount = 0m;
 
-            // Apply coupon if provided
             if (!string.IsNullOrEmpty(guestOrderCreateDto.CouponCode))
             {
                 discount = await ApplyCouponAsync(guestOrderCreateDto.CouponCode, subTotal);
@@ -260,29 +243,25 @@ namespace Brewed.Services
 
             var totalAmount = subTotal + shippingCost - discount;
 
-            // Reuse existing Guest user or create a new one
             User guestUser;
             if (existingUser != null && existingUser.Role == "Guest")
             {
-                // Reuse existing guest user
                 guestUser = existingUser;
             }
             else
             {
-                // Create a new temporary guest user (no password, not verified)
                 guestUser = new User
                 {
                     Name = $"{guestOrderCreateDto.ShippingAddress.FirstName} {guestOrderCreateDto.ShippingAddress.LastName}",
                     Email = guestOrderCreateDto.Email,
-                    PasswordHash = string.Empty, // No password for guest users
+                    PasswordHash = string.Empty,
                     Role = "Guest",
                     EmailConfirmed = false
                 };
                 await _context.Users.AddAsync(guestUser);
-                await _context.SaveChangesAsync(); // Save to get the UserId
+                await _context.SaveChangesAsync();
             }
 
-            // Create shipping address
             var shippingAddress = new Address
             {
                 FirstName = guestOrderCreateDto.ShippingAddress.FirstName,
@@ -293,11 +272,10 @@ namespace Brewed.Services
                 PostalCode = guestOrderCreateDto.ShippingAddress.PostalCode,
                 Country = guestOrderCreateDto.ShippingAddress.Country,
                 PhoneNumber = guestOrderCreateDto.ShippingAddress.PhoneNumber,
-                UserId = null // Guest address - not linked to user profile
+                UserId = null 
             };
             await _context.Addresses.AddAsync(shippingAddress);
 
-            // Create billing address
             var billingAddress = new Address
             {
                 FirstName = guestOrderCreateDto.BillingAddress.FirstName,
@@ -308,12 +286,11 @@ namespace Brewed.Services
                 PostalCode = guestOrderCreateDto.BillingAddress.PostalCode,
                 Country = guestOrderCreateDto.BillingAddress.Country,
                 PhoneNumber = guestOrderCreateDto.BillingAddress.PhoneNumber,
-                UserId = null // Guest address - not linked to user profile
+                UserId = null 
             };
             await _context.Addresses.AddAsync(billingAddress);
-            await _context.SaveChangesAsync(); // Save to get address IDs
+            await _context.SaveChangesAsync(); 
 
-            // Create the order with all required IDs
             var order = new Order
             {
                 OrderNumber = GenerateOrderNumber(),
@@ -327,7 +304,7 @@ namespace Brewed.Services
                 Notes = guestOrderCreateDto.Notes,
                 ShippingAddressId = shippingAddress.Id,
                 BillingAddressId = billingAddress.Id,
-                IsGuestOrder = true, // Mark as guest order
+                IsGuestOrder = true, 
                 OrderItems = cart.CartItems.Select(ci => new OrderItem
                 {
                     ProductId = ci.ProductId,
@@ -339,18 +316,15 @@ namespace Brewed.Services
 
             await _context.Orders.AddAsync(order);
 
-            // Update stock
             foreach (var cartItem in cart.CartItems)
             {
                 cartItem.Product.StockQuantity -= cartItem.Quantity;
                 _context.Products.Update(cartItem.Product);
 
-                // Send low stock alert if stock is below threshold (e.g., 10)
                 if (cartItem.Product.StockQuantity <= 10 && cartItem.Product.StockQuantity > 0)
                 {
                     try
                     {
-                        // Get all admin users from database
                         var adminEmails = await _context.Users
                             .Where(u => u.Role == "Admin" && !u.IsDeleted)
                             .Select(u => u.Email)
@@ -360,19 +334,15 @@ namespace Brewed.Services
                     }
                     catch (Exception ex)
                     {
-                        // Log error but don't fail the order
                         Console.WriteLine($"Failed to send low stock alert for {cartItem.Product.Name}: {ex.Message}");
                     }
                 }
             }
 
-            // Clear cart
             _context.CartItems.RemoveRange(cart.CartItems);
 
-            // Save order first to get the order ID
             await _context.SaveChangesAsync();
 
-            // Create and save guest order details for easy querying
             var guestOrderDetails = new GuestOrderDetails
             {
                 OrderId = order.Id,
@@ -396,7 +366,6 @@ namespace Brewed.Services
             await _context.GuestOrderDetails.AddAsync(guestOrderDetails);
             await _context.SaveChangesAsync();
 
-            // Reload order with all relationships for email
             var savedOrder = await _context.Orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Product)
@@ -406,11 +375,9 @@ namespace Brewed.Services
                 .Include(o => o.GuestOrderDetails)
                 .FirstOrDefaultAsync(o => o.Id == order.Id);
 
-            // Send order confirmation email to guest
             var orderDto = MapOrderToDto(savedOrder);
             await _emailService.SendOrderConfirmationAsync(orderDto);
 
-            // Send bank transfer payment details email if payment method is BankTransfer
             if (guestOrderCreateDto.PaymentMethod == "BankTransfer")
             {
                 try
@@ -438,7 +405,6 @@ namespace Brewed.Services
                 throw new KeyNotFoundException("Order not found");
             }
 
-            // Check if user has permission to cancel (must be their order)
             if (order.UserId != userId)
             {
                 throw new UnauthorizedAccessException("You don't have permission to cancel this order");
@@ -452,7 +418,6 @@ namespace Brewed.Services
             order.Status = "Cancelled";
             order.PaymentStatus = "Refunded";
 
-            // Restore stock
             foreach (var orderItem in order.OrderItems)
             {
                 orderItem.Product.StockQuantity += orderItem.Quantity;
@@ -537,7 +502,6 @@ namespace Brewed.Services
                 throw new KeyNotFoundException("Order not found");
             }
 
-            // Check if invoice exists before allowing Shipped or Delivered status
             if ((statusDto.Status == "Shipped" || statusDto.Status == "Delivered") && order.Invoice == null)
             {
                 throw new InvalidOperationException("Cannot ship or deliver order without generating an invoice first. Please generate invoice before updating status.");
@@ -556,11 +520,9 @@ namespace Brewed.Services
             }
             else if (statusDto.Status == "Cancelled")
             {
-                // Save cancellation note
                 order.Notes = statusDto.Notes;
                 order.PaymentStatus = "Refunded";
 
-                // Restore stock
                 foreach (var orderItem in order.OrderItems)
                 {
                     orderItem.Product.StockQuantity += orderItem.Quantity;
@@ -571,7 +533,6 @@ namespace Brewed.Services
             _context.Orders.Update(order);
             await _context.SaveChangesAsync();
 
-            // Send email notification
             var user = await _context.Users.FindAsync(order.UserId);
             if (user != null)
             {
@@ -592,7 +553,6 @@ namespace Brewed.Services
                 throw new KeyNotFoundException("Invoice not found");
             }
 
-            // Allow access if admin, or if user owns the order
             if (!isAdmin && invoice.Order.UserId != userId)
             {
                 throw new UnauthorizedAccessException("You don't have permission to view this invoice");
@@ -669,13 +629,12 @@ namespace Brewed.Services
 
         private decimal CalculateShippingCost(decimal subTotal)
         {
-            if (subTotal >= 50) return 0; // Free shipping over 50 euros
+            if (subTotal >= 50) return 0;
             return 10;
         }
 
         private async Task<decimal> ApplyCouponAsync(string couponCode, decimal orderAmount, int? userId = null)
         {
-            // If userId is provided, validate that the user has access to this coupon
             if (userId.HasValue)
             {
                 var validation = await _couponService.ValidateCouponForUserAsync(userId.Value, couponCode, orderAmount);
@@ -687,7 +646,6 @@ namespace Brewed.Services
             }
             else
             {
-                // Guest orders - use regular validation (no user restriction)
                 return await _couponService.ApplyCouponAsync(couponCode, orderAmount);
             }
         }
@@ -703,25 +661,22 @@ namespace Brewed.Services
                 throw new KeyNotFoundException("Order not found");
             }
 
-            // Check if invoice already exists
             if (order.Invoice != null)
             {
                 throw new InvalidOperationException("Invoice already exists for this order");
             }
 
-            // Create new invoice
             var invoice = new Invoice
             {
                 InvoiceNumber = GenerateInvoiceNumber(),
                 OrderId = order.Id,
                 TotalAmount = order.TotalAmount,
-                PdfUrl = string.Empty // Will be generated later
+                PdfUrl = string.Empty
             };
 
             await _context.Invoices.AddAsync(invoice);
             await _context.SaveChangesAsync();
 
-            // Send invoice email
             var orderDto = await GetOrderByIdAsync(orderId, order.UserId, true);
             await _emailService.SendInvoiceEmailAsync(orderDto);
 
@@ -737,7 +692,6 @@ namespace Brewed.Services
 
         public async Task<bool> HasUserPurchasedProductAsync(int userId, int productId)
         {
-            // Check if user has any delivered orders containing this product
             var hasPurchased = await _context.Orders
                 .Include(o => o.OrderItems)
                 .AnyAsync(o => o.UserId == userId

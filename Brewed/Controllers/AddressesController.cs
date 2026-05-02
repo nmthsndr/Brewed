@@ -99,7 +99,6 @@ namespace Brewed.API.Controllers
         {
             try
             {
-                // Check if user is admin
                 if (User.IsInRole("Admin"))
                 {
                     await _addressService.DeleteAddressByAdminAsync(addressId);

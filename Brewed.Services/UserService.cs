@@ -58,7 +58,6 @@ namespace Brewed.Services
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            // Generate 6-digit verification code
             var verificationCode = GenerateVerificationCode();
             var userToken = new UserToken
             {
@@ -71,7 +70,6 @@ namespace Brewed.Services
             await _context.UserTokens.AddAsync(userToken);
             await _context.SaveChangesAsync();
 
-            // Send confirmation email with code
             await _emailService.SendEmailConfirmationAsync(user.Email, user.Name, verificationCode);
 
             return _mapper.Map<UserDto>(user);
@@ -164,7 +162,6 @@ namespace Brewed.Services
                 throw new KeyNotFoundException("User not found");
             }
 
-            // Check if user has orders (cannot delete users with orders to maintain order history)
             var hasOrders = await _context.Orders
                 .AnyAsync(o => o.UserId == userId);
 
@@ -173,7 +170,6 @@ namespace Brewed.Services
                 throw new InvalidOperationException("Cannot delete user with existing orders. User has order history that must be preserved.");
             }
 
-            // Delete related CartItems first
             var cart = await _context.Carts
                 .FirstOrDefaultAsync(c => c.UserId == userId);
 
@@ -191,7 +187,6 @@ namespace Brewed.Services
                 _context.Carts.Remove(cart);
             }
 
-            // Delete related Addresses
             var addresses = await _context.Addresses
                 .Where(a => a.UserId == userId)
                 .ToListAsync();
@@ -201,7 +196,6 @@ namespace Brewed.Services
                 _context.Addresses.RemoveRange(addresses);
             }
 
-            // Delete related Reviews
             var reviews = await _context.Reviews
                 .Where(r => r.UserId == userId)
                 .ToListAsync();
@@ -211,7 +205,6 @@ namespace Brewed.Services
                 _context.Reviews.RemoveRange(reviews);
             }
 
-            // Delete related UserTokens
             var userTokens = await _context.UserTokens
                 .Where(ut => ut.UserId == userId)
                 .ToListAsync();
@@ -221,7 +214,6 @@ namespace Brewed.Services
                 _context.UserTokens.RemoveRange(userTokens);
             }
 
-            // Delete related UserCoupons
             var userCoupons = await _context.UserCoupons
                 .Where(uc => uc.UserId == userId)
                 .ToListAsync();
@@ -246,7 +238,6 @@ namespace Brewed.Services
                 throw new KeyNotFoundException("User not found");
             }
 
-            // Admin can delete any non-admin user; users can delete themselves
             if (isAdmin)
             {
                 if (user.Role == "Admin")
@@ -262,11 +253,9 @@ namespace Brewed.Services
                 }
             }
 
-            // Soft delete: set IsDeleted flag
             user.IsDeleted = true;
             _context.Users.Update(user);
 
-            // Remove user coupon assignments
             var userCoupons = await _context.UserCoupons
                 .Where(uc => uc.UserId == userId)
                 .ToListAsync();
@@ -278,7 +267,6 @@ namespace Brewed.Services
 
             await _context.SaveChangesAsync();
 
-            // Send deletion notification email
             try
             {
                 await _emailService.SendAccountDeletionAsync(user.Email, user.Name);
@@ -428,7 +416,7 @@ namespace Brewed.Services
 
             var user = _mapper.Map<User>(userDto);
             user.PasswordHash = HashPassword(userDto.Password);
-            user.EmailConfirmed = true; // Admin created users are auto-confirmed
+            user.EmailConfirmed = true;
             user.Role = "Admin";
 
             await _context.Users.AddAsync(user);

@@ -48,7 +48,6 @@ namespace Brewed.DataContext.Entities
         [Required]
         public int BillingAddressId { get; set; }
 
-        // Flag to identify guest orders
         public bool IsGuestOrder { get; set; } = false;
 
         public virtual User User { get; set; }

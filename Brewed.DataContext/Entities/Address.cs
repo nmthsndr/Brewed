@@ -44,7 +44,7 @@ namespace Brewed.DataContext.Entities
 
         public bool IsDefault { get; set; } = false;
 
-        // Nullable for guest addresses
+        // null - guest
         public int? UserId { get; set; }
 
         public virtual User User { get; set; }

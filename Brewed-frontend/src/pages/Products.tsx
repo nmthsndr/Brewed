@@ -119,7 +119,6 @@ const Products = () => {
     setPage(1);
   };
 
-  // Check if selected category is coffee beans
   const selectedCategory = categories.find(c => c.id === filters.categoryId);
   const isCoffeeBeanCategory = selectedCategory?.name.toLowerCase().includes('bean') ||
                                 selectedCategory?.name.toLowerCase().includes('coffee bean') ||
@@ -170,7 +169,6 @@ const Products = () => {
                     ...filters,
                     categoryId: value ? parseInt(value) : undefined
                   };
-                  // Clear roast level, organic, and caffeine-free if not coffee beans
                   const isCoffeeBean = value && categories.find(c => c.id === parseInt(value))?.name.toLowerCase().includes('bean');
                   if (!isCoffeeBean) {
                     newFilters.roastLevel = undefined;
@@ -244,7 +242,7 @@ const Products = () => {
         </Stack>
       </Paper>
 
-      {/* Products Grid */}
+      {/* Products grid */}
       <Grid>
         {products.length === 0 ? (
           <Grid.Col span={12}>

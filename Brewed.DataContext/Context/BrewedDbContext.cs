@@ -27,12 +27,11 @@ namespace Brewed.DataContext.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // User Relationships
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Orders)
                 .WithOne(o => o.User)
                 .HasForeignKey(o => o.UserId)
-                .IsRequired(true) // Always required - guest orders will have a guest user
+                .IsRequired(true)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<User>()
@@ -45,7 +44,7 @@ namespace Brewed.DataContext.Context
                 .HasMany(u => u.Addresses)
                 .WithOne(a => a.User)
                 .HasForeignKey(a => a.UserId)
-                .IsRequired(false) // Allow null for guest addresses
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<User>()
@@ -54,14 +53,12 @@ namespace Brewed.DataContext.Context
                 .HasForeignKey<Cart>(c => c.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Category-Product Relationship
             modelBuilder.Entity<Category>()
                 .HasMany(c => c.Products)
                 .WithOne(p => p.Category)
                 .HasForeignKey(p => p.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Product Relationships
             modelBuilder.Entity<Product>()
                 .HasMany(p => p.ProductImages)
                 .WithOne(pi => pi.Product)
@@ -86,14 +83,12 @@ namespace Brewed.DataContext.Context
                 .HasForeignKey(ci => ci.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Cart Relationships
             modelBuilder.Entity<Cart>()
                 .HasMany(c => c.CartItems)
                 .WithOne(ci => ci.Cart)
                 .HasForeignKey(ci => ci.CartId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Order Relationships
             modelBuilder.Entity<Order>()
                 .HasMany(o => o.OrderItems)
                 .WithOne(oi => oi.Order)
@@ -124,7 +119,6 @@ namespace Brewed.DataContext.Context
                 .HasForeignKey<GuestOrderDetails>(g => g.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Unique Indexes
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
@@ -144,7 +138,6 @@ namespace Brewed.DataContext.Context
             modelBuilder.Entity<Cart>()
                 .HasIndex(c => c.SessionId);
 
-            // Decimal precision
             modelBuilder.Entity<Product>()
                 .Property(p => p.Price)
                 .HasPrecision(18, 2);
@@ -194,7 +187,6 @@ namespace Brewed.DataContext.Context
                 .HasIndex(c => c.Code)
                 .IsUnique();
 
-            // UserCoupon Relationships
             modelBuilder.Entity<UserCoupon>()
                 .HasOne(uc => uc.User)
                 .WithMany(u => u.UserCoupons)
@@ -214,7 +206,6 @@ namespace Brewed.DataContext.Context
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Unique constraint: egy felhasználó egy kupont csak egyszer kaphat meg
             modelBuilder.Entity<UserCoupon>()
                 .HasIndex(uc => new { uc.UserId, uc.CouponId })
                 .IsUnique();

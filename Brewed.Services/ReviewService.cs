@@ -123,7 +123,6 @@ namespace Brewed.Services
                 throw new KeyNotFoundException("Product not found");
             }
 
-            // Check if user already reviewed this product
             var existingReview = await _context.Reviews
                 .FirstOrDefaultAsync(r => r.UserId == userId && r.ProductId == reviewDto.ProductId);
 
@@ -132,7 +131,6 @@ namespace Brewed.Services
                 throw new Exception("You have already reviewed this product");
             }
 
-            // Optional: Check if user has purchased this product
             var hasPurchased = await _context.Orders
                 .Include(o => o.OrderItems)
                 .AnyAsync(o => o.UserId == userId &&

@@ -209,16 +209,12 @@ namespace Brewed.API.Controllers
                 var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
                 var isAdmin = User.IsInRole("Admin");
 
-                // Get invoice to verify it exists
                 var invoice = await _orderService.GetInvoiceAsync(orderId, userId, isAdmin);
 
-                // Get full order details
                 var order = await _orderService.GetOrderByIdAsync(orderId, userId, isAdmin);
 
-                // Generate PDF
                 var pdfBytes = _pdfService.GenerateInvoicePdf(order, invoice);
 
-                // Return PDF file
                 return File(pdfBytes, "application/pdf", $"invoice-{invoice.InvoiceNumber}.pdf");
             }
             catch (KeyNotFoundException ex)
