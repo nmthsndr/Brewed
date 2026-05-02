@@ -1,7 +1,7 @@
 import { ActionIcon, Group, Text } from "@mantine/core";
 import {
   IconBrandInstagram,
-  IconBrandTwitter,
+  IconBrandX,
   IconBrandFacebook,
 } from "@tabler/icons-react";
 import classes from "./Footer.module.css";
@@ -25,7 +25,7 @@ const Footer = () => {
 
       <Group gap="xs" wrap="nowrap" className={classes.socials}>
         <ActionIcon size="lg" variant="subtle" color="brown" radius="xl" aria-label="Twitter" href="https://x.com" component="a" target="_blank">
-          <IconBrandTwitter size={18} stroke={1.5} />
+          <IconBrandX size={18} stroke={1.5} />
         </ActionIcon>
         <ActionIcon size="lg" variant="subtle" color="brown" radius="xl" aria-label="Facebook" href="https://facebook.com" component="a" target="_blank">
           <IconBrandFacebook size={18} stroke={1.5} />
